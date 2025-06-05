@@ -21,7 +21,7 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
       <ResizablePanelGroup direction="horizontal" className="h-screen">
         {/* Chat Interface - Resizable Panel */}
-        <ResizablePanel defaultSize={50} minSize={30}>
+        <ResizablePanel defaultSize={33} minSize={25} maxSize={33}>
           <ChatInterface 
             onGenerateVideo={handleVideoGeneration}
             isGenerating={isGenerating}
@@ -32,7 +32,7 @@ const Index = () => {
         <ResizableHandle withHandle />
         
         {/* Video Viewer - Resizable Panel */}
-        <ResizablePanel defaultSize={50} minSize={30}>
+        <ResizablePanel defaultSize={67} minSize={67}>
           <VideoViewer 
             videoUrl={currentVideo}
             isGenerating={isGenerating}
