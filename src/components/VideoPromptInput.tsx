@@ -32,30 +32,31 @@ const VideoPromptInput = ({
   };
 
   return (
-    <div className="w-full max-w-2xl bg-black/30 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
-      <div className="flex gap-4">
+    <div className="w-full max-w-2xl bg-slate-800/60 backdrop-blur-sm rounded-2xl p-4 border border-slate-600/30">
+      <div className="flex gap-3 items-end">
         <Textarea
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           placeholder={placeholder}
           onKeyPress={handleKeyPress}
           disabled={isDisabled}
-          className="bg-white/10 border-white/20 text-white placeholder:text-white/50 flex-1 resize-none min-h-[60px] max-h-[240px] overflow-y-auto focus:bg-white/15 transition-colors"
+          className="bg-transparent border-none text-white placeholder:text-slate-400 flex-1 resize-none min-h-[44px] max-h-[240px] p-0 focus-visible:ring-0 focus-visible:ring-offset-0"
           style={{
-            height: Math.min(240, Math.max(60, prompt.split('\n').length * 24 + 36))
+            height: Math.min(240, Math.max(44, prompt.split('\n').length * 24 + 20))
           }}
         />
         <Button 
           onClick={handleSubmit}
           disabled={!prompt.trim() || isDisabled}
-          className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 self-start shadow-lg"
+          size="icon"
+          className="bg-purple-600 hover:bg-purple-700 text-white rounded-lg h-10 w-10 flex-shrink-0"
         >
           <Send className="w-4 h-4" />
         </Button>
       </div>
-      <div className="flex items-center gap-2 mt-4">
+      <div className="flex items-center gap-2 mt-3 pt-2 border-t border-slate-600/20">
         <Sparkles className="w-4 h-4 text-purple-400" />
-        <span className="text-sm text-white/60">Public</span>
+        <span className="text-sm text-slate-400">Public</span>
       </div>
     </div>
   );
