@@ -1,8 +1,9 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Video } from "lucide-react";
+import { Video, Plus } from "lucide-react";
 import VideoPromptInput from "@/components/VideoPromptInput";
 
 const Landing = () => {
@@ -78,7 +79,7 @@ const Landing = () => {
         </p>
 
         {/* Prompt Input */}
-        <div className="mb-12">
+        <div className="mb-12 w-full max-w-4xl px-6">
           <VideoPromptInput onSubmit={handleGetStarted} />
         </div>
       </div>
@@ -88,8 +89,9 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-12">
             <h2 className="text-3xl font-bold text-white">From the Community</h2>
-            <Button variant="ghost" className="text-white hover:bg-white/10">
-              View All
+            <Button variant="ghost" className="text-white hover:bg-white/10 flex items-center gap-2">
+              <Plus className="w-4 h-4" />
+              Create Empty Project
             </Button>
           </div>
 
