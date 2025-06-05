@@ -25,7 +25,7 @@ const ProjectMenu = () => {
           variant="ghost" 
           className="text-white hover:bg-white/10 flex items-center gap-2"
         >
-          <span className="text-sm">chatterbox-video-wizard</span>
+          <span className="text-sm">video-generation-project</span>
           <ChevronDown className="w-4 h-4" />
         </Button>
       </DropdownMenuTrigger>
