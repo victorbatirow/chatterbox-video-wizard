@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Send, Heart, Sparkles, Code, Palette, Zap } from "lucide-react";
+import { Send, Video, Sparkles, Film, Camera, Zap } from "lucide-react";
 
 const Landing = () => {
   const [prompt, setPrompt] = useState("");
@@ -18,42 +18,42 @@ const Landing = () => {
 
   const features = [
     {
-      icon: <Code className="w-6 h-6" />,
-      title: "AI-Powered Development",
-      description: "Build applications by simply describing what you want"
+      icon: <Film className="w-6 h-6" />,
+      title: "AI-Powered Video Creation",
+      description: "Generate stunning videos by simply describing what you want"
     },
     {
-      icon: <Palette className="w-6 h-6" />,
-      title: "Beautiful Design",
-      description: "Get polished, responsive designs out of the box"
+      icon: <Camera className="w-6 h-6" />,
+      title: "Professional Quality",
+      description: "Get polished, cinematic videos out of the box"
     },
     {
       icon: <Zap className="w-6 h-6" />,
       title: "Lightning Fast",
-      description: "See your ideas come to life in real-time"
+      description: "See your video ideas come to life in real-time"
     }
   ];
 
   const projects = [
     {
-      title: "Video Generator",
-      description: "AI-powered video creation tool",
+      title: "Product Showcase",
+      description: "AI-generated product demo video",
       image: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=300&h=200&fit=crop"
     },
     {
-      title: "Task Manager",
-      description: "Productivity dashboard with team collaboration",
-      image: "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=300&h=200&fit=crop"
+      title: "Nature Documentary",
+      description: "Wildlife scenes with stunning visuals",
+      image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=300&h=200&fit=crop"
     },
     {
-      title: "E-commerce Store",
-      description: "Modern online shopping experience",
-      image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=300&h=200&fit=crop"
+      title: "Travel Adventure",
+      description: "Epic journey through beautiful landscapes",
+      image: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=300&h=200&fit=crop"
     },
     {
-      title: "Portfolio Site",
-      description: "Creative showcase for professionals",
-      image: "https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=300&h=200&fit=crop"
+      title: "Corporate Video",
+      description: "Professional business presentation",
+      image: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=300&h=200&fit=crop"
     }
   ];
 
@@ -62,14 +62,14 @@ const Landing = () => {
       {/* Navigation */}
       <nav className="flex items-center justify-between p-6">
         <div className="flex items-center gap-2">
-          <Heart className="w-8 h-8 text-red-500" />
-          <span className="text-xl font-bold text-white">Lovable</span>
+          <Video className="w-8 h-8 text-purple-400" />
+          <span className="text-xl font-bold text-white">Vixar</span>
         </div>
         <div className="hidden md:flex items-center gap-6 text-white/80">
           <a href="#" className="hover:text-white transition-colors">Community</a>
-          <a href="#" className="hover:text-white transition-colors">Teams</a>
+          <a href="#" className="hover:text-white transition-colors">Gallery</a>
           <a href="#" className="hover:text-white transition-colors">Learn</a>
-          <a href="#" className="hover:text-white transition-colors">Shipped</a>
+          <a href="#" className="hover:text-white transition-colors">Showcase</a>
         </div>
         <div className="flex items-center gap-3">
           <Link to="/login">
@@ -88,14 +88,14 @@ const Landing = () => {
       {/* Hero Section */}
       <div className="flex flex-col items-center justify-center px-6 py-20 text-center">
         <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
-          Build something{" "}
+          Create videos with{" "}
           <span className="inline-flex items-center gap-2">
-            <Heart className="w-12 h-12 md:w-16 md:h-16 text-red-500" />
-            Lovable
+            <Video className="w-12 h-12 md:w-16 md:h-16 text-purple-400" />
+            Vixar
           </span>
         </h1>
         <p className="text-xl text-white/70 mb-12 max-w-2xl">
-          Create apps and websites by chatting with AI
+          Generate stunning videos by chatting with AI
         </p>
 
         {/* Prompt Input */}
@@ -104,7 +104,7 @@ const Landing = () => {
             <Input
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Describe the app you want to build..."
+              placeholder="Describe the video you want to create..."
               className="bg-white/10 border-white/20 text-white placeholder:text-white/50 flex-1"
               onKeyPress={(e) => e.key === "Enter" && handleGetStarted()}
             />
@@ -147,7 +147,7 @@ const Landing = () => {
           </div>
 
           <div className="flex gap-4 mb-8">
-            {["Popular", "Discover", "Internal Tools", "Website", "Personal", "Consumer App", "B2B App", "Prototype"].map((tag) => (
+            {["Popular", "Discover", "Cinematic", "Product Demo", "Nature", "Animation", "Tutorial", "Music Video"].map((tag) => (
               <Button
                 key={tag}
                 variant={tag === "Popular" ? "default" : "ghost"}
