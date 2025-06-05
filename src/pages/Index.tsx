@@ -2,6 +2,7 @@
 import { useState } from "react";
 import ChatInterface from "@/components/ChatInterface";
 import VideoViewer from "@/components/VideoViewer";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 
 const Index = () => {
   const [currentVideo, setCurrentVideo] = useState<string | null>(null);
@@ -17,22 +18,27 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex">
-      {/* Chat Interface - Left Side */}
-      <div className="w-1/2 border-r border-white/10">
-        <ChatInterface 
-          onGenerateVideo={handleVideoGeneration}
-          isGenerating={isGenerating}
-        />
-      </div>
-      
-      {/* Video Viewer - Right Side */}
-      <div className="w-1/2">
-        <VideoViewer 
-          videoUrl={currentVideo}
-          isGenerating={isGenerating}
-        />
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+      <ResizablePanelGroup direction="horizontal" className="h-screen">
+        {/* Chat Interface - Resizable Panel */}
+        <ResizablePanel defaultSize={50} minSize={30}>
+          <ChatInterface 
+            onGenerateVideo={handleVideoGeneration}
+            isGenerating={isGenerating}
+          />
+        </ResizablePanel>
+        
+        {/* Draggable Handle */}
+        <ResizableHandle withHandle />
+        
+        {/* Video Viewer - Resizable Panel */}
+        <ResizablePanel defaultSize={50} minSize={30}>
+          <VideoViewer 
+            videoUrl={currentVideo}
+            isGenerating={isGenerating}
+          />
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </div>
   );
 };
