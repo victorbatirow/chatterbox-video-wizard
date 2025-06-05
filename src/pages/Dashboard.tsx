@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { Heart, Plus, Search, Settings, LogOut, Clock, Users, Globe } from "luci
 const Dashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("Last edited");
+  const navigate = useNavigate();
 
   const projects = [
     {
@@ -54,6 +55,14 @@ const Dashboard = () => {
     project.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const handleProjectClick = (projectId: number) => {
+    navigate('/app');
+  };
+
+  const handleCreateProject = () => {
+    navigate('/app');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
       {/* Header */}
@@ -97,10 +106,11 @@ const Dashboard = () => {
               <Input
                 placeholder="Describe the app you want to build..."
                 className="bg-white/10 border-white/20 text-white placeholder:text-white/50 flex-1"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
               />
-              <Button className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600">
+              <Button 
+                onClick={handleCreateProject}
+                className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Create Project
               </Button>
@@ -138,7 +148,11 @@ const Dashboard = () => {
         {/* Projects Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredProjects.map((project) => (
-            <Card key={project.id} className="bg-white/10 backdrop-blur-sm border-white/20 overflow-hidden group hover:scale-105 transition-transform cursor-pointer">
+            <Card 
+              key={project.id} 
+              className="bg-white/10 backdrop-blur-sm border-white/20 overflow-hidden group hover:scale-105 transition-transform cursor-pointer"
+              onClick={() => handleProjectClick(project.id)}
+            >
               <div className={`h-32 bg-gradient-to-br ${project.color} relative`}>
                 <div className="absolute inset-0 bg-black/20" />
                 <div className="absolute top-3 right-3 flex gap-2">
