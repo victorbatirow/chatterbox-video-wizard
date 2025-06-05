@@ -1,14 +1,12 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import { Heart, Plus, Search, Video, Play, Send, Sparkles } from "lucide-react";
+import { Heart, Plus, Search, Video, Play } from "lucide-react";
+import VideoPromptInput from "@/components/VideoPromptInput";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [videoPrompt, setVideoPrompt] = useState("");
 
   const handleCreateProject = () => {
     navigate('/app');
@@ -18,18 +16,9 @@ const Dashboard = () => {
     navigate('/app');
   };
 
-  const handleCreateVideoFromPrompt = () => {
-    if (videoPrompt.trim()) {
-      // Navigate to app with the prompt (in a real app, you'd pass this as state or URL param)
-      navigate('/app');
-    }
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleCreateVideoFromPrompt();
-    }
+  const handleCreateVideoFromPrompt = (prompt: string) => {
+    // Navigate to app with the prompt (in a real app, you'd pass this as state or URL param)
+    navigate('/app');
   };
 
   const projects = [
@@ -97,31 +86,7 @@ const Dashboard = () => {
 
         {/* Video Creation Prompt */}
         <div className="flex justify-center mb-8">
-          <div className="w-full max-w-2xl bg-black/30 backdrop-blur-sm rounded-2xl p-6">
-            <div className="flex gap-4">
-              <Textarea
-                value={videoPrompt}
-                onChange={(e) => setVideoPrompt(e.target.value)}
-                placeholder="Describe the video you want to create..."
-                onKeyPress={handleKeyPress}
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/50 flex-1 resize-none min-h-[60px] max-h-[240px] overflow-y-auto"
-                style={{
-                  height: Math.min(240, Math.max(60, videoPrompt.split('\n').length * 24 + 36))
-                }}
-              />
-              <Button 
-                onClick={handleCreateVideoFromPrompt}
-                disabled={!videoPrompt.trim()}
-                className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 self-start"
-              >
-                <Send className="w-4 h-4" />
-              </Button>
-            </div>
-            <div className="flex items-center gap-2 mt-4">
-              <Sparkles className="w-4 h-4 text-purple-400" />
-              <span className="text-sm text-white/60">Public</span>
-            </div>
-          </div>
+          <VideoPromptInput onSubmit={handleCreateVideoFromPrompt} />
         </div>
 
         <div className="text-center mb-8">

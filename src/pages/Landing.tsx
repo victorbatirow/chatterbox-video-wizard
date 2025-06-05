@@ -1,19 +1,16 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Send, Video, Sparkles } from "lucide-react";
+import { Video } from "lucide-react";
+import VideoPromptInput from "@/components/VideoPromptInput";
 
 const Landing = () => {
   const [prompt, setPrompt] = useState("");
 
-  const handleGetStarted = () => {
-    if (prompt.trim()) {
-      // For now, just navigate to the main app
-      window.location.href = "/app";
-    }
+  const handleGetStarted = (prompt: string) => {
+    // For now, just navigate to the main app
+    window.location.href = "/app";
   };
 
   const projects = [
@@ -81,27 +78,8 @@ const Landing = () => {
         </p>
 
         {/* Prompt Input */}
-        <div className="w-full max-w-2xl bg-black/30 backdrop-blur-sm rounded-2xl p-6 mb-12">
-          <div className="flex gap-4">
-            <Input
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Describe the video you want to create..."
-              className="bg-white/10 border-white/20 text-white placeholder:text-white/50 flex-1"
-              onKeyPress={(e) => e.key === "Enter" && handleGetStarted()}
-            />
-            <Button 
-              onClick={handleGetStarted}
-              className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
-              disabled={!prompt.trim()}
-            >
-              <Send className="w-4 h-4" />
-            </Button>
-          </div>
-          <div className="flex items-center gap-2 mt-4">
-            <Sparkles className="w-4 h-4 text-purple-400" />
-            <span className="text-sm text-white/60">Public</span>
-          </div>
+        <div className="mb-12">
+          <VideoPromptInput onSubmit={handleGetStarted} />
         </div>
       </div>
 
