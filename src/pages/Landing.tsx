@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Send, Video, Sparkles, Film, Camera, Zap } from "lucide-react";
+import { Send, Video, Sparkles } from "lucide-react";
 
 const Landing = () => {
   const [prompt, setPrompt] = useState("");
@@ -15,24 +15,6 @@ const Landing = () => {
       window.location.href = "/app";
     }
   };
-
-  const features = [
-    {
-      icon: <Film className="w-6 h-6" />,
-      title: "AI-Powered Video Creation",
-      description: "Generate stunning videos by simply describing what you want"
-    },
-    {
-      icon: <Camera className="w-6 h-6" />,
-      title: "Professional Quality",
-      description: "Get polished, cinematic videos out of the box"
-    },
-    {
-      icon: <Zap className="w-6 h-6" />,
-      title: "Lightning Fast",
-      description: "See your video ideas come to life in real-time"
-    }
-  ];
 
   const projects = [
     {
@@ -63,7 +45,7 @@ const Landing = () => {
       <nav className="flex items-center justify-between p-6">
         <div className="flex items-center gap-2">
           <Video className="w-8 h-8 text-purple-400" />
-          <span className="text-xl font-bold text-white">Vixar</span>
+          <span className="text-xl font-bold text-white">Pamba</span>
         </div>
         <div className="hidden md:flex items-center gap-6 text-white/80">
           <a href="#" className="hover:text-white transition-colors">Community</a>
@@ -91,7 +73,7 @@ const Landing = () => {
           Create videos with{" "}
           <span className="inline-flex items-center gap-2">
             <Video className="w-12 h-12 md:w-16 md:h-16 text-purple-400" />
-            Vixar
+            Pamba
           </span>
         </h1>
         <p className="text-xl text-white/70 mb-12 max-w-2xl">
@@ -120,19 +102,6 @@ const Landing = () => {
             <Sparkles className="w-4 h-4 text-purple-400" />
             <span className="text-sm text-white/60">Public</span>
           </div>
-        </div>
-
-        {/* Features */}
-        <div className="grid md:grid-cols-3 gap-8 mb-20 max-w-4xl">
-          {features.map((feature, index) => (
-            <div key={index} className="text-center">
-              <div className="inline-flex items-center justify-center w-12 h-12 bg-white/10 rounded-full mb-4 text-purple-400">
-                {feature.icon}
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-2">{feature.title}</h3>
-              <p className="text-white/60">{feature.description}</p>
-            </div>
-          ))}
         </div>
       </div>
 

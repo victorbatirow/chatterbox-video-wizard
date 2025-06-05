@@ -4,11 +4,11 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Heart, Plus, Search, Video, Play, Film, Camera, Sparkles } from "lucide-react";
+import { Heart, Plus, Search, Video, Play, Send } from "lucide-react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [videoPrompt, setVideoPrompt] = useState("");
 
   const handleCreateProject = () => {
     navigate('/app');
@@ -16,6 +16,13 @@ const Dashboard = () => {
 
   const handleProjectClick = () => {
     navigate('/app');
+  };
+
+  const handleCreateVideoFromPrompt = () => {
+    if (videoPrompt.trim()) {
+      // Navigate to app with the prompt (in a real app, you'd pass this as state or URL param)
+      navigate('/app');
+    }
   };
 
   const projects = [
@@ -55,7 +62,7 @@ const Dashboard = () => {
       <nav className="flex items-center justify-between p-6">
         <div className="flex items-center gap-2">
           <Video className="w-8 h-8 text-purple-400" />
-          <span className="text-xl font-bold text-white">Vixar</span>
+          <span className="text-xl font-bold text-white">Pamba</span>
         </div>
         <div className="flex items-center gap-3">
           <Button variant="ghost" className="text-white hover:bg-white/10">
@@ -74,63 +81,39 @@ const Dashboard = () => {
         {/* Welcome Section - Centered */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-white mb-2">
-            Victor's Vixar Workspace
+            Victor's Pamba Workspace
           </h1>
           <p className="text-xl text-white/70">
             Welcome back! Ready to create something amazing?
           </p>
         </div>
 
-        {/* Search and Create */}
+        {/* Video Creation Prompt */}
         <div className="flex flex-col md:flex-row gap-4 mb-8">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/40 w-4 h-4" />
+          <div className="flex-1 flex gap-3">
             <Input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search your video projects..."
-              className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/40"
+              value={videoPrompt}
+              onChange={(e) => setVideoPrompt(e.target.value)}
+              placeholder="Describe the video you want to create..."
+              onKeyPress={(e) => e.key === "Enter" && handleCreateVideoFromPrompt()}
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
             />
+            <Button 
+              onClick={handleCreateVideoFromPrompt}
+              disabled={!videoPrompt.trim()}
+              className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
+            >
+              <Send className="w-4 h-4" />
+            </Button>
           </div>
           <Button 
             onClick={handleCreateProject}
-            className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 flex items-center gap-2"
+            variant="outline"
+            className="border-white/20 text-white hover:bg-white/10 flex items-center gap-2"
           >
             <Plus className="w-4 h-4" />
-            Create Video Project
+            Create Empty Project
           </Button>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="grid md:grid-cols-4 gap-4 mb-8">
-          <Card className="bg-white/10 border-white/20 hover:bg-white/15 transition-colors cursor-pointer" onClick={handleCreateProject}>
-            <CardContent className="p-6 text-center">
-              <Video className="w-8 h-8 text-purple-400 mx-auto mb-3" />
-              <h3 className="text-white font-semibold mb-1">New Video</h3>
-              <p className="text-white/60 text-sm">Start from scratch</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-white/10 border-white/20 hover:bg-white/15 transition-colors cursor-pointer">
-            <CardContent className="p-6 text-center">
-              <Film className="w-8 h-8 text-blue-400 mx-auto mb-3" />
-              <h3 className="text-white font-semibold mb-1">Template</h3>
-              <p className="text-white/60 text-sm">Use a preset style</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-white/10 border-white/20 hover:bg-white/15 transition-colors cursor-pointer">
-            <CardContent className="p-6 text-center">
-              <Camera className="w-8 h-8 text-green-400 mx-auto mb-3" />
-              <h3 className="text-white font-semibold mb-1">From Image</h3>
-              <p className="text-white/60 text-sm">Upload and animate</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-white/10 border-white/20 hover:bg-white/15 transition-colors cursor-pointer">
-            <CardContent className="p-6 text-center">
-              <Sparkles className="w-8 h-8 text-yellow-400 mx-auto mb-3" />
-              <h3 className="text-white font-semibold mb-1">AI Magic</h3>
-              <p className="text-white/60 text-sm">Describe your vision</p>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Recent Projects */}
