@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -76,8 +77,8 @@ const Dashboard = () => {
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Welcome Section - Centered */}
         <div className="text-center mb-12">
-          <h1 className="text-3xl font-bold text-white mb-2">
-            Dream it, describe it, watch it come alive
+          <h1 className="text-4xl font-bold text-white mb-2">
+            Victor's Pamba Workspace
           </h1>
           <p className="text-xl text-white/70">
             Welcome back! Ready to create something amazing?
@@ -104,6 +105,14 @@ const Dashboard = () => {
         <div>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-white">Recent Video Projects</h2>
+            <Button 
+              onClick={handleCreateProject}
+              variant="ghost" 
+              className="text-white/60 hover:text-white hover:bg-white/10 flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Create Empty Project
+            </Button>
           </div>
 
           <div className="grid md:grid-cols-4 gap-6">
