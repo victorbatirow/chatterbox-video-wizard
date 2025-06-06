@@ -141,7 +141,9 @@ const Dashboard = () => {
       <Navbar isAuthenticated={true} />
 
       {/* Hero Section with Video Creation Prompt */}
-      <HeroSection onSubmit={handleCreateVideoFromPrompt} />
+      <div className="px-6 py-8">
+        <HeroSection onSubmit={handleCreateVideoFromPrompt} />
+      </div>
 
       {/* Recent Projects */}
       <div className="px-6 py-8">
