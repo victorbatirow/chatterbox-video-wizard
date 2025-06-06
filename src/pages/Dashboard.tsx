@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -157,16 +156,6 @@ const Dashboard = () => {
       </nav>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Welcome Section - Centered */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-white mb-2">
-            Victor's Pamba Workspace
-          </h1>
-          <p className="text-xl text-white/70">
-            Ready to create something amazing?
-          </p>
-        </div>
-
         {/* Hero Section with Video Creation Prompt */}
         <div className="mb-8">
           <HeroSection onSubmit={handleCreateVideoFromPrompt} />

@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -56,7 +55,7 @@ const VideoPromptInput = ({
           placeholder={placeholder}
           onKeyPress={handleKeyPress}
           disabled={isDisabled}
-          className="bg-transparent border-none text-white placeholder:text-slate-400 w-full resize-none p-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-lg"
+          className="bg-transparent border-none text-white placeholder:text-slate-400 w-full resize-none p-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-base"
           style={{
             minHeight: '80px',
             height: '80px',
