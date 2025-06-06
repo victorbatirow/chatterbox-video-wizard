@@ -40,9 +40,7 @@ const VideoPromptInput = ({
   useEffect(() => {
     const textarea = textareaRef.current;
     if (textarea) {
-      // Reset height to auto to get the correct scrollHeight
       textarea.style.height = 'auto';
-      // Set height based on content, with min and max constraints
       const newHeight = Math.min(Math.max(textarea.scrollHeight, 80), 200);
       textarea.style.height = `${newHeight}px`;
     }
@@ -50,7 +48,7 @@ const VideoPromptInput = ({
 
   return (
     <div className="w-full max-w-2xl bg-slate-800/60 backdrop-blur-sm rounded-2xl p-4 border border-slate-600/30">
-      <div className="flex gap-3 items-end">
+      <div className="w-full">
         <Textarea
           ref={textareaRef}
           value={prompt}
@@ -58,14 +56,22 @@ const VideoPromptInput = ({
           placeholder={placeholder}
           onKeyPress={handleKeyPress}
           disabled={isDisabled}
-          className="bg-transparent border-none text-white placeholder:text-slate-400 flex-1 resize-none p-0 focus-visible:ring-0 focus-visible:ring-offset-0 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/30 hover:scrollbar-thumb-white/50"
+          className="bg-transparent border-none text-white placeholder:text-slate-400 w-full resize-none p-0 focus-visible:ring-0 focus-visible:ring-offset-0"
           style={{
             minHeight: '80px',
             height: '80px',
             maxHeight: '200px',
-            overflow: 'auto'
+            overflow: 'auto',
+            scrollbarWidth: 'thin',
+            scrollbarColor: 'rgba(255,255,255,0.3) transparent'
           }}
         />
+      </div>
+      <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-600/20">
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-purple-400" />
+          <span className="text-sm text-slate-400">Public</span>
+        </div>
         <Button 
           onClick={handleSubmit}
           disabled={!prompt.trim() || isDisabled}
@@ -74,10 +80,6 @@ const VideoPromptInput = ({
         >
           <Send className="w-4 h-4" />
         </Button>
-      </div>
-      <div className="flex items-center gap-2 mt-3 pt-2 border-t border-slate-600/20">
-        <Sparkles className="w-4 h-4 text-purple-400" />
-        <span className="text-sm text-slate-400">Public</span>
       </div>
     </div>
   );
