@@ -41,15 +41,17 @@ const Landing = () => {
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
       {/* Navigation */}
       <nav className="flex items-center justify-between p-6">
-        <div className="flex items-center gap-2">
-          <Video className="w-8 h-8 text-purple-400" />
-          <span className="text-xl font-bold text-white">Pamba</span>
-        </div>
-        <div className="flex items-center gap-6 text-white/80">
-          <a href="#" className="hover:text-white transition-colors">Community</a>
-          <a href="#" className="hover:text-white transition-colors">Gallery</a>
-          <a href="#" className="hover:text-white transition-colors">Learn</a>
-          <a href="#" className="hover:text-white transition-colors">Showcase</a>
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2">
+            <Video className="w-8 h-8 text-purple-400" />
+            <span className="text-xl font-bold text-white">Pamba</span>
+          </div>
+          <div className="flex items-center gap-6 text-white/80">
+            <a href="#" className="hover:text-white transition-colors">Community</a>
+            <a href="#" className="hover:text-white transition-colors">Gallery</a>
+            <a href="#" className="hover:text-white transition-colors">Learn</a>
+            <a href="#" className="hover:text-white transition-colors">Showcase</a>
+          </div>
         </div>
         <div className="flex items-center gap-3">
           <Link to="/login">
