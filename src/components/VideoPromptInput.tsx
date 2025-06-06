@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send, Sparkles } from "lucide-react";
@@ -16,6 +16,7 @@ const VideoPromptInput = ({
   isDisabled = false 
 }: VideoPromptInputProps) => {
   const [prompt, setPrompt] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSubmit = () => {
     if (prompt.trim() && !isDisabled) {
@@ -31,19 +32,38 @@ const VideoPromptInput = ({
     }
   };
 
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setPrompt(e.target.value);
+  };
+
+  // Auto-resize textarea
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      // Reset height to auto to get the correct scrollHeight
+      textarea.style.height = 'auto';
+      // Set height based on content, with min and max constraints
+      const newHeight = Math.min(Math.max(textarea.scrollHeight, 80), 200);
+      textarea.style.height = `${newHeight}px`;
+    }
+  }, [prompt]);
+
   return (
     <div className="w-full max-w-2xl bg-slate-800/60 backdrop-blur-sm rounded-2xl p-4 border border-slate-600/30">
       <div className="flex gap-3 items-end">
         <Textarea
+          ref={textareaRef}
           value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
+          onChange={handleChange}
           placeholder={placeholder}
           onKeyPress={handleKeyPress}
           disabled={isDisabled}
-          className="bg-transparent border-none text-white placeholder:text-slate-400 flex-1 resize-none min-h-[44px] max-h-[240px] p-0 focus-visible:ring-0 focus-visible:ring-offset-0 overflow-hidden"
+          className="bg-transparent border-none text-white placeholder:text-slate-400 flex-1 resize-none p-0 focus-visible:ring-0 focus-visible:ring-offset-0 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-600"
           style={{
-            height: Math.min(240, Math.max(44, prompt.split('\n').length * 24 + 20)),
-            overflowY: prompt.split('\n').length * 24 + 20 > 240 ? 'auto' : 'hidden'
+            minHeight: '80px',
+            height: '80px',
+            maxHeight: '200px',
+            overflow: 'auto'
           }}
         />
         <Button 
