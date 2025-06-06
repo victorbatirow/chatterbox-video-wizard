@@ -26,33 +26,33 @@ const Dashboard = () => {
   const projects = [
     {
       id: 1,
-      title: "Product Demo Video",
-      description: "AI-generated product showcase",
-      thumbnail: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=300&h=200&fit=crop",
+      title: "Educational Tutorial",
+      description: "Step-by-step learning content",
+      thumbnail: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=300&h=200&fit=crop",
       lastModified: "2 hours ago",
       duration: "2:45"
     },
     {
       id: 2,
-      title: "Nature Documentary",
-      description: "Wildlife scenes compilation",
-      thumbnail: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=300&h=200&fit=crop",
+      title: "Tech Review",
+      description: "Latest gadget analysis",
+      thumbnail: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=300&h=200&fit=crop",
       lastModified: "1 day ago",
       duration: "5:12"
     },
     {
       id: 3,
-      title: "Corporate Presentation",
-      description: "Business meeting highlights",
-      thumbnail: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=300&h=200&fit=crop",
+      title: "Programming Guide",
+      description: "Coding best practices",
+      thumbnail: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=300&h=200&fit=crop",
       lastModified: "3 days ago",
       duration: "3:28"
     },
     {
       id: 4,
-      title: "Travel Vlog",
-      description: "Adventure moments captured",
-      thumbnail: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=300&h=200&fit=crop",
+      title: "Workspace Setup",
+      description: "Office productivity tips",
+      thumbnail: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=300&h=200&fit=crop",
       lastModified: "1 week ago",
       duration: "4:33"
     }
@@ -95,7 +95,7 @@ const Dashboard = () => {
           <VideoPromptInput onSubmit={handleCreateVideoFromPrompt} />
         </div>
 
-        {/* Recent Projects - New Design */}
+        {/* Recent Projects - Back to Original Card Style */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-white">Recent Video Projects</h2>
@@ -109,48 +109,29 @@ const Dashboard = () => {
             </Button>
           </div>
 
-          <div className="space-y-3">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {projects.map((project) => (
               <Card 
                 key={project.id} 
-                className="bg-white/5 border-white/10 hover:bg-white/10 transition-colors cursor-pointer"
+                className="bg-white/10 border-white/20 overflow-hidden group hover:scale-105 transition-transform cursor-pointer"
                 onClick={handleProjectClick}
               >
+                <div className="aspect-video bg-gradient-to-br from-purple-600 to-blue-600 relative">
+                  <img 
+                    src={project.thumbnail} 
+                    alt={project.title}
+                    className="w-full h-full object-cover opacity-80"
+                  />
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Play className="w-8 h-8 text-white" />
+                  </div>
+                </div>
                 <CardContent className="p-4">
-                  <div className="flex items-center gap-4">
-                    {/* Thumbnail */}
-                    <div className="w-20 h-14 rounded-lg overflow-hidden flex-shrink-0 relative group">
-                      <img 
-                        src={project.thumbnail} 
-                        alt={project.title}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Play className="w-5 h-5 text-white" />
-                      </div>
-                    </div>
-                    
-                    {/* Project Info */}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-white text-lg truncate">{project.title}</h3>
-                      <p className="text-sm text-white/60 truncate">{project.description}</p>
-                      <div className="flex items-center gap-4 mt-1">
-                        <div className="flex items-center gap-1 text-xs text-white/40">
-                          <Calendar className="w-3 h-3" />
-                          {project.lastModified}
-                        </div>
-                        <div className="text-xs text-white/40">
-                          Duration: {project.duration}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="icon" className="text-white/60 hover:text-white hover:bg-white/10">
-                        <MoreVertical className="w-4 h-4" />
-                      </Button>
-                    </div>
+                  <h3 className="font-semibold text-white mb-2">{project.title}</h3>
+                  <p className="text-sm text-white/60 mb-2">{project.description}</p>
+                  <div className="flex items-center justify-between text-xs text-white/40">
+                    <span>{project.lastModified}</span>
+                    <span>{project.duration}</span>
                   </div>
                 </CardContent>
               </Card>
