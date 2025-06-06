@@ -137,7 +137,7 @@ const Dashboard = () => {
                   <p className="text-sm text-white/60 mb-2">{project.description}</p>
                   <p className="text-xs text-white/40">Modified {project.lastModified}</p>
                 </CardContent>
-              </div>
+              </Card>
             ))}
           </div>
         </div>
