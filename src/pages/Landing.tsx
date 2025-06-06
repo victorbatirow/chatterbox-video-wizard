@@ -42,9 +42,9 @@ const Landing = () => {
       {/* Navigation */}
       <nav className="flex items-center justify-between p-6">
         <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2">
-            <Video className="w-8 h-8 text-purple-400" />
-            <span className="text-xl font-bold text-white">Pamba</span>
+          <div className="flex items-center gap-3">
+            <Video className="w-10 h-10 text-purple-400" />
+            <span className="text-2xl font-bold text-white">Pamba</span>
           </div>
           <div className="flex items-center gap-6 text-white/80">
             <a href="#" className="hover:text-white transition-colors">Community</a>
@@ -55,7 +55,7 @@ const Landing = () => {
         </div>
         <div className="flex items-center gap-3">
           <Link to="/login">
-            <Button variant="ghost" className="text-white hover:bg-white/10">
+            <Button variant="ghost" className="text-white hover:bg-white/10 hover:text-white">
               Log in
             </Button>
           </Link>
@@ -90,7 +90,7 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-12">
             <h2 className="text-3xl font-bold text-white">From the Community</h2>
-            <Button variant="ghost" className="text-white hover:bg-white/10 flex items-center gap-2">
+            <Button variant="ghost" className="text-white hover:bg-white/10 hover:text-white flex items-center gap-2">
               View All
             </Button>
           </div>
