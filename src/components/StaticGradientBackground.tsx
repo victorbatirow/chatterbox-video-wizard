@@ -10,7 +10,7 @@ const StaticGradientBackground = () => {
         className="w-full"
         style={{
           height: 'calc(100vh + 100vh)', // Make it tall enough for scrolling
-          background: `radial-gradient(circle at center 70%, 
+          background: `radial-gradient(circle at center 30%, 
             rgb(219, 39, 119) 0%,     /* Pink center */
             rgb(88, 28, 135) 50%,     /* Purple */
             rgb(15, 23, 42) 85%       /* Navy outer */
