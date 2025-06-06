@@ -3,10 +3,13 @@ import Navbar from "@/components/Navbar";
 import RecentProjectsSection from "@/components/RecentProjectsSection";
 import Footer from "@/components/Footer";
 import Container from "@/components/Container";
+import StaticGradientBackground from "@/components/StaticGradientBackground";
 
 const Projects = () => {
   return (
-    <div className="flex flex-col min-h-full bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+    <div className="flex flex-col min-h-full">
+      <StaticGradientBackground />
+      
       <Navbar isAuthenticated={true} />
       
       <div className="flex flex-col flex-1">
