@@ -101,6 +101,12 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground flex flex-col min-h-dvh;
+  }
+}
+
+@layer components {
+  .container-home {
+    @apply max-w-7xl mx-auto px-4 md:px-6 lg:px-8;
   }
 }
