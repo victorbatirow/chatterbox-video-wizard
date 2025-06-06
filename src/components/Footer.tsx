@@ -4,7 +4,7 @@ import { Video } from "lucide-react";
 
 const Footer = () => {
   return (
-    <footer className="mx-auto mb-4 flex w-full max-w-7xl flex-col justify-center rounded-[20px] border border-gray-200/20 bg-white/5 backdrop-blur-sm px-8 py-8 dark:border-gray-800/20 sm:flex-row mt-6">
+    <footer className="mx-auto mb-8 flex w-full max-w-7xl flex-col justify-center rounded-[20px] border border-gray-200/20 bg-white/5 backdrop-blur-sm px-8 py-8 dark:border-gray-800/20 sm:flex-row mt-6">
       <nav className="grid w-full grid-cols-3 content-center justify-end gap-4 gap-y-12 text-base sm:gap-12 md:grid-cols-6">
         <div className="col-span-full mb-16 flex flex-col max-sm:items-center sm:col-span-1 sm:mb-0">
           <Link to="/" className="self-center sm:self-start">
