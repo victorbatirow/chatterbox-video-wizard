@@ -80,7 +80,7 @@ const Dashboard = () => {
             Victor's Pamba Workspace
           </h1>
           <p className="text-xl text-white/70">
-            Ready to create something amazing?
+            Welcome back! Ready to create something amazing?
           </p>
         </div>
 
@@ -88,18 +88,7 @@ const Dashboard = () => {
         <div className="flex justify-center mb-8">
           <VideoPromptInput onSubmit={handleCreateVideoFromPrompt} />
         </div>
-
-        <div className="text-center mb-8">
-          <Button 
-            onClick={handleCreateProject}
-            variant="outline"
-            className="border-white/20 text-white hover:bg-white/10 flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            Create Empty Project
-          </Button>
-        </div>
-
+        
         {/* Recent Projects */}
         <div>
           <div className="flex items-center justify-between mb-6">
