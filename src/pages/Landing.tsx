@@ -6,6 +6,7 @@ import { Video } from "lucide-react";
 import HeroSection from "@/components/HeroSection";
 import CommunitySection from "@/components/CommunitySection";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 const Landing = () => {
   const [prompt, setPrompt] = useState("");
@@ -25,6 +26,9 @@ const Landing = () => {
 
       {/* From the Community */}
       <CommunitySection />
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };

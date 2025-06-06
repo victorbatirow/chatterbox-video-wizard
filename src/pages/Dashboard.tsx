@@ -4,6 +4,7 @@ import HeroSection from "@/components/HeroSection";
 import CommunitySection from "@/components/CommunitySection";
 import RecentProjectsSection from "@/components/RecentProjectsSection";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -26,6 +27,9 @@ const Dashboard = () => {
 
       {/* From the Community */}
       <CommunitySection />
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };
