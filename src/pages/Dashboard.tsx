@@ -31,6 +31,9 @@ const Dashboard = () => {
           {/* Recent Projects */}
           <RecentProjectsSection />
 
+          {/* Spacing between sections */}
+          <div className="py-4" />
+
           {/* From the Community */}
           <CommunitySection />
         </Container>
