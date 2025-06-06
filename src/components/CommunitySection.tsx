@@ -73,7 +73,7 @@ const CommunitySection = () => {
   ];
 
   return (
-    <div className="px-6 py-8 bg-black/30 backdrop-blur-sm rounded-2xl">
+    <div className="px-6 py-8 bg-black/50 backdrop-blur-sm rounded-2xl">
       <div className="flex items-center justify-between mb-12">
         <h2 className="text-3xl font-bold text-white">From the Community</h2>
         <Button 
