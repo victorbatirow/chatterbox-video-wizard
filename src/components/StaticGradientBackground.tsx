@@ -1,16 +1,15 @@
 
-
 const StaticGradientBackground = () => {
   return (
     <div className="absolute inset-0 w-full min-h-full">
       {/* Solid navy section at top */}
       <div className="w-full h-36 bg-slate-900" />
       
-      {/* Extended mirrored gradient section with darker colors */}
+      {/* Mirrored gradient section with darker colors */}
       <div 
         className="w-full"
         style={{
-          height: '300vh', // Much taller for very gradual transitions
+          height: '150vh', // Shorter height for quicker transitions
           background: `linear-gradient(to bottom, 
             rgb(15, 23, 42) 0%,      /* Navy start */
             rgb(15, 23, 42) 5%,      /* Navy hold */
@@ -24,12 +23,8 @@ const StaticGradientBackground = () => {
           )`
         }}
       />
-      
-      {/* Extended navy section to ensure full coverage */}
-      <div className="w-full h-screen bg-slate-900" />
     </div>
   );
 };
 
 export default StaticGradientBackground;
-
