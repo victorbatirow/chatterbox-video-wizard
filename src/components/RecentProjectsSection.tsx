@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -132,7 +133,7 @@ const RecentProjectsSection = () => {
   const visibleProjects = showAllProjects ? sortedProjects : sortedProjects.slice(0, 7);
 
   return (
-    <div className="px-6 py-8 bg-black/30 backdrop-blur-sm rounded-2xl">
+    <div className="px-6 py-8">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
           <h2 className="text-2xl font-bold text-white">Recent Video Projects</h2>

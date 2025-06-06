@@ -8,7 +8,7 @@ import CommunitySection from "@/components/CommunitySection";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Container from "@/components/Container";
-import StaticGradientBackground from "@/components/StaticGradientBackground";
+import LayeredBackground from "@/components/LayeredBackground";
 
 const Landing = () => {
   const [prompt, setPrompt] = useState("");
@@ -19,25 +19,25 @@ const Landing = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-full relative">
-      <StaticGradientBackground />
-      
-      {/* Navigation */}
-      <Navbar isAuthenticated={false} />
+    <LayeredBackground>
+      <div className="flex flex-col min-h-full">
+        {/* Navigation */}
+        <Navbar isAuthenticated={false} />
 
-      <div className="flex flex-col flex-1 relative z-10">
-        <Container>
-          {/* Hero Section */}
-          <HeroSection onSubmit={handleGetStarted} />
+        <div className="flex flex-col flex-1">
+          <Container>
+            {/* Hero Section */}
+            <HeroSection onSubmit={handleGetStarted} />
 
-          {/* From the Community */}
-          <CommunitySection />
-        </Container>
+            {/* From the Community */}
+            <CommunitySection />
+          </Container>
+        </div>
+
+        {/* Footer */}
+        <Footer />
       </div>
-
-      {/* Footer */}
-      <Footer />
-    </div>
+    </LayeredBackground>
   );
 };
 
