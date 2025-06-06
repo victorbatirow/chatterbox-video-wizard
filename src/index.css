@@ -96,13 +96,11 @@
     @apply border-border;
   }
 
-  html {
+  html, body {
     height: 100%;
-    background-color: rgb(15, 23, 42); /* Navy blue background for HTML */
   }
 
   body {
-    height: 100%;
     @apply bg-background text-foreground flex flex-col min-h-dvh;
   }
 }
