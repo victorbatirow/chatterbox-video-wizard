@@ -140,90 +140,88 @@ const Dashboard = () => {
       {/* Navigation */}
       <Navbar isAuthenticated={true} />
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Hero Section with Video Creation Prompt */}
-        <div className="mb-8">
-          <HeroSection onSubmit={handleCreateVideoFromPrompt} />
+      {/* Hero Section with Video Creation Prompt */}
+      <div className="px-6 py-8">
+        <HeroSection onSubmit={handleCreateVideoFromPrompt} />
+      </div>
+
+      {/* Recent Projects */}
+      <div className="px-6 py-8">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <h2 className="text-2xl font-bold text-white">Recent Video Projects</h2>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-[140px] bg-white/10 border-white/20 text-white">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="last-edited">Last edited</SelectItem>
+                <SelectItem value="date-created">Date created</SelectItem>
+                <SelectItem value="alphabetical">Alphabetical</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <Button 
+            variant="ghost" 
+            className="text-white/60 hover:text-white hover:bg-white/10"
+          >
+            View All
+          </Button>
         </div>
 
-        {/* Recent Projects */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
-              <h2 className="text-2xl font-bold text-white">Recent Video Projects</h2>
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-[140px] bg-white/10 border-white/20 text-white">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="last-edited">Last edited</SelectItem>
-                  <SelectItem value="date-created">Date created</SelectItem>
-                  <SelectItem value="alphabetical">Alphabetical</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+        <div className="grid md:grid-cols-4 gap-6">
+          {visibleProjects.map((project) => (
+            <Card 
+              key={project.id} 
+              className="bg-white/10 border-white/20 overflow-hidden group hover:scale-105 transition-transform cursor-pointer"
+              onClick={handleProjectClick}
+            >
+              <div className="aspect-video bg-gradient-to-br from-purple-600 to-blue-600 relative">
+                <img 
+                  src={project.thumbnail} 
+                  alt={project.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Play className="w-8 h-8 text-white" />
+                </div>
+              </div>
+              <CardContent className="p-4">
+                <h3 className="font-semibold text-white mb-2">{project.title}</h3>
+                <p className="text-sm text-white/60 mb-2">{project.description}</p>
+                <div className="flex items-center justify-between text-xs text-white/40">
+                  <span>{project.lastModified}</span>
+                  <span>{project.duration}</span>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+
+          {/* Create Project Card */}
+          <Card 
+            className="bg-white/5 border-white/20 border-dashed overflow-hidden group hover:scale-105 transition-transform cursor-pointer flex items-center justify-center"
+            onClick={handleCreateProject}
+          >
+            <CardContent className="p-4 flex flex-col items-center justify-center h-full text-center">
+              <Plus className="w-12 h-12 text-white/60 mb-3" />
+              <h3 className="font-semibold text-white mb-1">Create Project</h3>
+              <p className="text-sm text-white/40">Start a new video project</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Show More Button */}
+        {!showAllProjects && sortedProjects.length > 7 && (
+          <div className="flex justify-center mt-8">
             <Button 
+              onClick={() => setShowAllProjects(true)}
               variant="ghost" 
               className="text-white/60 hover:text-white hover:bg-white/10"
             >
-              View All
+              Show More
             </Button>
           </div>
-
-          <div className="grid md:grid-cols-4 gap-6">
-            {visibleProjects.map((project) => (
-              <Card 
-                key={project.id} 
-                className="bg-white/10 border-white/20 overflow-hidden group hover:scale-105 transition-transform cursor-pointer"
-                onClick={handleProjectClick}
-              >
-                <div className="aspect-video bg-gradient-to-br from-purple-600 to-blue-600 relative">
-                  <img 
-                    src={project.thumbnail} 
-                    alt={project.title}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Play className="w-8 h-8 text-white" />
-                  </div>
-                </div>
-                <CardContent className="p-4">
-                  <h3 className="font-semibold text-white mb-2">{project.title}</h3>
-                  <p className="text-sm text-white/60 mb-2">{project.description}</p>
-                  <div className="flex items-center justify-between text-xs text-white/40">
-                    <span>{project.lastModified}</span>
-                    <span>{project.duration}</span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-
-            {/* Create Project Card */}
-            <Card 
-              className="bg-white/5 border-white/20 border-dashed overflow-hidden group hover:scale-105 transition-transform cursor-pointer flex items-center justify-center"
-              onClick={handleCreateProject}
-            >
-              <CardContent className="p-4 flex flex-col items-center justify-center h-full text-center">
-                <Plus className="w-12 h-12 text-white/60 mb-3" />
-                <h3 className="font-semibold text-white mb-1">Create Project</h3>
-                <p className="text-sm text-white/40">Start a new video project</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Show More Button */}
-          {!showAllProjects && sortedProjects.length > 7 && (
-            <div className="flex justify-center mt-8">
-              <Button 
-                onClick={() => setShowAllProjects(true)}
-                variant="ghost" 
-                className="text-white/60 hover:text-white hover:bg-white/10"
-              >
-                Show More
-              </Button>
-            </div>
-          )}
-        </div>
+        )}
       </div>
 
       {/* From the Community */}
