@@ -88,7 +88,7 @@ const Dashboard = () => {
         <div className="flex justify-center mb-8">
           <VideoPromptInput onSubmit={handleCreateVideoFromPrompt} />
         </div>
-
+        
         {/* Recent Projects */}
         <div>
           <div className="flex items-center justify-between mb-6">
