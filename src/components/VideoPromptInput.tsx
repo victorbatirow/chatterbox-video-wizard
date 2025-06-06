@@ -56,7 +56,7 @@ const VideoPromptInput = ({
           placeholder={placeholder}
           onKeyPress={handleKeyPress}
           disabled={isDisabled}
-          className="bg-transparent border-none text-white placeholder:text-slate-400 w-full resize-none p-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="bg-transparent border-none text-white placeholder:text-slate-400 w-full resize-none p-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-lg"
           style={{
             minHeight: '80px',
             height: '80px',

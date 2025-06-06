@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Heart, Plus, Search, Video, Play } from "lucide-react";
 import VideoPromptInput from "@/components/VideoPromptInput";
+import CommunitySection from "@/components/CommunitySection";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -91,7 +92,7 @@ const Dashboard = () => {
         </div>
 
         {/* Recent Projects */}
-        <div>
+        <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-white">Recent Video Projects</h2>
             <Button 
@@ -131,6 +132,9 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* From the Community */}
+      <CommunitySection />
     </div>
   );
 };

@@ -1,0 +1,74 @@
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+
+const CommunitySection = () => {
+  const projects = [
+    {
+      title: "Product Showcase",
+      description: "AI-generated product demo video",
+      image: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=300&h=200&fit=crop"
+    },
+    {
+      title: "Nature Documentary",
+      description: "Wildlife scenes with stunning visuals",
+      image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=300&h=200&fit=crop"
+    },
+    {
+      title: "Travel Adventure",
+      description: "Epic journey through beautiful landscapes",
+      image: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=300&h=200&fit=crop"
+    },
+    {
+      title: "Corporate Video",
+      description: "Professional business presentation",
+      image: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=300&h=200&fit=crop"
+    }
+  ];
+
+  return (
+    <div className="px-6 py-20">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex items-center justify-between mb-12">
+          <h2 className="text-3xl font-bold text-white">From the Community</h2>
+          <Button variant="ghost" className="text-white hover:bg-white/10 hover:text-white flex items-center gap-2">
+            View All
+          </Button>
+        </div>
+
+        <div className="flex gap-4 mb-8">
+          {["Popular", "Discover", "Cinematic", "Product Demo", "Nature", "Animation", "Tutorial", "Music Video"].map((tag) => (
+            <Button
+              key={tag}
+              variant={tag === "Popular" ? "default" : "ghost"}
+              className={tag === "Popular" ? "bg-white text-purple-900" : "text-white/60 hover:text-white hover:bg-white/10"}
+              size="sm"
+            >
+              {tag}
+            </Button>
+          ))}
+        </div>
+
+        <div className="grid md:grid-cols-4 gap-6">
+          {projects.map((project, index) => (
+            <Card key={index} className="bg-white/10 border-white/20 overflow-hidden group hover:scale-105 transition-transform">
+              <div className="aspect-video bg-gradient-to-br from-purple-600 to-blue-600 relative">
+                <img 
+                  src={project.image} 
+                  alt={project.title}
+                  className="w-full h-full object-cover opacity-80"
+                />
+              </div>
+              <CardContent className="p-4">
+                <h3 className="font-semibold text-white mb-2">{project.title}</h3>
+                <p className="text-sm text-white/60">{project.description}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CommunitySection;
