@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -47,7 +46,7 @@ const VideoPromptInput = ({
   }, [prompt]);
 
   return (
-    <div className="w-full max-w-2xl bg-slate-800 rounded-2xl p-4 border border-slate-600">
+    <div className="w-full max-w-2xl bg-slate-800/60 backdrop-blur-sm rounded-2xl p-4 border border-slate-600/30">
       <div className="w-full">
         <Textarea
           ref={textareaRef}
@@ -56,7 +55,7 @@ const VideoPromptInput = ({
           placeholder={placeholder}
           onKeyPress={handleKeyPress}
           disabled={isDisabled}
-          className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 w-full resize-none p-3 focus-visible:ring-0 focus-visible:ring-offset-0 text-base"
+          className="bg-transparent border-none text-white placeholder:text-slate-400 w-full resize-none p-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-base"
           style={{
             minHeight: '80px',
             height: '80px',
@@ -67,7 +66,7 @@ const VideoPromptInput = ({
           }}
         />
       </div>
-      <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-600">
+      <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-600/20">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-purple-400" />
           <span className="text-sm text-slate-400">Public</span>
