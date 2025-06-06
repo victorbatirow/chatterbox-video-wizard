@@ -70,9 +70,7 @@ const Landing = () => {
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
           Dream it, describe it,{" "}
           <span className="inline-flex items-center gap-2">
-            watch it come alive with
-            <Video className="w-8 h-8 md:w-10 md:h-10 text-purple-400" />
-            Pamba
+            watch it come alive
           </span>
         </h1>
         <p className="text-xl text-white/70 mb-12 max-w-2xl">
