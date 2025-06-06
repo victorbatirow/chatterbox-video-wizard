@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -105,13 +104,8 @@ const Dashboard = () => {
         <div>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-white">Recent Video Projects</h2>
-            <Button 
-              onClick={handleCreateProject}
-              variant="ghost" 
-              className="text-white/60 hover:text-white hover:bg-white/10 flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              Create Empty Project
+            <Button variant="ghost" className="text-white/60 hover:text-white hover:bg-white/10">
+              View All
             </Button>
           </div>
 
@@ -137,7 +131,7 @@ const Dashboard = () => {
                   <p className="text-sm text-white/60 mb-2">{project.description}</p>
                   <p className="text-xs text-white/40">Modified {project.lastModified}</p>
                 </CardContent>
-              </div>
+              </Card>
             ))}
           </div>
         </div>
