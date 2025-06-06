@@ -23,6 +23,26 @@ const CommunitySection = () => {
       title: "Corporate Video",
       description: "Professional business presentation",
       image: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=300&h=200&fit=crop"
+    },
+    {
+      title: "Music Video",
+      description: "Creative visual storytelling with beats",
+      image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=200&fit=crop"
+    },
+    {
+      title: "Food Commercial",
+      description: "Mouth-watering culinary showcase",
+      image: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=300&h=200&fit=crop"
+    },
+    {
+      title: "Fashion Show",
+      description: "Runway moments and style highlights",
+      image: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=300&h=200&fit=crop"
+    },
+    {
+      title: "Sports Highlights",
+      description: "Athletic achievements and victories",
+      image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=300&h=200&fit=crop"
     }
   ];
 
