@@ -40,9 +40,10 @@ const VideoPromptInput = ({
           placeholder={placeholder}
           onKeyPress={handleKeyPress}
           disabled={isDisabled}
-          className="bg-transparent border-none text-white placeholder:text-slate-400 flex-1 resize-none min-h-[44px] max-h-[240px] p-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="bg-transparent border-none text-white placeholder:text-slate-400 flex-1 resize-none min-h-[44px] max-h-[240px] p-0 focus-visible:ring-0 focus-visible:ring-offset-0 overflow-hidden"
           style={{
-            height: Math.min(240, Math.max(44, prompt.split('\n').length * 24 + 20))
+            height: Math.min(240, Math.max(44, prompt.split('\n').length * 24 + 20)),
+            overflowY: prompt.split('\n').length * 24 + 20 > 240 ? 'auto' : 'hidden'
           }}
         />
         <Button 
