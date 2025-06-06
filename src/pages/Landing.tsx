@@ -19,13 +19,13 @@ const Landing = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-full">
+    <div className="flex flex-col min-h-full relative">
       <StaticGradientBackground />
       
       {/* Navigation */}
       <Navbar isAuthenticated={false} />
 
-      <div className="flex flex-col flex-1">
+      <div className="flex flex-col flex-1 relative z-10">
         <Container>
           {/* Hero Section */}
           <HeroSection onSubmit={handleGetStarted} />

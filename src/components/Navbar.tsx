@@ -23,8 +23,8 @@ const Navbar = ({ isAuthenticated = false }: NavbarProps) => {
   }, []);
 
   return (
-    <nav className={`sticky top-0 z-50 w-full border-b border-transparent transition-all duration-200 ease-out ${
-      isScrolled ? 'backdrop-blur-md bg-background/80' : ''
+    <nav className={`sticky top-0 z-50 w-full border-b border-transparent transition-all duration-200 ease-out bg-slate-900 ${
+      isScrolled ? 'backdrop-blur-md bg-slate-900/95' : ''
     }`}>
       <Container className="flex h-16 items-center justify-between">
         <div className="flex items-center gap-6">
