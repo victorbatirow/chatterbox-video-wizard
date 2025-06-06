@@ -43,6 +43,26 @@ const CommunitySection = () => {
       title: "Sports Highlights",
       description: "Athletic achievements and victories",
       image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=300&h=200&fit=crop"
+    },
+    {
+      title: "Gaming Montage",
+      description: "Epic gaming moments compilation",
+      image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=300&h=200&fit=crop"
+    },
+    {
+      title: "Architecture Tour",
+      description: "Modern building design showcase",
+      image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=300&h=200&fit=crop"
+    },
+    {
+      title: "Science Experiment",
+      description: "Educational lab demonstration",
+      image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=300&h=200&fit=crop"
+    },
+    {
+      title: "Dance Performance",
+      description: "Choreography and movement art",
+      image: "https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=300&h=200&fit=crop"
     }
   ];
 
@@ -76,7 +96,7 @@ const CommunitySection = () => {
                 <img 
                   src={project.image} 
                   alt={project.title}
-                  className="w-full h-full object-cover opacity-80"
+                  className="w-full h-full object-cover"
                 />
               </div>
               <CardContent className="p-4">

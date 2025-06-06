@@ -26,33 +26,33 @@ const Dashboard = () => {
   const projects = [
     {
       id: 1,
-      title: "Educational Tutorial",
-      description: "Step-by-step learning content",
-      thumbnail: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=300&h=200&fit=crop",
+      title: "Cooking Tutorial",
+      description: "Delicious recipe walkthrough",
+      thumbnail: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=300&h=200&fit=crop",
       lastModified: "2 hours ago",
       duration: "2:45"
     },
     {
       id: 2,
-      title: "Tech Review",
-      description: "Latest gadget analysis",
-      thumbnail: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=300&h=200&fit=crop",
+      title: "Fitness Workout",
+      description: "Home exercise routine",
+      thumbnail: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=200&fit=crop",
       lastModified: "1 day ago",
       duration: "5:12"
     },
     {
       id: 3,
-      title: "Programming Guide",
-      description: "Coding best practices",
-      thumbnail: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=300&h=200&fit=crop",
+      title: "Art Process",
+      description: "Digital painting timelapse",
+      thumbnail: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=300&h=200&fit=crop",
       lastModified: "3 days ago",
       duration: "3:28"
     },
     {
       id: 4,
-      title: "Workspace Setup",
-      description: "Office productivity tips",
-      thumbnail: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=300&h=200&fit=crop",
+      title: "Travel Vlog",
+      description: "City exploration adventure",
+      thumbnail: "https://images.unsplash.com/photo-1539650116574-75c0c6d0c96b?w=300&h=200&fit=crop",
       lastModified: "1 week ago",
       duration: "4:33"
     }
@@ -120,9 +120,9 @@ const Dashboard = () => {
                   <img 
                     src={project.thumbnail} 
                     alt={project.title}
-                    className="w-full h-full object-cover opacity-80"
+                    className="w-full h-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <Play className="w-8 h-8 text-white" />
                   </div>
                 </div>
