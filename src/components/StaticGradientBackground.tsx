@@ -2,8 +2,8 @@
 const StaticGradientBackground = () => {
   return (
     <div className="absolute inset-0 w-full min-h-full">
-      {/* Solid navy section at top - reduced by half */}
-      <div className="w-full h-16 bg-slate-900" />
+      {/* Solid navy section at top */}
+      <div className="w-full h-32 bg-slate-900" />
       
       {/* Circular gradient section */}
       <div 
