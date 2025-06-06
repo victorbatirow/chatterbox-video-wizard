@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Video } from "lucide-react";
-import VideoPromptInput from "@/components/VideoPromptInput";
+import HeroSection from "@/components/HeroSection";
 import CommunitySection from "@/components/CommunitySection";
 
 const Landing = () => {
@@ -45,22 +45,7 @@ const Landing = () => {
       </nav>
 
       {/* Hero Section */}
-      <div className="flex flex-col items-center justify-center px-6 py-20 text-center">
-        <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
-          Dream it, describe it,{" "}
-          <span className="inline-flex items-center gap-2">
-            watch it come alive
-          </span>
-        </h1>
-        <p className="text-xl text-white/70 mb-12 max-w-2xl">
-          Generate stunning videos by chatting with AI
-        </p>
-
-        {/* Prompt Input - Centered */}
-        <div className="mb-12 flex justify-center w-full">
-          <VideoPromptInput onSubmit={handleGetStarted} />
-        </div>
-      </div>
+      <HeroSection onSubmit={handleGetStarted} />
 
       {/* From the Community */}
       <CommunitySection />

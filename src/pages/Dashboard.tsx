@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Heart, Plus, Search, Video, Play, Calendar, MoreVertical } from "lucide-react";
-import VideoPromptInput from "@/components/VideoPromptInput";
+import HeroSection from "@/components/HeroSection";
 import CommunitySection from "@/components/CommunitySection";
 
 const Dashboard = () => {
@@ -167,9 +167,9 @@ const Dashboard = () => {
           </p>
         </div>
 
-        {/* Video Creation Prompt */}
-        <div className="flex justify-center mb-8">
-          <VideoPromptInput onSubmit={handleCreateVideoFromPrompt} />
+        {/* Hero Section with Video Creation Prompt */}
+        <div className="mb-8">
+          <HeroSection onSubmit={handleCreateVideoFromPrompt} />
         </div>
 
         {/* Recent Projects */}
