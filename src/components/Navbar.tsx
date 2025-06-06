@@ -1,4 +1,5 @@
 
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Video } from "lucide-react";
@@ -9,8 +10,22 @@ interface NavbarProps {
 }
 
 const Navbar = ({ isAuthenticated = false }: NavbarProps) => {
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      setIsScrolled(scrollTop > 0);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-transparent transition-all duration-200 ease-out">
+    <nav className={`sticky top-0 z-50 w-full border-b border-transparent transition-all duration-200 ease-out ${
+      isScrolled ? 'backdrop-blur-md bg-background/80' : ''
+    }`}>
       <Container className="flex h-16 items-center justify-between">
         <div className="flex items-center gap-6">
           <Link to={isAuthenticated ? "/dashboard" : "/"} className="flex items-center gap-3">
