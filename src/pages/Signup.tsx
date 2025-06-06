@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Video, Eye, EyeOff } from "lucide-react";
+import { Heart, Eye, EyeOff } from "lucide-react";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -45,14 +45,14 @@ const Signup = () => {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex items-center justify-center gap-2 mb-8">
-          <Video className="w-8 h-8 text-purple-400" />
-          <span className="text-2xl font-bold text-white">Pamba</span>
+          <Heart className="w-8 h-8 text-red-500" />
+          <span className="text-2xl font-bold text-white">Lovable</span>
         </div>
 
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl text-white">Create your account</CardTitle>
-            <p className="text-white/60">Start creating amazing videos today</p>
+            <p className="text-white/60">Start building amazing apps today</p>
           </CardHeader>
           <CardContent className="space-y-6">
             <form onSubmit={handleSignup} className="space-y-4">
