@@ -68,7 +68,7 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
   return (
     <div className="h-screen flex flex-col bg-black/20 backdrop-blur-sm">
       {/* Header */}
-      <div className="p-6 border-b border-white/10">
+      <div className="p-6 border-b border-white/10 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-semibold text-white">Video Timeline</h2>
@@ -89,9 +89,9 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
         </div>
       </div>
 
-      {/* Video Player */}
+      {/* Video Player - Fixed Height */}
       {currentVideo && (
-        <div className="p-6 border-b border-white/10">
+        <div className="p-6 border-b border-white/10 flex-shrink-0">
           <div className="relative w-full h-64 bg-black rounded-lg overflow-hidden mb-4">
             <video
               className="w-full h-full object-contain"
@@ -133,18 +133,20 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
         </div>
       )}
 
-      {/* Timeline */}
-      <div className="flex-1">
-        <ScrollArea className="h-full" ref={scrollAreaRef}>
-          <div className="p-6 space-y-4">
-            <h3 className="text-white font-medium mb-4">Generated Videos</h3>
+      {/* Timeline - Scrollable with Fixed Height */}
+      <div className="flex-1 flex flex-col min-h-0">
+        <div className="px-6 py-3 border-b border-white/10 flex-shrink-0">
+          <h3 className="text-white font-medium">Generated Videos</h3>
+        </div>
+        <ScrollArea className="flex-1" ref={scrollAreaRef}>
+          <div className="p-4 space-y-3">
             {videos.map((video) => (
               <div
                 key={video.id}
                 ref={(el) => {
                   if (el) videoRefs.current[video.id] = el;
                 }}
-                className={`p-4 rounded-lg border cursor-pointer transition-all ${
+                className={`p-3 rounded-lg border cursor-pointer transition-all ${
                   currentVideoId === video.id
                     ? "border-purple-500 bg-purple-500/10"
                     : "border-white/20 bg-white/5 hover:bg-white/10"
@@ -152,7 +154,7 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
                 onClick={() => onVideoSelect(video.id)}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-16 h-12 bg-black rounded overflow-hidden flex-shrink-0">
+                  <div className="w-12 h-9 bg-black rounded overflow-hidden flex-shrink-0">
                     <video
                       className="w-full h-full object-cover"
                       src={video.videoUrl}
