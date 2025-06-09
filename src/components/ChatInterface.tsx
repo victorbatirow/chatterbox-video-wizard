@@ -1,7 +1,6 @@
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, Sparkles } from "lucide-react";
 import MessageBubble from "@/components/MessageBubble";
@@ -33,6 +32,7 @@ const ChatInterface = ({ onGenerateVideo, onVideoSelect, isGenerating, videos }:
     },
   ]);
   const [inputValue, setInputValue] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const promptSuggestions = [
     "A serene sunset over mountains with birds flying",
@@ -40,6 +40,19 @@ const ChatInterface = ({ onGenerateVideo, onVideoSelect, isGenerating, videos }:
     "Ocean waves crashing on a beach in slow motion",
     "A cozy coffee shop on a rainy day",
   ];
+
+  // Auto-resize textarea
+  const adjustTextareaHeight = () => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = "auto";
+      textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`;
+    }
+  };
+
+  useEffect(() => {
+    adjustTextareaHeight();
+  }, [inputValue]);
 
   const handleSendMessage = () => {
     if (!inputValue.trim() || isGenerating) return;
@@ -64,6 +77,13 @@ const ChatInterface = ({ onGenerateVideo, onVideoSelect, isGenerating, videos }:
 
     setMessages(prev => [...prev, aiMessage]);
     setInputValue("");
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
   };
 
   // Update messages when a new video is generated
@@ -173,23 +193,28 @@ const ChatInterface = ({ onGenerateVideo, onVideoSelect, isGenerating, videos }:
 
       {/* Input */}
       <div className="p-6 border-t border-white/10">
-        <div className="flex gap-3">
-          <Input
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Describe the video you want to create..."
-            onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-            disabled={isGenerating}
-            className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
-          />
+        <div className="flex gap-3 items-end">
+          <div className="flex-1">
+            <Textarea
+              ref={textareaRef}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Describe the video you want to create..."
+              disabled={isGenerating}
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/40 resize-none overflow-hidden min-h-[40px] max-h-[200px]"
+              rows={1}
+            />
+          </div>
           <Button 
             onClick={handleSendMessage}
             disabled={!inputValue.trim() || isGenerating}
-            className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
+            className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 shrink-0"
           >
             <Send className="w-4 h-4" />
           </Button>
         </div>
+        <p className="text-xs text-white/40 mt-2">Press Enter to send, Shift+Enter for new line</p>
       </div>
     </div>
   );
