@@ -28,13 +28,13 @@ const MessageBubble = ({ message, onClick, hasVideo }: MessageBubbleProps) => {
         }`}
         onClick={onClick}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-start gap-2">
           {hasVideo && (
-            <div className="flex-shrink-0 w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
+            <div className="flex-shrink-0 w-6 h-6 bg-white/20 rounded-full flex items-center justify-center mt-0.5">
               <Play className="w-3 h-3 text-white" />
             </div>
           )}
-          <p className="text-sm leading-relaxed">{message.text}</p>
+          <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.text}</p>
         </div>
         <p className={`text-xs mt-1 ${
           message.isUser ? "text-gray-500" : "text-white/50"
