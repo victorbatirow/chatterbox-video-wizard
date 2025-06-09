@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -193,27 +194,36 @@ const ChatInterface = ({ onGenerateVideo, onVideoSelect, isGenerating, videos }:
 
       {/* Input */}
       <div className="p-6 border-t border-white/10">
-        <div className="flex gap-3 items-end">
-          <div className="flex-1">
-            <Textarea
-              ref={textareaRef}
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Describe the video you want to create..."
-              disabled={isGenerating}
-              className="bg-white/10 border-white/20 text-white placeholder:text-white/40 resize-none overflow-hidden min-h-[40px] max-h-[200px]"
-              rows={1}
-            />
+        <form 
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSendMessage();
+          }}
+          className="flex flex-col gap-2 rounded-3xl border border-white/20 bg-white/5 p-3 transition-colors hover:bg-white/10 focus-within:bg-white/10"
+        >
+          <div className="flex items-end gap-3">
+            <div className="flex-1">
+              <Textarea
+                ref={textareaRef}
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Describe the video you want to create..."
+                disabled={isGenerating}
+                className="resize-none bg-transparent border-none text-white placeholder:text-white/40 focus-visible:ring-0 focus-visible:ring-offset-0 max-h-[200px] min-h-[40px] p-0 text-base leading-snug scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/20"
+                rows={1}
+                style={{ minHeight: '40px' }}
+              />
+            </div>
+            <Button 
+              type="submit"
+              disabled={!inputValue.trim() || isGenerating}
+              className="size-6 rounded-full bg-white text-black hover:bg-white/90 shrink-0 p-0"
+            >
+              <Send className="w-3 h-3" />
+            </Button>
           </div>
-          <Button 
-            onClick={handleSendMessage}
-            disabled={!inputValue.trim() || isGenerating}
-            className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 shrink-0"
-          >
-            <Send className="w-4 h-4" />
-          </Button>
-        </div>
+        </form>
         <p className="text-xs text-white/40 mt-2">Press Enter to send, Shift+Enter for new line</p>
       </div>
     </div>
