@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -5,14 +6,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, Sparkles } from "lucide-react";
 import MessageBubble from "@/components/MessageBubble";
 import ProjectMenu from "@/components/ProjectMenu";
-import { VideoMessage } from "@/pages/Chat";
-
-interface ChatInterfaceProps {
-  onGenerateVideo: (prompt: string) => void;
-  onVideoSelect: (videoId: string) => void;
-  isGenerating: boolean;
-  videos: VideoMessage[];
-}
 
 interface Message {
   id: string;
@@ -22,15 +15,14 @@ interface Message {
   videoId?: string;
 }
 
-const ChatInterface = ({ onGenerateVideo, onVideoSelect, isGenerating, videos }: ChatInterfaceProps) => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      text: "Hi! I'm your AI video generator. Describe the video you'd like me to create - be as detailed as possible!",
-      isUser: false,
-      timestamp: new Date(),
-    },
-  ]);
+interface ChatInterfaceProps {
+  onSendMessage: (message: string) => void;
+  onVideoSelect: (videoId: string) => void;
+  isGenerating: boolean;
+  messages: Message[];
+}
+
+const ChatInterface = ({ onSendMessage, onVideoSelect, isGenerating, messages }: ChatInterfaceProps) => {
   const [inputValue, setInputValue] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -73,25 +65,7 @@ const ChatInterface = ({ onGenerateVideo, onVideoSelect, isGenerating, videos }:
   const handleSendMessage = () => {
     if (!inputValue.trim() || isGenerating) return;
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      text: inputValue,
-      isUser: true,
-      timestamp: new Date(),
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-    onGenerateVideo(inputValue);
-
-    // Add AI response
-    const aiMessage: Message = {
-      id: (Date.now() + 1).toString(),
-      text: "Great! I'm generating your video now. This might take a few moments...",
-      isUser: false,
-      timestamp: new Date(),
-    };
-
-    setMessages(prev => [...prev, aiMessage]);
+    onSendMessage(inputValue);
     setInputValue("");
   };
 
@@ -101,40 +75,6 @@ const ChatInterface = ({ onGenerateVideo, onVideoSelect, isGenerating, videos }:
       handleSendMessage();
     }
   };
-
-  // Update messages when a new video is generated
-  useEffect(() => {
-    if (videos.length > 0) {
-      const latestVideo = videos[videos.length - 1];
-      const videoMessage: Message = {
-        id: `video-${latestVideo.id}`,
-        text: `Here's your generated video: "${latestVideo.prompt}"`,
-        isUser: false,
-        timestamp: latestVideo.timestamp,
-        videoId: latestVideo.id,
-      };
-
-      setMessages(prev => {
-        // Replace the "generating" message with the video message
-        const updatedMessages = [...prev];
-        // Find the last AI message that doesn't have a video
-        let lastAiMessageIndex = -1;
-        for (let i = updatedMessages.length - 1; i >= 0; i--) {
-          if (!updatedMessages[i].isUser && !updatedMessages[i].videoId) {
-            lastAiMessageIndex = i;
-            break;
-          }
-        }
-        
-        if (lastAiMessageIndex !== -1) {
-          updatedMessages[lastAiMessageIndex] = videoMessage;
-        } else {
-          updatedMessages.push(videoMessage);
-        }
-        return updatedMessages;
-      });
-    }
-  }, [videos]);
 
   const handleSuggestionClick = (suggestion: string) => {
     setInputValue(suggestion);
@@ -174,7 +114,7 @@ const ChatInterface = ({ onGenerateVideo, onVideoSelect, isGenerating, videos }:
                 <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce delay-100"></div>
                 <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce delay-200"></div>
               </div>
-              <span className="text-sm">Generating video...</span>
+              <span className="text-sm">Processing your request...</span>
             </div>
           )}
         </div>
@@ -220,7 +160,7 @@ const ChatInterface = ({ onGenerateVideo, onVideoSelect, isGenerating, videos }:
               }}
             />
           </div>
-          <div className="flex justify-between mt-3 pt-2 border-t border-white/20">
+          <div className="flex justify-between items-center mt-3 pt-2 border-t border-white/20">
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-purple-400" />
               <span className="text-sm text-white/60">Public</span>

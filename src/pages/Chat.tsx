@@ -11,26 +11,81 @@ export interface VideoMessage {
   timestamp: Date;
 }
 
+interface Message {
+  id: string;
+  text: string;
+  isUser: boolean;
+  timestamp: Date;
+  videoId?: string;
+}
+
 const Chat = () => {
   const [videos, setVideos] = useState<VideoMessage[]>([]);
   const [currentVideoId, setCurrentVideoId] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: "1",
+      text: "Hi! I'm your AI video generator. Describe the video you'd like me to create - be as detailed as possible!",
+      isUser: false,
+      timestamp: new Date(),
+    },
+  ]);
 
-  const handleVideoGeneration = async (prompt: string) => {
+  const handleSendMessage = async (userInput: string) => {
+    if (!userInput.trim() || isGenerating) return;
+
+    // Add user message to chat
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      text: userInput,
+      isUser: true,
+      timestamp: new Date(),
+    };
+
+    setMessages(prev => [...prev, userMessage]);
     setIsGenerating(true);
-    // Simulate video generation delay
-    setTimeout(() => {
-      const newVideo: VideoMessage = {
-        id: Date.now().toString(),
-        videoUrl: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
-        prompt,
+
+    try {
+      // Call backend API
+      const response = await fetch('http://localhost:8080/prompt', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ user_input: userInput }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // Add AI response to chat
+      const aiMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: data.response,
+        isUser: false,
         timestamp: new Date(),
       };
+
+      setMessages(prev => [...prev, aiMessage]);
+    } catch (error) {
+      console.error('Error calling backend API:', error);
       
-      setVideos(prev => [...prev, newVideo]);
-      setCurrentVideoId(newVideo.id);
+      // Add error message to chat
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: "Sorry, I'm having trouble connecting to the server. Please try again later.",
+        isUser: false,
+        timestamp: new Date(),
+      };
+
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsGenerating(false);
-    }, 3000);
+    }
   };
 
   const handleVideoSelect = (videoId: string) => {
@@ -43,10 +98,10 @@ const Chat = () => {
         {/* Chat Interface - Resizable Panel */}
         <ResizablePanel defaultSize={33} minSize={25} maxSize={50}>
           <ChatInterface 
-            onGenerateVideo={handleVideoGeneration}
+            onSendMessage={handleSendMessage}
             onVideoSelect={handleVideoSelect}
             isGenerating={isGenerating}
-            videos={videos}
+            messages={messages}
           />
         </ResizablePanel>
         
