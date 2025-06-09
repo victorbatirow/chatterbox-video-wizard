@@ -21,7 +21,7 @@ const MessageBubble = ({ message, onClick, hasVideo }: MessageBubbleProps) => {
       <div 
         className={`max-w-[80%] ${
           message.isUser 
-            ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white" 
+            ? "bg-white/15 text-white border border-white/20" 
             : "bg-white/10 text-white"
         } rounded-2xl px-4 py-3 ${
           hasVideo ? "cursor-pointer hover:bg-white/20 transition-colors" : ""
