@@ -41,7 +41,7 @@ const Chat = () => {
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
       <ResizablePanelGroup direction="horizontal" className="h-screen">
         {/* Chat Interface - Resizable Panel */}
-        <ResizablePanel defaultSize={33} minSize={25} maxSize={33}>
+        <ResizablePanel defaultSize={33} minSize={25} maxSize={50}>
           <ChatInterface 
             onGenerateVideo={handleVideoGeneration}
             onVideoSelect={handleVideoSelect}
@@ -54,7 +54,7 @@ const Chat = () => {
         <ResizableHandle withHandle />
         
         {/* Video Timeline - Resizable Panel */}
-        <ResizablePanel defaultSize={67} minSize={67}>
+        <ResizablePanel defaultSize={67} minSize={50}>
           <VideoTimeline 
             videos={videos}
             currentVideoId={currentVideoId}

@@ -14,8 +14,8 @@ const Landing = () => {
   const [prompt, setPrompt] = useState("");
 
   const handleGetStarted = (prompt: string) => {
-    // For now, just navigate to the main app
-    window.location.href = "/app";
+    // Navigate to the chat page
+    window.location.href = "/chat";
   };
 
   return (
