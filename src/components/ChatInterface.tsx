@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -66,7 +67,7 @@ const ChatInterface = ({ onGenerateVideo, onVideoSelect, isGenerating, videos }:
   };
 
   // Update messages when a new video is generated
-  useState(() => {
+  useEffect(() => {
     if (videos.length > 0) {
       const latestVideo = videos[videos.length - 1];
       const videoMessage: Message = {
@@ -80,7 +81,15 @@ const ChatInterface = ({ onGenerateVideo, onVideoSelect, isGenerating, videos }:
       setMessages(prev => {
         // Replace the "generating" message with the video message
         const updatedMessages = [...prev];
-        const lastAiMessageIndex = updatedMessages.findLastIndex(msg => !msg.isUser && !msg.videoId);
+        // Find the last AI message that doesn't have a video
+        let lastAiMessageIndex = -1;
+        for (let i = updatedMessages.length - 1; i >= 0; i--) {
+          if (!updatedMessages[i].isUser && !updatedMessages[i].videoId) {
+            lastAiMessageIndex = i;
+            break;
+          }
+        }
+        
         if (lastAiMessageIndex !== -1) {
           updatedMessages[lastAiMessageIndex] = videoMessage;
         } else {
