@@ -139,15 +139,6 @@ const ChatInterface = ({ onGenerateVideo, onVideoSelect, isGenerating, videos }:
         <div className="flex items-center justify-between mb-3">
           <ProjectMenu />
         </div>
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-white">Pamba Studio</h1>
-            <p className="text-sm text-white/60">AI-powered video generation</p>
-          </div>
-        </div>
       </div>
 
       {/* Messages */}
@@ -206,8 +197,8 @@ const ChatInterface = ({ onGenerateVideo, onVideoSelect, isGenerating, videos }:
               disabled={isGenerating}
               className="bg-transparent border-none text-white placeholder:text-white/40 w-full resize-none p-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-base"
               style={{
-                minHeight: '80px',
-                height: '80px',
+                minHeight: '40px',
+                height: inputValue ? 'auto' : '40px',
                 maxHeight: '200px',
                 overflow: 'auto',
                 scrollbarWidth: 'thin',
