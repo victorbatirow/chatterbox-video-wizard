@@ -111,9 +111,9 @@ const ChatInterface = ({ onGenerateVideo, onVideoSelect, isGenerating, videos }:
   };
 
   return (
-    <div className="flex flex-col h-full bg-white/5 backdrop-blur-sm border-r border-white/10">
+    <div className="flex flex-col h-screen bg-black/20 backdrop-blur-sm">
       {/* Header */}
-      <div className="p-6 border-b border-white/10 bg-white/5">
+      <div className="p-6 border-b border-white/10">
         <div className="flex items-center justify-between mb-3">
           <ProjectMenu />
         </div>
@@ -155,14 +155,14 @@ const ChatInterface = ({ onGenerateVideo, onVideoSelect, isGenerating, videos }:
 
       {/* Suggestions */}
       {messages.length === 1 && (
-        <div className="p-6 border-t border-white/10 bg-white/5">
+        <div className="p-6 border-t border-white/10">
           <p className="text-sm text-white/60 mb-3">Try these prompts:</p>
           <div className="grid grid-cols-1 gap-2">
             {promptSuggestions.map((suggestion, index) => (
               <button
                 key={index}
                 onClick={() => handleSuggestionClick(suggestion)}
-                className="text-left p-3 bg-white/5 hover:bg-white/10 rounded-lg text-sm text-white/80 transition-colors border border-white/10"
+                className="text-left p-3 bg-white/5 hover:bg-white/10 rounded-lg text-sm text-white/80 transition-colors"
               >
                 {suggestion}
               </button>
@@ -172,7 +172,7 @@ const ChatInterface = ({ onGenerateVideo, onVideoSelect, isGenerating, videos }:
       )}
 
       {/* Input */}
-      <div className="p-6 border-t border-white/10 bg-white/5">
+      <div className="p-6 border-t border-white/10">
         <div className="flex gap-3">
           <Input
             value={inputValue}

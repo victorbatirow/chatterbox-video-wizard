@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Video } from "lucide-react";
 import HeroSection from "@/components/HeroSection";
@@ -12,11 +12,10 @@ import StaticGradientBackground from "@/components/StaticGradientBackground";
 
 const Landing = () => {
   const [prompt, setPrompt] = useState("");
-  const navigate = useNavigate();
 
   const handleGetStarted = (prompt: string) => {
-    // Navigate to chat instead of the non-existent /app route
-    navigate('/chat');
+    // For now, just navigate to the main app
+    window.location.href = "/app";
   };
 
   return (
