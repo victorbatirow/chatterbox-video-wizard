@@ -13,11 +13,10 @@ interface VideoTimelineProps {
 }
 
 const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: VideoTimelineProps) => {
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [playingVideos, setPlayingVideos] = useState<Set<string>>(new Set());
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const videoRefs = useRef<{ [key: string]: HTMLDivElement }>({});
-
-  const currentVideo = videos.find(video => video.id === currentVideoId);
+  const videoElementRefs = useRef<{ [key: string]: HTMLVideoElement }>({});
 
   // Scroll to current video when selection changes
   useEffect(() => {
@@ -29,8 +28,21 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
     }
   }, [currentVideoId]);
 
-  const handlePlayPause = () => {
-    setIsPlaying(!isPlaying);
+  const handlePlayPause = (videoId: string) => {
+    const videoElement = videoElementRefs.current[videoId];
+    if (!videoElement) return;
+
+    if (playingVideos.has(videoId)) {
+      videoElement.pause();
+      setPlayingVideos(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(videoId);
+        return newSet;
+      });
+    } else {
+      videoElement.play();
+      setPlayingVideos(prev => new Set([...prev, videoId]));
+    }
   };
 
   if (isGenerating) {
@@ -74,104 +86,91 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
             <h2 className="text-lg font-semibold text-white">Video Timeline</h2>
             <p className="text-sm text-white/60">{videos.length} video{videos.length !== 1 ? 's' : ''} generated</p>
           </div>
-          {currentVideo && (
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" className="border-white/20 text-white hover:bg-white/10">
-                <RotateCcw className="w-4 h-4 mr-2" />
-                Regenerate
-              </Button>
-              <Button size="sm" className="bg-gradient-to-r from-purple-500 to-blue-500">
-                <Download className="w-4 h-4 mr-2" />
-                Download
-              </Button>
-            </div>
-          )}
         </div>
       </div>
 
-      {/* Video Player - Fixed Height */}
-      {currentVideo && (
-        <div className="p-6 border-b border-white/10 flex-shrink-0">
-          <div className="relative w-full h-64 bg-black rounded-lg overflow-hidden mb-4">
-            <video
-              className="w-full h-full object-contain"
-              src={currentVideo.videoUrl}
-              controls={false}
-            />
-            
-            {/* Custom Controls Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300">
-              <div className="absolute bottom-4 left-4 right-4">
-                <div className="flex items-center gap-4">
-                  <Button
-                    size="sm"
-                    onClick={handlePlayPause}
-                    className="bg-white/20 hover:bg-white/30 backdrop-blur-sm"
-                  >
-                    {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                  </Button>
-                  
-                  <div className="flex-1 h-1 bg-white/20 rounded-full">
-                    <div className="h-full bg-white rounded-full w-1/3"></div>
-                  </div>
-                  
-                  <Button
-                    size="sm"
-                    className="bg-white/20 hover:bg-white/30 backdrop-blur-sm"
-                  >
-                    <Volume2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white/5 rounded-lg p-3">
-            <h4 className="text-white font-medium mb-1">Current Video</h4>
-            <p className="text-white/70 text-sm">{currentVideo.prompt}</p>
-          </div>
-        </div>
-      )}
-
-      {/* Timeline - Scrollable with Fixed Height */}
+      {/* Video Timeline - Scrollable */}
       <div className="flex-1 flex flex-col min-h-0">
-        <div className="px-6 py-3 border-b border-white/10 flex-shrink-0">
-          <h3 className="text-white font-medium">Generated Videos</h3>
-        </div>
         <ScrollArea className="flex-1" ref={scrollAreaRef}>
-          <div className="p-4 space-y-3">
+          <div className="p-4 space-y-6">
             {videos.map((video) => (
               <div
                 key={video.id}
                 ref={(el) => {
                   if (el) videoRefs.current[video.id] = el;
                 }}
-                className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                className={`rounded-lg border transition-all ${
                   currentVideoId === video.id
                     ? "border-purple-500 bg-purple-500/10"
-                    : "border-white/20 bg-white/5 hover:bg-white/10"
+                    : "border-white/20 bg-white/5"
                 }`}
                 onClick={() => onVideoSelect(video.id)}
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-9 bg-black rounded overflow-hidden flex-shrink-0">
-                    <video
-                      className="w-full h-full object-cover"
-                      src={video.videoUrl}
-                      muted
-                    />
+                {/* Video Player */}
+                <div className="relative w-full h-64 bg-black rounded-t-lg overflow-hidden">
+                  <video
+                    ref={(el) => {
+                      if (el) videoElementRefs.current[video.id] = el;
+                    }}
+                    className="w-full h-full object-contain"
+                    src={video.videoUrl}
+                    controls={false}
+                  />
+                  
+                  {/* Custom Controls Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300">
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <div className="flex items-center gap-4">
+                        <Button
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handlePlayPause(video.id);
+                          }}
+                          className="bg-white/20 hover:bg-white/30 backdrop-blur-sm"
+                        >
+                          {playingVideos.has(video.id) ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                        </Button>
+                        
+                        <div className="flex-1 h-1 bg-white/20 rounded-full">
+                          <div className="h-full bg-white rounded-full w-1/3"></div>
+                        </div>
+                        
+                        <Button
+                          size="sm"
+                          className="bg-white/20 hover:bg-white/30 backdrop-blur-sm"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Volume2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-white text-sm font-medium truncate">
-                      {video.prompt}
-                    </p>
-                    <p className="text-white/50 text-xs">
+                </div>
+
+                {/* Video Info */}
+                <div className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-white font-medium">{video.prompt}</h4>
+                    {currentVideoId === video.id && (
+                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <p className="text-white/50 text-sm">
                       {video.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </p>
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                        <RotateCcw className="w-4 h-4 mr-2" />
+                        Regenerate
+                      </Button>
+                      <Button size="sm" className="bg-gradient-to-r from-purple-500 to-blue-500">
+                        <Download className="w-4 h-4 mr-2" />
+                        Download
+                      </Button>
+                    </div>
                   </div>
-                  {currentVideoId === video.id && (
-                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                  )}
                 </div>
               </div>
             ))}
