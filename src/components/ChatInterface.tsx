@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -226,8 +225,6 @@ const ChatInterface = ({ onGenerateVideo, onVideoSelect, isGenerating, videos }:
               <Sparkles className="w-4 h-4 text-purple-400" />
               <span className="text-sm text-white/60">Public</span>
             </div>
-          </div>
-          <div className="flex justify-end mt-3">
             <Button 
               onClick={handleSendMessage}
               disabled={!inputValue.trim() || isGenerating}
