@@ -12,8 +12,8 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   const handleCreateVideoFromPrompt = (prompt: string) => {
-    // Navigate to app with the prompt (in a real app, you'd pass this as state or URL param)
-    navigate('/app');
+    // Navigate to chat with the prompt (in a real app, you'd pass this as state or URL param)
+    navigate('/chat');
   };
 
   return (

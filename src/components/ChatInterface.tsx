@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,10 +5,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, Sparkles } from "lucide-react";
 import MessageBubble from "@/components/MessageBubble";
 import ProjectMenu from "@/components/ProjectMenu";
+import { VideoMessage } from "@/pages/Chat";
 
 interface ChatInterfaceProps {
   onGenerateVideo: (prompt: string) => void;
+  onVideoSelect: (videoId: string) => void;
   isGenerating: boolean;
+  videos: VideoMessage[];
 }
 
 interface Message {
@@ -17,9 +19,10 @@ interface Message {
   text: string;
   isUser: boolean;
   timestamp: Date;
+  videoId?: string;
 }
 
-const ChatInterface = ({ onGenerateVideo, isGenerating }: ChatInterfaceProps) => {
+const ChatInterface = ({ onGenerateVideo, onVideoSelect, isGenerating, videos }: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -62,8 +65,40 @@ const ChatInterface = ({ onGenerateVideo, isGenerating }: ChatInterfaceProps) =>
     setInputValue("");
   };
 
+  // Update messages when a new video is generated
+  useState(() => {
+    if (videos.length > 0) {
+      const latestVideo = videos[videos.length - 1];
+      const videoMessage: Message = {
+        id: `video-${latestVideo.id}`,
+        text: `Here's your generated video: "${latestVideo.prompt}"`,
+        isUser: false,
+        timestamp: latestVideo.timestamp,
+        videoId: latestVideo.id,
+      };
+
+      setMessages(prev => {
+        // Replace the "generating" message with the video message
+        const updatedMessages = [...prev];
+        const lastAiMessageIndex = updatedMessages.findLastIndex(msg => !msg.isUser && !msg.videoId);
+        if (lastAiMessageIndex !== -1) {
+          updatedMessages[lastAiMessageIndex] = videoMessage;
+        } else {
+          updatedMessages.push(videoMessage);
+        }
+        return updatedMessages;
+      });
+    }
+  }, [videos]);
+
   const handleSuggestionClick = (suggestion: string) => {
     setInputValue(suggestion);
+  };
+
+  const handleMessageClick = (message: Message) => {
+    if (message.videoId) {
+      onVideoSelect(message.videoId);
+    }
   };
 
   return (
@@ -88,7 +123,12 @@ const ChatInterface = ({ onGenerateVideo, isGenerating }: ChatInterfaceProps) =>
       <ScrollArea className="flex-1 p-6">
         <div className="space-y-4">
           {messages.map((message) => (
-            <MessageBubble key={message.id} message={message} />
+            <MessageBubble 
+              key={message.id} 
+              message={message} 
+              onClick={() => handleMessageClick(message)}
+              hasVideo={!!message.videoId}
+            />
           ))}
           
           {isGenerating && (
