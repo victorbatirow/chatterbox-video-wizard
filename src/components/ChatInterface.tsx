@@ -1,4 +1,5 @@
 
+
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -194,36 +195,41 @@ const ChatInterface = ({ onGenerateVideo, onVideoSelect, isGenerating, videos }:
 
       {/* Input */}
       <div className="p-6 border-t border-white/10">
-        <form 
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSendMessage();
-          }}
-          className="flex flex-col gap-2 rounded-3xl border border-white/20 bg-white/5 p-3 transition-colors hover:bg-white/10 focus-within:bg-white/10"
-        >
-          <div className="flex items-end gap-3">
-            <div className="flex-1">
-              <Textarea
-                ref={textareaRef}
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Describe the video you want to create..."
-                disabled={isGenerating}
-                className="resize-none bg-transparent border-none text-white placeholder:text-white/40 focus-visible:ring-0 focus-visible:ring-offset-0 max-h-[200px] min-h-[40px] p-0 text-base leading-snug scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/20"
-                rows={1}
-                style={{ minHeight: '40px' }}
-              />
+        <div className="w-full bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
+          <div className="w-full">
+            <Textarea
+              ref={textareaRef}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Describe the video you want to create..."
+              disabled={isGenerating}
+              className="bg-transparent border-none text-white placeholder:text-white/40 w-full resize-none p-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-base"
+              style={{
+                minHeight: '80px',
+                height: '80px',
+                maxHeight: '200px',
+                overflow: 'auto',
+                scrollbarWidth: 'thin',
+                scrollbarColor: 'rgba(255,255,255,0.3) transparent'
+              }}
+            />
+          </div>
+          <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/20">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-purple-400" />
+              <span className="text-sm text-white/60">Public</span>
             </div>
             <Button 
-              type="submit"
+              onClick={handleSendMessage}
               disabled={!inputValue.trim() || isGenerating}
-              className="size-6 rounded-full bg-white text-black hover:bg-white/90 shrink-0 p-0"
+              size="icon"
+              className="bg-purple-600 hover:bg-purple-700 text-white rounded-lg h-10 w-10 flex-shrink-0"
             >
-              <Send className="w-3 h-3" />
+              <Send className="w-4 h-4" />
             </Button>
           </div>
-        </form>
+        </div>
         <p className="text-xs text-white/40 mt-2">Press Enter to send, Shift+Enter for new line</p>
       </div>
     </div>
@@ -231,3 +237,4 @@ const ChatInterface = ({ onGenerateVideo, onVideoSelect, isGenerating, videos }:
 };
 
 export default ChatInterface;
+
