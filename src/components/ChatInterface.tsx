@@ -1,5 +1,3 @@
-
-
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -35,6 +33,7 @@ const ChatInterface = ({ onGenerateVideo, onVideoSelect, isGenerating, videos }:
   ]);
   const [inputValue, setInputValue] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   const promptSuggestions = [
     "A serene sunset over mountains with birds flying",
@@ -52,9 +51,25 @@ const ChatInterface = ({ onGenerateVideo, onVideoSelect, isGenerating, videos }:
     }
   };
 
+  // Auto-scroll to bottom
+  const scrollToBottom = () => {
+    const scrollArea = scrollAreaRef.current;
+    if (scrollArea) {
+      const viewport = scrollArea.querySelector('[data-radix-scroll-area-viewport]');
+      if (viewport) {
+        viewport.scrollTop = viewport.scrollHeight;
+      }
+    }
+  };
+
   useEffect(() => {
     adjustTextareaHeight();
   }, [inputValue]);
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isGenerating]);
 
   const handleSendMessage = () => {
     if (!inputValue.trim() || isGenerating) return;
@@ -142,7 +157,7 @@ const ChatInterface = ({ onGenerateVideo, onVideoSelect, isGenerating, videos }:
       </div>
 
       {/* Messages */}
-      <ScrollArea className="flex-1 p-6">
+      <ScrollArea ref={scrollAreaRef} className="flex-1 p-6">
         <div className="space-y-4">
           {messages.map((message) => (
             <MessageBubble 
@@ -206,11 +221,13 @@ const ChatInterface = ({ onGenerateVideo, onVideoSelect, isGenerating, videos }:
               }}
             />
           </div>
-          <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/20">
+          <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/20">
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-purple-400" />
               <span className="text-sm text-white/60">Public</span>
             </div>
+          </div>
+          <div className="flex justify-end mt-3">
             <Button 
               onClick={handleSendMessage}
               disabled={!inputValue.trim() || isGenerating}
@@ -228,4 +245,3 @@ const ChatInterface = ({ onGenerateVideo, onVideoSelect, isGenerating, videos }:
 };
 
 export default ChatInterface;
-
