@@ -101,38 +101,55 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
 
     setVideoDuration(prev => ({ ...prev, [videoId]: videoElement.duration }));
     
-    // More reliable audio detection
-    const detectAudio = () => {
-      // Check if the video element has mozHasAudio property (Firefox)
-      if ('mozHasAudio' in videoElement) {
-        return (videoElement as any).mozHasAudio;
-      }
-      
-      // Check if the video element has webkitAudioDecodedByteCount property (Chrome/Safari)
-      if ('webkitAudioDecodedByteCount' in videoElement) {
-        return (videoElement as any).webkitAudioDecodedByteCount > 0;
-      }
-      
-      // Fallback: assume video has audio if duration > 0 and no other indicators suggest otherwise
-      // This is not perfect but works for most cases
-      return false; // Default to no audio for generated videos
-    };
+    // Wait a bit for the video to load more data, then check for audio
+    setTimeout(() => {
+      const detectAudio = () => {
+        // Check for browser-specific audio detection properties
+        if ('mozHasAudio' in videoElement) {
+          return (videoElement as any).mozHasAudio;
+        }
+        
+        if ('webkitAudioDecodedByteCount' in videoElement) {
+          return (videoElement as any).webkitAudioDecodedByteCount > 0;
+        }
+        
+        // Generic fallback: check if video element reports audio tracks
+        if ('audioTracks' in videoElement && (videoElement as any).audioTracks) {
+          return (videoElement as any).audioTracks.length > 0;
+        }
+        
+        // Another fallback: test volume change capability
+        const originalVolume = videoElement.volume;
+        try {
+          videoElement.volume = 0.5;
+          const canChangeVolume = videoElement.volume === 0.5;
+          videoElement.volume = originalVolume;
+          
+          // If we can change volume and the video has a reasonable duration, assume it has audio
+          // For generated videos without audio, this will still work but we'll set them to muted
+          return canChangeVolume && videoElement.duration > 0;
+        } catch {
+          return false;
+        }
+      };
 
-    const videoHasAudio = detectAudio();
-    
-    setHasAudio(prev => ({ ...prev, [videoId]: videoHasAudio }));
-    
-    if (videoHasAudio) {
-      // Video has audio - set normal volume controls
-      setVideoVolume(prev => ({ ...prev, [videoId]: videoElement.volume * 100 }));
-      setIsMuted(prev => ({ ...prev, [videoId]: false }));
-    } else {
-      // Video has no audio - mute it and disable volume controls
-      videoElement.volume = 0;
-      videoElement.muted = true;
-      setVideoVolume(prev => ({ ...prev, [videoId]: 0 }));
-      setIsMuted(prev => ({ ...prev, [videoId]: true }));
-    }
+      const videoHasAudio = detectAudio();
+      console.log(`Video ${videoId} audio detection:`, videoHasAudio);
+      
+      setHasAudio(prev => ({ ...prev, [videoId]: videoHasAudio }));
+      
+      if (videoHasAudio) {
+        // Video has audio - set normal volume controls
+        setVideoVolume(prev => ({ ...prev, [videoId]: videoElement.volume * 100 }));
+        setIsMuted(prev => ({ ...prev, [videoId]: false }));
+      } else {
+        // Video has no audio - mute it and disable volume controls
+        videoElement.volume = 0;
+        videoElement.muted = true;
+        setVideoVolume(prev => ({ ...prev, [videoId]: 0 }));
+        setIsMuted(prev => ({ ...prev, [videoId]: true }));
+      }
+    }, 100); // Small delay to let video load
   };
 
   const handleProgressChange = (videoId: string, value: number[]) => {
