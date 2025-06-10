@@ -35,6 +35,10 @@ const Navbar = ({ isAuthenticated = false }: NavbarProps) => {
     navigate('/chat');
   };
 
+  const handleSignOut = () => {
+    navigate('/');
+  };
+
   return (
     <nav className={`sticky top-0 z-50 w-full border-b border-transparent transition-all duration-200 ease-out bg-slate-900 ${
       isScrolled ? 'backdrop-blur-md bg-slate-900/95' : ''
@@ -107,11 +111,6 @@ const Navbar = ({ isAuthenticated = false }: NavbarProps) => {
                       </div>
                       <p className="text-xs text-muted-foreground">30/100</p>
                     </div>
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="max-w-[35ch] text-wrap text-xs text-muted-foreground">
-                        You have 2 daily credits to use first
-                      </p>
-                    </div>
                   </div>
                 </div>
 
@@ -180,7 +179,7 @@ const Navbar = ({ isAuthenticated = false }: NavbarProps) => {
                     className="shrink-0 h-5 w-5" 
                     fill="currentColor"
                   >
-                    <path d="M484.03-247Q500-247 511-258.03t11-27T510.97-312t-27-11T457-311.97t-11 27T457.03-258t27 11m-3.76 167q-82.74 0-155.5-31.5Q252-143 197.5-197.5t-86-127.34T80-480.5t31.5-155.66 86-126.84 127.34-85.5T480.5-880t155.66 31.5T763-763t85.5 127T880-480.27q0 82.74-31.5 155.5Q817-252 763-197.68q-54 54.31-127 86Q563-80 480.27-80m.23-60Q622-140 721-239.5t99-241T721.19-721 480-820q-141 0-240.5 98.81T140-480q0 141 99.5 240.5t241 99.5m2.27-520Q513-660 536-641.5t23 47.2q0 26.3-15.65 45.73T508-512q-23 19-40 42.38-17 23.39-17 52.62 0 11 8.4 17.5T479-393q12 0 19.88-8 7.87-8 10.12-20 3-21 16-38t30.23-30.78Q580-510 596-537t16-58.61q0-50.39-37.5-83.89T485.55-713Q450-713 417-698t-54 44q-7 10-6.5 21.5t9.47 18.5q11.41 8 23.65 5 12.23-3 20.38-14 12.75-17.9 31.88-27.45Q461-660 482.77-660"/>
+                    <path d="M484.03-247Q500-247 511-258.03t11-27T510.97-312t-27-11T457-311.97t-11 27T457.03-258t27 11m-3.2-314q14.02 0 23.52-9.2T513-626q0-14.45-9.48-24.22-9.48-9.78-23.5-9.78t-23.52 9.78Q447-640.45 447-626q0 13.6 9.48 22.8t23.5 9.2m.29 514q-82.74 0-155.5-31.5Q252-143 197.5-197.5t-86-127.34T80-480.5t31.5-155.66 86-126.84 127.34-85.5T480.5-880t155.66 31.5T763-763t85.5 127T880-480.27q0 82.74-31.5 155.5Q817-252 763-197.68q-54 54.31-127 86Q563-80 480.27-80m.23-60Q622-140 721-239.5t99-241T721.19-721 480-820q-141 0-240.5 98.81T140-480q0 141 99.5 240.5t241 99.5m-.5-340"/>
                   </svg>
                   <p>Help Center</p>
                 </DropdownMenuItem>
@@ -188,7 +187,10 @@ const Navbar = ({ isAuthenticated = false }: NavbarProps) => {
                 <DropdownMenuSeparator />
 
                 {/* Sign Out */}
-                <DropdownMenuItem className="gap-2 px-2 py-1.5">
+                <DropdownMenuItem 
+                  className="gap-2 px-2 py-1.5 cursor-pointer"
+                  onClick={handleSignOut}
+                >
                   <svg 
                     xmlns="http://www.w3.org/2000/svg" 
                     width="16" 
