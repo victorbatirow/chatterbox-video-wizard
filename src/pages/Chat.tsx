@@ -11,10 +11,82 @@ export interface VideoMessage {
   timestamp: Date;
 }
 
+export interface Message {
+  id: string;
+  text: string;
+  isUser: boolean;
+  timestamp: Date;
+  videoId?: string;
+}
+
 const Chat = () => {
   const [videos, setVideos] = useState<VideoMessage[]>([]);
   const [currentVideoId, setCurrentVideoId] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: "1",
+      text: "Hi! I'm your AI assistant. How can I help you today?",
+      isUser: false,
+      timestamp: new Date(),
+    },
+  ]);
+
+  const handleSendMessage = async (prompt: string) => {
+    if (!prompt.trim() || isGenerating) return;
+
+    // Add user message
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      text: prompt,
+      isUser: true,
+      timestamp: new Date(),
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setIsGenerating(true);
+
+    try {
+      // Send to backend API
+      const response = await fetch('http://localhost:8081/prompt', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ user_input: prompt }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // Add AI response
+      const aiMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: data.response,
+        isUser: false,
+        timestamp: new Date(),
+      };
+
+      setMessages(prev => [...prev, aiMessage]);
+    } catch (error) {
+      console.error('Error calling backend API:', error);
+      
+      // Add error message
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: "Sorry, I'm having trouble connecting to the server. Please try again later.",
+        isUser: false,
+        timestamp: new Date(),
+      };
+
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const handleVideoGeneration = async (prompt: string) => {
     setIsGenerating(true);
@@ -43,10 +115,12 @@ const Chat = () => {
         {/* Chat Interface - Resizable Panel */}
         <ResizablePanel defaultSize={33} minSize={25} maxSize={50}>
           <ChatInterface 
+            onSendMessage={handleSendMessage}
             onGenerateVideo={handleVideoGeneration}
             onVideoSelect={handleVideoSelect}
             isGenerating={isGenerating}
             videos={videos}
+            messages={messages}
           />
         </ResizablePanel>
         
