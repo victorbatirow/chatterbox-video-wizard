@@ -145,6 +145,15 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
     }
   };
 
+  const handleDownload = (videoUrl: string, prompt: string) => {
+    const link = document.createElement('a');
+    link.href = videoUrl;
+    link.download = `${prompt.slice(0, 30).replace(/[^a-zA-Z0-9]/g, '_')}.mp4`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const formatTime = (seconds: number) => {
     if (isNaN(seconds)) return "0:00";
     const mins = Math.floor(seconds / 60);
@@ -261,58 +270,86 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
                         </div>
                       </div>
                       
-                      <div className="flex items-center gap-4">
-                        <Button
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handlePlayPause(video.id);
-                          }}
-                          className="bg-white/20 hover:bg-white/30 backdrop-blur-sm"
-                        >
-                          {playingVideos.has(video.id) ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                        </Button>
-                        
-                        {/* Volume Control */}
-                        <div className="flex items-center gap-2 flex-1 max-w-32">
+                      <div className="flex items-center justify-between">
+                        {/* Left side controls */}
+                        <div className="flex items-center gap-4">
                           <Button
                             size="sm"
-                            className="bg-white/20 hover:bg-white/30 backdrop-blur-sm p-2"
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleMuteToggle(video.id);
+                              handlePlayPause(video.id);
                             }}
+                            className="bg-white/20 hover:bg-white/30 backdrop-blur-sm"
                           >
-                            {isMuted[video.id] ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                            {playingVideos.has(video.id) ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
                           </Button>
-                          <div 
-                            className="relative w-full h-1 bg-white/20 rounded-full cursor-pointer"
-                            data-slider={`${video.id}-volume`}
-                            onClick={(e) => handleSliderClick(e, video.id, 'volume')}
-                            onMouseDown={(e) => handleSliderMouseDown(e, video.id, 'volume')}
-                          >
+                          
+                          {/* Volume Control */}
+                          <div className="flex items-center gap-2 max-w-32">
+                            <Button
+                              size="sm"
+                              className="bg-white/20 hover:bg-white/30 backdrop-blur-sm p-2"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleMuteToggle(video.id);
+                              }}
+                            >
+                              {isMuted[video.id] ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                            </Button>
                             <div 
-                              className="absolute h-full bg-white rounded-full transition-all duration-150"
-                              style={{ width: `${videoVolume[video.id] || 100}%` }}
-                            />
-                            <div 
-                              className="absolute w-3 h-3 bg-white rounded-full border border-white shadow-lg transform -translate-y-1/2 -translate-x-1/2 top-1/2 cursor-grab active:cursor-grabbing"
-                              style={{ left: `${videoVolume[video.id] || 100}%` }}
+                              className="relative w-20 h-1 bg-white/20 rounded-full cursor-pointer"
+                              data-slider={`${video.id}-volume`}
+                              onClick={(e) => handleSliderClick(e, video.id, 'volume')}
                               onMouseDown={(e) => handleSliderMouseDown(e, video.id, 'volume')}
-                            />
+                            >
+                              <div 
+                                className="absolute h-full bg-white rounded-full transition-all duration-150"
+                                style={{ width: `${videoVolume[video.id] || 100}%` }}
+                              />
+                              <div 
+                                className="absolute w-3 h-3 bg-white rounded-full border border-white shadow-lg transform -translate-y-1/2 -translate-x-1/2 top-1/2 cursor-grab active:cursor-grabbing"
+                                style={{ left: `${videoVolume[video.id] || 100}%` }}
+                                onMouseDown={(e) => handleSliderMouseDown(e, video.id, 'volume')}
+                              />
+                            </div>
                           </div>
                         </div>
                         
-                        <Button
-                          size="sm"
-                          className="bg-white/20 hover:bg-white/30 backdrop-blur-sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleFullscreen(video.id);
-                          }}
-                        >
-                          <Maximize className="w-4 h-4" />
-                        </Button>
+                        {/* Right side controls */}
+                        <div className="flex items-center gap-2">
+                          <Button
+                            size="sm"
+                            className="bg-white/20 hover:bg-white/30 backdrop-blur-sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // Add regenerate functionality here
+                            }}
+                          >
+                            <RotateCcw className="w-4 h-4" />
+                          </Button>
+                          
+                          <Button
+                            size="sm"
+                            className="bg-white/20 hover:bg-white/30 backdrop-blur-sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDownload(video.videoUrl, video.prompt);
+                            }}
+                          >
+                            <Download className="w-4 h-4" />
+                          </Button>
+                          
+                          <Button
+                            size="sm"
+                            className="bg-white/20 hover:bg-white/30 backdrop-blur-sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleFullscreen(video.id);
+                            }}
+                          >
+                            <Maximize className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -326,21 +363,9 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
                       <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
                     )}
                   </div>
-                  <div className="flex items-center justify-between">
-                    <p className="text-white/50 text-sm">
-                      {video.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </p>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline" className="border-white/20 text-white hover:bg-white/10">
-                        <RotateCcw className="w-4 h-4 mr-2" />
-                        Regenerate
-                      </Button>
-                      <Button size="sm" className="bg-gradient-to-r from-purple-500 to-blue-500">
-                        <Download className="w-4 h-4 mr-2" />
-                        Download
-                      </Button>
-                    </div>
-                  </div>
+                  <p className="text-white/50 text-sm">
+                    {video.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </p>
                 </div>
               </div>
             ))}
