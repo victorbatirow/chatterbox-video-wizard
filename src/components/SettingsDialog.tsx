@@ -40,10 +40,10 @@ const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
           orientation="vertical"
           className="mt-0 flex w-full flex-1 flex-col items-start overflow-hidden md:flex-row"
         >
-          <TabsList className="mt-[22px] h-full w-full flex-col gap-0.5 overflow-y-auto px-4 py-6 md:mt-0 md:w-[240px] md:flex-nowrap md:border-r hidden md:flex bg-transparent">
+          <TabsList className="mt-[22px] h-full w-full flex-col gap-0.5 overflow-y-auto px-4 py-6 md:mt-0 md:w-[240px] md:flex-nowrap md:border-r hidden md:flex bg-transparent justify-start items-start">
             {isInProject && (
               <>
-                <div className="mb-1 mt-6 px-3 text-xs font-medium text-muted-foreground first:mt-0">
+                <div className="mb-1 mt-6 px-3 text-xs font-medium text-muted-foreground first:mt-0 w-full text-left">
                   Project
                 </div>
                 <TabsTrigger
@@ -56,7 +56,7 @@ const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
               </>
             )}
 
-            <div className="mb-1 mt-6 px-3 text-xs font-medium text-muted-foreground first:mt-0">
+            <div className="mb-1 mt-6 px-3 text-xs font-medium text-muted-foreground first:mt-0 w-full text-left">
               Workspace
             </div>
             <TabsTrigger
@@ -96,7 +96,7 @@ const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
               <p>Plans & Billing</p>
             </TabsTrigger>
 
-            <div className="mb-1 mt-6 px-3 text-xs font-medium text-muted-foreground first:mt-0">
+            <div className="mb-1 mt-6 px-3 text-xs font-medium text-muted-foreground first:mt-0 w-full text-left">
               Account
             </div>
             <TabsTrigger
@@ -112,12 +112,12 @@ const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
             {isInProject && (
               <TabsContent
                 value="project"
-                className="flex max-h-full w-full flex-1 flex-col gap-6 overflow-y-auto px-6 pb-6 pt-20 md:px-10 md:pt-6 m-0"
+                className="flex max-h-full w-full flex-1 flex-col gap-6 overflow-y-auto px-6 pb-6 pt-6 md:px-10 m-0"
               >
-                <div className="hidden w-full flex-col gap-2 border-b pb-3 md:flex">
+                <div className="w-full flex-col gap-2 border-b pb-3 flex">
                   <h4 className="text-lg font-medium">Project Settings</h4>
-                  <p className="flex items-center justify-between gap-2 text-sm text-muted-foreground">
-                    <span>Manage your project details, visibility, and preferences.</span>
+                  <p className="text-sm text-muted-foreground">
+                    Manage your project details, visibility, and preferences.
                   </p>
                 </div>
 
@@ -230,12 +230,12 @@ const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
 
             <TabsContent
               value="workspace"
-              className="flex max-h-full w-full flex-1 flex-col gap-6 overflow-y-auto px-6 pb-6 pt-20 md:px-10 md:pt-6 m-0"
+              className="flex max-h-full w-full flex-1 flex-col gap-6 overflow-y-auto px-6 pb-6 pt-6 md:px-10 m-0"
             >
-              <div className="hidden w-full flex-col gap-2 border-b pb-3 md:flex">
+              <div className="w-full flex-col gap-2 border-b pb-3 flex">
                 <h4 className="text-lg font-medium">Workspace Settings</h4>
-                <p className="flex items-center justify-between gap-2 text-sm text-muted-foreground">
-                  <span>Manage your workspace preferences and settings.</span>
+                <p className="text-sm text-muted-foreground">
+                  Manage your workspace preferences and settings.
                 </p>
               </div>
               <div className="flex items-center justify-center h-32">
@@ -245,12 +245,12 @@ const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
 
             <TabsContent
               value="people"
-              className="flex max-h-full w-full flex-1 flex-col gap-6 overflow-y-auto px-6 pb-6 pt-20 md:px-10 md:pt-6 m-0"
+              className="flex max-h-full w-full flex-1 flex-col gap-6 overflow-y-auto px-6 pb-6 pt-6 md:px-10 m-0"
             >
-              <div className="hidden w-full flex-col gap-2 border-b pb-3 md:flex">
+              <div className="w-full flex-col gap-2 border-b pb-3 flex">
                 <h4 className="text-lg font-medium">People</h4>
-                <p className="flex items-center justify-between gap-2 text-sm text-muted-foreground">
-                  <span>Manage team members and collaborators.</span>
+                <p className="text-sm text-muted-foreground">
+                  Manage team members and collaborators.
                 </p>
               </div>
               <div className="flex items-center justify-center h-32">
@@ -260,12 +260,12 @@ const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
 
             <TabsContent
               value="billing"
-              className="flex max-h-full w-full flex-1 flex-col gap-6 overflow-y-auto px-6 pb-6 pt-20 md:px-10 md:pt-6 m-0"
+              className="flex max-h-full w-full flex-1 flex-col gap-6 overflow-y-auto px-6 pb-6 pt-6 md:px-10 m-0"
             >
-              <div className="hidden w-full flex-col gap-2 border-b pb-3 md:flex">
+              <div className="w-full flex-col gap-2 border-b pb-3 flex">
                 <h4 className="text-lg font-medium">Plans & Billing</h4>
-                <p className="flex items-center justify-between gap-2 text-sm text-muted-foreground">
-                  <span>Manage your subscription and billing information.</span>
+                <p className="text-sm text-muted-foreground">
+                  Manage your subscription and billing information.
                 </p>
               </div>
               <div className="flex items-center justify-center h-32">
@@ -275,12 +275,12 @@ const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
 
             <TabsContent
               value="account"
-              className="flex max-h-full w-full flex-1 flex-col gap-6 overflow-y-auto px-6 pb-6 pt-20 md:px-10 md:pt-6 m-0"
+              className="flex max-h-full w-full flex-1 flex-col gap-6 overflow-y-auto px-6 pb-6 pt-6 md:px-10 m-0"
             >
-              <div className="hidden w-full flex-col gap-2 border-b pb-3 md:flex">
+              <div className="w-full flex-col gap-2 border-b pb-3 flex">
                 <h4 className="text-lg font-medium">Account Settings</h4>
-                <p className="flex items-center justify-between gap-2 text-sm text-muted-foreground">
-                  <span>Manage your personal account information.</span>
+                <p className="text-sm text-muted-foreground">
+                  Manage your personal account information.
                 </p>
               </div>
               <div className="flex items-center justify-center h-32">
