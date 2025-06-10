@@ -11,7 +11,7 @@ const RecentProjectsSection = () => {
   const [showAllProjects, setShowAllProjects] = useState(false);
 
   const handleCreateProject = () => {
-    navigate('/app');
+    navigate('/chat');
   };
 
   const handleProjectClick = () => {
