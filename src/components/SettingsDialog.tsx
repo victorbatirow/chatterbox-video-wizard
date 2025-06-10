@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import {
@@ -12,7 +11,14 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
-import { Settings, User } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Settings, User, Check, Info } from "lucide-react";
 
 interface SettingsDialogProps {
   isOpen: boolean;
@@ -26,6 +32,7 @@ const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogOverlay className="fixed inset-0 z-[10000] bg-black/30 backdrop-blur-sm" />
       <DialogContent className="fixed left-[50%] top-[50%] z-[10001] max-w-[95vw] translate-x-[-50%] translate-y-[-50%] gap-0 rounded-xl border bg-background p-0 shadow-lg duration-300 md:max-w-[1200px] flex h-[90dvh] max-h-[640px] w-[95dvw] flex-1 overflow-hidden">
         <DialogTitle className="sr-only">Settings</DialogTitle>
         <DialogDescription className="sr-only">Manage your project and account settings</DialogDescription>
@@ -285,14 +292,185 @@ const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
               }}
             >
               <div className="h-full w-full flex flex-col">
-                <div className="border-b p-6">
-                  <h4 className="text-lg font-medium">Plans & Billing</h4>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Manage your subscription and billing information.
-                  </p>
+                <div className="border-b p-6 flex items-center justify-between">
+                  <div>
+                    <h4 className="text-lg font-medium">Plans & Billing</h4>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Choose plans for starting solo, growing your projects, and collaborating with your team.
+                    </p>
+                  </div>
+                  <Button variant="ghost" size="sm" className="text-muted-foreground">
+                    Docs
+                  </Button>
                 </div>
-                <div className="flex-1 flex items-center justify-center">
-                  <p className="text-muted-foreground">Billing settings coming soon...</p>
+
+                <div className="flex-1 p-6 space-y-8">
+                  {/* Credits Section */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h5 className="font-medium">Credits</h5>
+                      <span className="text-sm text-muted-foreground">201/400</span>
+                    </div>
+                    <div className="w-full bg-muted rounded-full h-2">
+                      <div className="bg-blue-600 h-2 rounded-full" style={{ width: '50.25%' }}></div>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      You're currently subscribed to plan: <strong>Pro 3</strong> charged at $100/mo.{' '}
+                      <button className="underline">Manage your payment preferences</button>, or change your plan below. Your monthly credits will renew on June 17 at 15:18.
+                    </p>
+                  </div>
+
+                  {/* Plans Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Free Plan */}
+                    <div className="border rounded-lg p-6 space-y-4">
+                      <div>
+                        <h3 className="text-lg font-semibold">Free</h3>
+                        <div className="mt-2">
+                          <span className="text-3xl font-bold">$0</span>
+                          <span className="text-muted-foreground"> /month</span>
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-2">For getting started</p>
+                      </div>
+
+                      <div className="flex items-center gap-2 text-sm">
+                        <span>5 daily credits</span>
+                        <Info className="h-4 w-4 text-muted-foreground" />
+                      </div>
+
+                      <Button variant="outline" className="w-full">
+                        Downgrade
+                      </Button>
+
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium">Get started with:</p>
+                        <div className="flex items-center gap-2 text-sm">
+                          <Check className="h-4 w-4 text-green-600" />
+                          <span>Public projects</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Pro Plan */}
+                    <div className="border-2 border-blue-600 rounded-lg p-6 space-y-4 relative">
+                      <div className="absolute -top-2 left-4">
+                        <span className="bg-blue-600 text-white px-2 py-1 text-xs rounded">POPULAR</span>
+                      </div>
+                      
+                      <div>
+                        <h3 className="text-lg font-semibold">Pro</h3>
+                        <div className="mt-2">
+                          <span className="text-3xl font-bold">$100</span>
+                          <span className="text-muted-foreground"> /month</span>
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-2">For more projects and usage</p>
+                      </div>
+
+                      <Select defaultValue="400">
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="100">100 credits / month</SelectItem>
+                          <SelectItem value="200">200 credits / month</SelectItem>
+                          <SelectItem value="400">400 credits / month</SelectItem>
+                          <SelectItem value="800">800 credits / month</SelectItem>
+                          <SelectItem value="1200">1200 credits / month</SelectItem>
+                          <SelectItem value="2000">2000 credits / month</SelectItem>
+                          <SelectItem value="3000">3000 credits / month</SelectItem>
+                          <SelectItem value="4000">4000 credits / month</SelectItem>
+                        </SelectContent>
+                      </Select>
+
+                      <Button className="w-full" disabled>
+                        Your current plan
+                      </Button>
+
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium">Everything in Free, plus:</p>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 text-sm">
+                            <Check className="h-4 w-4 text-green-600" />
+                            <span>400 credits / month</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm">
+                            <Check className="h-4 w-4 text-green-600" />
+                            <span>Private projects</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm">
+                            <Check className="h-4 w-4 text-green-600" />
+                            <span>Remove the Lovable badge</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm">
+                            <Check className="h-4 w-4 text-green-600" />
+                            <span>Custom domains</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm">
+                            <Check className="h-4 w-4 text-green-600" />
+                            <span>3 editors per project</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Teams Plan */}
+                    <div className="border rounded-lg p-6 space-y-4">
+                      <div>
+                        <h3 className="text-lg font-semibold">Teams</h3>
+                        <div className="mt-2">
+                          <span className="text-3xl font-bold">$240</span>
+                          <span className="text-muted-foreground"> /month</span>
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-2">For collaborating with others</p>
+                      </div>
+
+                      <Select defaultValue="800">
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="800">800 credits / month</SelectItem>
+                        </SelectContent>
+                      </Select>
+
+                      <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                        Upgrade
+                      </Button>
+
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium">Everything in Pro, plus:</p>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 text-sm">
+                            <Check className="h-4 w-4 text-green-600" />
+                            <span>Centralised billing</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm">
+                            <Check className="h-4 w-4 text-green-600" />
+                            <span>Centralised access management</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm">
+                            <Check className="h-4 w-4 text-green-600" />
+                            <span>Includes 20 seats</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Enterprise Section */}
+                  <div className="border rounded-lg p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-lg font-semibold">Enterprise</h3>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          For custom needs, dedicated support, SSO, and to opt out of data training.
+                        </p>
+                      </div>
+                      <Button className="bg-blue-600 hover:bg-blue-700">
+                        Contact us
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </TabsContent>
@@ -325,3 +503,5 @@ const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
 };
 
 export default SettingsDialog;
+
+</edits_to_apply>
