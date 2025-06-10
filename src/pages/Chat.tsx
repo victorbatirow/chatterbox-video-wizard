@@ -1,5 +1,6 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import ChatInterface from "@/components/ChatInterface";
 import VideoTimeline from "@/components/VideoTimeline";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
@@ -20,6 +21,7 @@ export interface Message {
 }
 
 const Chat = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [videos, setVideos] = useState<VideoMessage[]>([]);
   const [currentVideoId, setCurrentVideoId] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -31,6 +33,17 @@ const Chat = () => {
       timestamp: new Date(),
     },
   ]);
+
+  // Check for initial prompt from URL parameters
+  useEffect(() => {
+    const initialPrompt = searchParams.get('prompt');
+    if (initialPrompt) {
+      // Clear the URL parameter
+      setSearchParams(new URLSearchParams());
+      // Send the initial prompt
+      handleSendMessage(initialPrompt);
+    }
+  }, [searchParams]);
 
   const handleSendMessage = async (prompt: string) => {
     if (!prompt.trim() || isGenerating) return;

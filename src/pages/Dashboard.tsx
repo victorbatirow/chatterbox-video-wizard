@@ -12,8 +12,8 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   const handleCreateVideoFromPrompt = (prompt: string) => {
-    // Navigate to chat with the prompt (in a real app, you'd pass this as state or URL param)
-    navigate('/chat');
+    // Navigate to chat with the prompt as a URL parameter
+    navigate(`/chat?prompt=${encodeURIComponent(prompt)}`);
   };
 
   return (

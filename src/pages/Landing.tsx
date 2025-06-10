@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Video } from "lucide-react";
 import HeroSection from "@/components/HeroSection";
@@ -11,11 +11,11 @@ import Container from "@/components/Container";
 import StaticGradientBackground from "@/components/StaticGradientBackground";
 
 const Landing = () => {
-  const [prompt, setPrompt] = useState("");
+  const navigate = useNavigate();
 
   const handleGetStarted = (prompt: string) => {
-    // Navigate to the chat page
-    window.location.href = "/chat";
+    // Navigate to the chat page with the prompt as a URL parameter
+    navigate(`/chat?prompt=${encodeURIComponent(prompt)}`);
   };
 
   return (
