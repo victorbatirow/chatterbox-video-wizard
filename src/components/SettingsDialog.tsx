@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
-import { Settings, User } from "lucide-react";
+import { X, Settings, User } from "lucide-react";
 
 interface SettingsDialogProps {
   isOpen: boolean;
