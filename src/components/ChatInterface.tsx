@@ -81,6 +81,9 @@ const ChatInterface = ({ onSendMessage, onGenerateVideo, onVideoSelect, isGenera
 
   return (
     <div className="flex flex-col h-screen bg-black/20 backdrop-blur-sm">
+      {/* Header - spacing for the absolutely positioned ProjectMenu */}
+      <div className="h-16 flex-shrink-0"></div>
+
       {/* Messages */}
       <ScrollArea ref={scrollAreaRef} className="flex-1 p-6">
         <div className="space-y-4">
