@@ -80,7 +80,7 @@ const ChatInterface = ({ onSendMessage, onGenerateVideo, onVideoSelect, isGenera
   };
 
   return (
-    <div className="flex flex-col h-screen bg-black/20 backdrop-blur-sm">
+    <div className="flex flex-col h-screen" style={{ backgroundColor: '#1C1C1C' }}>
       {/* Header - spacing for the absolutely positioned ProjectMenu */}
       <div className="h-16 flex-shrink-0"></div>
 
