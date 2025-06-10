@@ -2,7 +2,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Play, Pause, Volume2, Download, RotateCcw } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import { Play, Pause, Volume2, Download, RotateCcw, Maximize, VolumeX } from "lucide-react";
 import { VideoMessage } from "@/pages/Chat";
 
 interface VideoTimelineProps {
@@ -14,6 +15,10 @@ interface VideoTimelineProps {
 
 const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: VideoTimelineProps) => {
   const [playingVideos, setPlayingVideos] = useState<Set<string>>(new Set());
+  const [videoProgress, setVideoProgress] = useState<{ [key: string]: number }>({});
+  const [videoDuration, setVideoDuration] = useState<{ [key: string]: number }>({});
+  const [videoVolume, setVideoVolume] = useState<{ [key: string]: number }>({});
+  const [isMuted, setIsMuted] = useState<{ [key: string]: boolean }>({});
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const videoRefs = useRef<{ [key: string]: HTMLDivElement }>({});
   const videoElementRefs = useRef<{ [key: string]: HTMLVideoElement }>({});
@@ -43,6 +48,72 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
       videoElement.play();
       setPlayingVideos(prev => new Set([...prev, videoId]));
     }
+  };
+
+  const handleTimeUpdate = (videoId: string) => {
+    const videoElement = videoElementRefs.current[videoId];
+    if (!videoElement) return;
+
+    const progress = (videoElement.currentTime / videoElement.duration) * 100;
+    setVideoProgress(prev => ({ ...prev, [videoId]: progress }));
+  };
+
+  const handleLoadedMetadata = (videoId: string) => {
+    const videoElement = videoElementRefs.current[videoId];
+    if (!videoElement) return;
+
+    setVideoDuration(prev => ({ ...prev, [videoId]: videoElement.duration }));
+    setVideoVolume(prev => ({ ...prev, [videoId]: videoElement.volume * 100 }));
+  };
+
+  const handleProgressChange = (videoId: string, value: number[]) => {
+    const videoElement = videoElementRefs.current[videoId];
+    const duration = videoDuration[videoId];
+    if (!videoElement || !duration) return;
+
+    const newTime = (value[0] / 100) * duration;
+    videoElement.currentTime = newTime;
+    setVideoProgress(prev => ({ ...prev, [videoId]: value[0] }));
+  };
+
+  const handleVolumeChange = (videoId: string, value: number[]) => {
+    const videoElement = videoElementRefs.current[videoId];
+    if (!videoElement) return;
+
+    const newVolume = value[0] / 100;
+    videoElement.volume = newVolume;
+    setVideoVolume(prev => ({ ...prev, [videoId]: value[0] }));
+    
+    if (newVolume === 0) {
+      setIsMuted(prev => ({ ...prev, [videoId]: true }));
+    } else {
+      setIsMuted(prev => ({ ...prev, [videoId]: false }));
+    }
+  };
+
+  const handleMuteToggle = (videoId: string) => {
+    const videoElement = videoElementRefs.current[videoId];
+    if (!videoElement) return;
+
+    const currentlyMuted = isMuted[videoId] || false;
+    videoElement.muted = !currentlyMuted;
+    setIsMuted(prev => ({ ...prev, [videoId]: !currentlyMuted }));
+  };
+
+  const handleFullscreen = (videoId: string) => {
+    const videoElement = videoElementRefs.current[videoId];
+    if (!videoElement) return;
+
+    if (videoElement.requestFullscreen) {
+      videoElement.requestFullscreen();
+    }
+  };
+
+  const formatTime = (seconds: number) => {
+    if (isNaN(seconds)) return "0:00";
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   if (videos.length === 0) {
@@ -98,7 +169,11 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
                 <div className="relative w-full h-64 bg-black rounded-t-lg overflow-hidden">
                   <video
                     ref={(el) => {
-                      if (el) videoElementRefs.current[video.id] = el;
+                      if (el) {
+                        videoElementRefs.current[video.id] = el;
+                        el.addEventListener('timeupdate', () => handleTimeUpdate(video.id));
+                        el.addEventListener('loadedmetadata', () => handleLoadedMetadata(video.id));
+                      }
                     }}
                     className="w-full h-full object-contain"
                     src={video.videoUrl}
@@ -106,8 +181,24 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
                   />
                   
                   {/* Custom Controls Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300">
                     <div className="absolute bottom-4 left-4 right-4">
+                      {/* Progress Bar */}
+                      <div className="mb-3">
+                        <Slider
+                          value={[videoProgress[video.id] || 0]}
+                          onValueChange={(value) => handleProgressChange(video.id, value)}
+                          max={100}
+                          step={0.1}
+                          className="w-full"
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                        <div className="flex justify-between text-xs text-white/70 mt-1">
+                          <span>{formatTime((videoProgress[video.id] || 0) * (videoDuration[video.id] || 0) / 100)}</span>
+                          <span>{formatTime(videoDuration[video.id] || 0)}</span>
+                        </div>
+                      </div>
+                      
                       <div className="flex items-center gap-4">
                         <Button
                           size="sm"
@@ -120,16 +211,37 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
                           {playingVideos.has(video.id) ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
                         </Button>
                         
-                        <div className="flex-1 h-1 bg-white/20 rounded-full">
-                          <div className="h-full bg-white rounded-full w-1/3"></div>
+                        {/* Volume Control */}
+                        <div className="flex items-center gap-2 flex-1 max-w-32">
+                          <Button
+                            size="sm"
+                            className="bg-white/20 hover:bg-white/30 backdrop-blur-sm p-2"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleMuteToggle(video.id);
+                            }}
+                          >
+                            {isMuted[video.id] ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                          </Button>
+                          <Slider
+                            value={[videoVolume[video.id] || 100]}
+                            onValueChange={(value) => handleVolumeChange(video.id, value)}
+                            max={100}
+                            step={1}
+                            className="flex-1"
+                            onClick={(e) => e.stopPropagation()}
+                          />
                         </div>
                         
                         <Button
                           size="sm"
                           className="bg-white/20 hover:bg-white/30 backdrop-blur-sm"
-                          onClick={(e) => e.stopPropagation()}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleFullscreen(video.id);
+                          }}
                         >
-                          <Volume2 className="w-4 h-4" />
+                          <Maximize className="w-4 h-4" />
                         </Button>
                       </div>
                     </div>
