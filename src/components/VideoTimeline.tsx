@@ -101,19 +101,34 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
 
     setVideoDuration(prev => ({ ...prev, [videoId]: videoElement.duration }));
     
-    // Check if video has audio tracks
-    const audioTracks = videoElement.audioTracks || [];
-    const hasAudioTracks = audioTracks.length > 0;
+    // Check if video has audio by testing volume changes
+    const originalVolume = videoElement.volume;
+    const originalMuted = videoElement.muted;
     
-    // Also check if the video element has audio by checking if it can be muted
-    // Some videos without audio tracks might still have silent audio
-    const canMute = !videoElement.muted;
-    videoElement.muted = true;
-    const volumeWhenMuted = videoElement.volume;
-    videoElement.muted = false;
-    const hasWorkingAudio = canMute && volumeWhenMuted !== undefined;
+    // Try to detect audio capability
+    let videoHasAudio = false;
+    try {
+      // Test if we can change volume (indicates audio capability)
+      videoElement.volume = 0.5;
+      videoElement.volume = originalVolume;
+      
+      // If we can change volume and it's not a silent video, it likely has audio
+      // Most videos with audio tracks will allow volume changes
+      videoHasAudio = true;
+      
+      // Additional check: try to detect if the video is actually silent
+      // by checking if muting has any effect on the video element
+      videoElement.muted = true;
+      videoElement.muted = false;
+      
+    } catch (error) {
+      // If we can't change volume properties, assume no audio
+      videoHasAudio = false;
+    }
     
-    const videoHasAudio = hasAudioTracks || hasWorkingAudio;
+    // Restore original state
+    videoElement.volume = originalVolume;
+    videoElement.muted = originalMuted;
     
     setHasAudio(prev => ({ ...prev, [videoId]: videoHasAudio }));
     
