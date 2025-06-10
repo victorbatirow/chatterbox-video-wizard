@@ -18,6 +18,7 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
   const [videoDuration, setVideoDuration] = useState<{ [key: string]: number }>({});
   const [videoVolume, setVideoVolume] = useState<{ [key: string]: number }>({});
   const [isMuted, setIsMuted] = useState<{ [key: string]: boolean }>({});
+  const [hasAudio, setHasAudio] = useState<{ [key: string]: boolean }>({});
   const [isDragging, setIsDragging] = useState<{ [key: string]: 'progress' | 'volume' | null }>({});
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const videoRefs = useRef<{ [key: string]: HTMLDivElement }>({});
@@ -99,7 +100,33 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
     if (!videoElement) return;
 
     setVideoDuration(prev => ({ ...prev, [videoId]: videoElement.duration }));
-    setVideoVolume(prev => ({ ...prev, [videoId]: videoElement.volume * 100 }));
+    
+    // Check if video has audio tracks
+    const audioTracks = videoElement.audioTracks || [];
+    const hasAudioTracks = audioTracks.length > 0;
+    
+    // Also check if the video element has audio by checking if it can be muted
+    // Some videos without audio tracks might still have silent audio
+    const canMute = !videoElement.muted;
+    videoElement.muted = true;
+    const volumeWhenMuted = videoElement.volume;
+    videoElement.muted = false;
+    const hasWorkingAudio = canMute && volumeWhenMuted !== undefined;
+    
+    const videoHasAudio = hasAudioTracks || hasWorkingAudio;
+    
+    setHasAudio(prev => ({ ...prev, [videoId]: videoHasAudio }));
+    
+    if (videoHasAudio) {
+      setVideoVolume(prev => ({ ...prev, [videoId]: videoElement.volume * 100 }));
+      setIsMuted(prev => ({ ...prev, [videoId]: false }));
+    } else {
+      // If no audio, set volume to 0 and mute by default
+      videoElement.volume = 0;
+      videoElement.muted = true;
+      setVideoVolume(prev => ({ ...prev, [videoId]: 0 }));
+      setIsMuted(prev => ({ ...prev, [videoId]: true }));
+    }
   };
 
   const handleProgressChange = (videoId: string, value: number[]) => {
@@ -114,7 +141,7 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
 
   const handleVolumeChange = (videoId: string, value: number[]) => {
     const videoElement = videoElementRefs.current[videoId];
-    if (!videoElement) return;
+    if (!videoElement || !hasAudio[videoId]) return;
 
     const newVolume = value[0] / 100;
     videoElement.volume = newVolume;
@@ -129,7 +156,7 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
 
   const handleMuteToggle = (videoId: string) => {
     const videoElement = videoElementRefs.current[videoId];
-    if (!videoElement) return;
+    if (!videoElement || !hasAudio[videoId]) return;
 
     const currentlyMuted = isMuted[videoId] || false;
     videoElement.muted = !currentlyMuted;
@@ -307,35 +334,45 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
                             {playingVideos.has(video.id) ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
                           </Button>
                           
-                          {/* Volume Control */}
-                          <div className="flex items-center gap-2 max-w-32">
-                            <Button
-                              size="sm"
-                              className="bg-white/20 hover:bg-white/30 backdrop-blur-sm p-2"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleMuteToggle(video.id);
-                              }}
-                            >
-                              {isMuted[video.id] ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-                            </Button>
-                            <div 
-                              className="relative w-20 h-1 bg-white/20 rounded-full cursor-pointer"
-                              data-slider={`${video.id}-volume`}
-                              onClick={(e) => handleSliderClick(e, video.id, 'volume')}
-                              onMouseDown={(e) => handleSliderMouseDown(e, video.id, 'volume')}
-                            >
+                          {/* Volume Control - Only show if video has audio */}
+                          {hasAudio[video.id] && (
+                            <div className="flex items-center gap-2 max-w-32">
+                              <Button
+                                size="sm"
+                                className="bg-white/20 hover:bg-white/30 backdrop-blur-sm p-2"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleMuteToggle(video.id);
+                                }}
+                              >
+                                {isMuted[video.id] ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                              </Button>
                               <div 
-                                className="absolute h-full bg-white rounded-full transition-all duration-150"
-                                style={{ width: `${videoVolume[video.id] || 100}%` }}
-                              />
-                              <div 
-                                className="absolute w-3 h-3 bg-white rounded-full border border-white shadow-lg transform -translate-y-1/2 -translate-x-1/2 top-1/2 cursor-grab active:cursor-grabbing"
-                                style={{ left: `${videoVolume[video.id] || 100}%` }}
+                                className="relative w-20 h-1 bg-white/20 rounded-full cursor-pointer"
+                                data-slider={`${video.id}-volume`}
+                                onClick={(e) => handleSliderClick(e, video.id, 'volume')}
                                 onMouseDown={(e) => handleSliderMouseDown(e, video.id, 'volume')}
-                              />
+                              >
+                                <div 
+                                  className="absolute h-full bg-white rounded-full transition-all duration-150"
+                                  style={{ width: `${videoVolume[video.id] || 100}%` }}
+                                />
+                                <div 
+                                  className="absolute w-3 h-3 bg-white rounded-full border border-white shadow-lg transform -translate-y-1/2 -translate-x-1/2 top-1/2 cursor-grab active:cursor-grabbing"
+                                  style={{ left: `${videoVolume[video.id] || 100}%` }}
+                                  onMouseDown={(e) => handleSliderMouseDown(e, video.id, 'volume')}
+                                />
+                              </div>
                             </div>
-                          </div>
+                          )}
+                          
+                          {/* Show indicator when video has no audio */}
+                          {hasAudio[video.id] === false && (
+                            <div className="flex items-center gap-2 text-white/50 text-xs">
+                              <VolumeX className="w-4 h-4" />
+                              <span>No audio</span>
+                            </div>
+                          )}
                         </div>
                         
                         {/* Right side controls */}
