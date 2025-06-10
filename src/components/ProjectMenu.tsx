@@ -11,11 +11,21 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown, ArrowLeft, Settings, FileText, Palette, HelpCircle } from "lucide-react";
 
-const ProjectMenu = () => {
+interface ProjectMenuProps {
+  onOpenSettings?: () => void;
+}
+
+const ProjectMenu = ({ onOpenSettings }: ProjectMenuProps) => {
   const navigate = useNavigate();
 
   const handleGoToDashboard = () => {
     navigate('/dashboard');
+  };
+
+  const handleSettingsClick = () => {
+    if (onOpenSettings) {
+      onOpenSettings();
+    }
   };
 
   return (
@@ -35,7 +45,7 @@ const ProjectMenu = () => {
           Go to Dashboard
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={handleSettingsClick}>
           <Settings className="w-4 h-4 mr-2" />
           Settings
         </DropdownMenuItem>

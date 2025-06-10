@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import ChatInterface from "@/components/ChatInterface";
 import VideoTimeline from "@/components/VideoTimeline";
+import ProjectMenu from "@/components/ProjectMenu";
+import SettingsDialog from "@/components/SettingsDialog";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 
 export interface VideoMessage {
@@ -25,6 +27,7 @@ const Chat = () => {
   const [videos, setVideos] = useState<VideoMessage[]>([]);
   const [currentVideoId, setCurrentVideoId] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -122,35 +125,51 @@ const Chat = () => {
     setCurrentVideoId(videoId);
   };
 
+  const handleOpenSettings = () => {
+    setIsSettingsOpen(true);
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-      <ResizablePanelGroup direction="horizontal" className="h-screen">
-        {/* Chat Interface - Resizable Panel */}
-        <ResizablePanel defaultSize={33} minSize={25} maxSize={50}>
-          <ChatInterface 
-            onSendMessage={handleSendMessage}
-            onGenerateVideo={handleVideoGeneration}
-            onVideoSelect={handleVideoSelect}
-            isGenerating={isGenerating}
-            videos={videos}
-            messages={messages}
-          />
-        </ResizablePanel>
+    <>
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+        {/* Project Menu - positioned absolutely in top left */}
+        <div className="absolute top-4 left-4 z-50">
+          <ProjectMenu onOpenSettings={handleOpenSettings} />
+        </div>
         
-        {/* Draggable Handle */}
-        <ResizableHandle withHandle />
-        
-        {/* Video Timeline - Resizable Panel */}
-        <ResizablePanel defaultSize={67} minSize={50}>
-          <VideoTimeline 
-            videos={videos}
-            currentVideoId={currentVideoId}
-            isGenerating={isGenerating}
-            onVideoSelect={handleVideoSelect}
-          />
-        </ResizablePanel>
-      </ResizablePanelGroup>
-    </div>
+        <ResizablePanelGroup direction="horizontal" className="h-screen">
+          {/* Chat Interface - Resizable Panel */}
+          <ResizablePanel defaultSize={33} minSize={25} maxSize={50}>
+            <ChatInterface 
+              onSendMessage={handleSendMessage}
+              onGenerateVideo={handleVideoGeneration}
+              onVideoSelect={handleVideoSelect}
+              isGenerating={isGenerating}
+              videos={videos}
+              messages={messages}
+            />
+          </ResizablePanel>
+          
+          {/* Draggable Handle */}
+          <ResizableHandle withHandle />
+          
+          {/* Video Timeline - Resizable Panel */}
+          <ResizablePanel defaultSize={67} minSize={50}>
+            <VideoTimeline 
+              videos={videos}
+              currentVideoId={currentVideoId}
+              isGenerating={isGenerating}
+              onVideoSelect={handleVideoSelect}
+            />
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      </div>
+      
+      <SettingsDialog 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)} 
+      />
+    </>
   );
 };
 
