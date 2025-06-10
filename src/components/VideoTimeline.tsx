@@ -45,21 +45,6 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
     }
   };
 
-  if (isGenerating) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-black/20 backdrop-blur-sm">
-        <div className="text-center">
-          <div className="w-20 h-20 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin mx-auto mb-6"></div>
-          <h3 className="text-xl font-semibold text-white mb-2">Generating Your Video</h3>
-          <p className="text-white/60">This may take a few moments...</p>
-          <div className="w-64 h-2 bg-white/10 rounded-full mx-auto mt-4">
-            <div className="h-full bg-gradient-to-r from-purple-500 to-blue-500 rounded-full animate-pulse w-3/4"></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   if (videos.length === 0) {
     return (
       <div className="h-screen flex items-center justify-center bg-black/20 backdrop-blur-sm">
@@ -84,7 +69,10 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-semibold text-white">Video Timeline</h2>
-            <p className="text-sm text-white/60">{videos.length} video{videos.length !== 1 ? 's' : ''} generated</p>
+            <p className="text-sm text-white/60">
+              {videos.length} video{videos.length !== 1 ? 's' : ''} generated
+              {isGenerating && <span className="ml-2 text-purple-400">• Generating new video...</span>}
+            </p>
           </div>
         </div>
       </div>
