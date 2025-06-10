@@ -302,7 +302,7 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
                 onClick={() => onVideoSelect(video.id)}
               >
                 {/* Video Player */}
-                <div className="relative w-full h-160 bg-black rounded-t-lg overflow-hidden">
+                <div className="relative w-full h-[80vh] bg-black rounded-t-lg overflow-hidden">
                   <video
                     ref={(el) => {
                       if (el) {
