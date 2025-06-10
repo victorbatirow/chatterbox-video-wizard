@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -80,7 +79,7 @@ const ChatInterface = ({ onSendMessage, onGenerateVideo, onVideoSelect, isGenera
   };
 
   return (
-    <div className="flex flex-col h-screen" style={{ backgroundColor: '#1C1C1C' }}>
+    <div className="flex flex-col h-screen bg-slate-900">
       {/* Header - spacing for the absolutely positioned ProjectMenu */}
       <div className="h-16 flex-shrink-0"></div>
 
