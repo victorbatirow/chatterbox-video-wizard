@@ -35,7 +35,12 @@ const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
           orientation="vertical"
           className="flex w-full h-full"
         >
-          <TabsList className="h-full w-[240px] flex-col gap-0.5 overflow-y-auto px-4 py-6 border-r bg-transparent justify-start items-start flex-shrink-0">
+          <TabsList className="h-full w-[240px] flex-col gap-0.5 overflow-y-auto px-4 py-6 border-r bg-transparent justify-start items-start flex-shrink-0"
+            style={{
+              scrollbarWidth: 'thin',
+              scrollbarColor: 'rgba(255,255,255,0.3) transparent'
+            }}
+          >
             {isInProject && (
               <>
                 <div className="mb-1 mt-6 px-3 text-xs font-medium text-muted-foreground first:mt-0 w-full text-left">
@@ -56,7 +61,7 @@ const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
             </div>
             <TabsTrigger
               value="workspace"
-              className="flex min-h-8 w-full items-center justify-start gap-2 rounded-md px-2.5 py-2 text-start text-sm data-[state=active]:bg-muted hover:bg-muted -ml-0.5"
+              className="flex min-h-8 w-full items-center justify-start gap-2 rounded-md px-2.5 py-2 text-start text-sm data-[state=active]:bg-muted hover:bg-muted hover:text-current -ml-0.5"
             >
               <Avatar className="h-5 w-5 rounded-[6px]">
                 <AvatarFallback className="bg-purple-600 text-white font-medium text-xs rounded-[6px]">
@@ -108,6 +113,10 @@ const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
               <TabsContent
                 value="project"
                 className="h-full w-full overflow-y-auto p-0 m-0"
+                style={{
+                  scrollbarWidth: 'thin',
+                  scrollbarColor: 'rgba(255,255,255,0.3) transparent'
+                }}
               >
                 <div className="h-full w-full flex flex-col">
                   <div className="border-b p-6">
@@ -228,6 +237,10 @@ const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
             <TabsContent
               value="workspace"
               className="h-full w-full overflow-y-auto p-0 m-0"
+              style={{
+                scrollbarWidth: 'thin',
+                scrollbarColor: 'rgba(255,255,255,0.3) transparent'
+              }}
             >
               <div className="h-full w-full flex flex-col">
                 <div className="border-b p-6">
@@ -245,6 +258,10 @@ const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
             <TabsContent
               value="people"
               className="h-full w-full overflow-y-auto p-0 m-0"
+              style={{
+                scrollbarWidth: 'thin',
+                scrollbarColor: 'rgba(255,255,255,0.3) transparent'
+              }}
             >
               <div className="h-full w-full flex flex-col">
                 <div className="border-b p-6">
@@ -262,6 +279,10 @@ const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
             <TabsContent
               value="billing"
               className="h-full w-full overflow-y-auto p-0 m-0"
+              style={{
+                scrollbarWidth: 'thin',
+                scrollbarColor: 'rgba(255,255,255,0.3) transparent'
+              }}
             >
               <div className="h-full w-full flex flex-col">
                 <div className="border-b p-6">
@@ -279,6 +300,10 @@ const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
             <TabsContent
               value="account"
               className="h-full w-full overflow-y-auto p-0 m-0"
+              style={{
+                scrollbarWidth: 'thin',
+                scrollbarColor: 'rgba(255,255,255,0.3) transparent'
+              }}
             >
               <div className="h-full w-full flex flex-col">
                 <div className="border-b p-6">
