@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -108,6 +107,7 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated }: NavbarProps) => {
           </div>
           <div className="flex items-center gap-3">
             {actualIsAuthenticated ? (
+              
               <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
                 <DropdownMenuTrigger asChild>
                   <Button 
