@@ -145,13 +145,36 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
     }
   };
 
-  const handleDownload = (videoUrl: string, prompt: string) => {
-    const link = document.createElement('a');
-    link.href = videoUrl;
-    link.download = `${prompt.slice(0, 30).replace(/[^a-zA-Z0-9]/g, '_')}.mp4`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownload = async (videoUrl: string, prompt: string) => {
+    try {
+      // Fetch the video as a blob
+      const response = await fetch(videoUrl);
+      const blob = await response.blob();
+      
+      // Create a download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${prompt.slice(0, 30).replace(/[^a-zA-Z0-9]/g, '_')}.mp4`;
+      
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+      
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading video:', error);
+      // Fallback to direct link if blob fetch fails
+      const link = document.createElement('a');
+      link.href = videoUrl;
+      link.download = `${prompt.slice(0, 30).replace(/[^a-zA-Z0-9]/g, '_')}.mp4`;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   };
 
   const formatTime = (seconds: number) => {
@@ -323,6 +346,7 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
                             onClick={(e) => {
                               e.stopPropagation();
                               // Add regenerate functionality here
+                              console.log('Regenerate video:', video.id);
                             }}
                           >
                             <RotateCcw className="w-4 h-4" />
