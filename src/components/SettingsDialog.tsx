@@ -503,5 +503,3 @@ const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
 };
 
 export default SettingsDialog;
-
-</edits_to_apply>
