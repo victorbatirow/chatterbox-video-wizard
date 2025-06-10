@@ -5,7 +5,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, Sparkles } from "lucide-react";
 import MessageBubble from "@/components/MessageBubble";
-import ProjectMenu from "@/components/ProjectMenu";
 import { VideoMessage, Message } from "@/pages/Chat";
 
 interface ChatInterfaceProps {
@@ -82,13 +81,6 @@ const ChatInterface = ({ onSendMessage, onGenerateVideo, onVideoSelect, isGenera
 
   return (
     <div className="flex flex-col h-screen bg-black/20 backdrop-blur-sm">
-      {/* Header */}
-      <div className="p-6 border-b border-white/10">
-        <div className="flex items-center justify-between mb-3">
-          <ProjectMenu />
-        </div>
-      </div>
-
       {/* Messages */}
       <ScrollArea ref={scrollAreaRef} className="flex-1 p-6">
         <div className="space-y-4">
