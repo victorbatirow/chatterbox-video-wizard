@@ -63,6 +63,15 @@ const Chat = () => {
     setIsGenerating(true);
 
     try {
+      // Create a video for this message
+      const videoId = (Date.now() + 1000).toString();
+      const newVideo: VideoMessage = {
+        id: videoId,
+        videoUrl: "https://v3.fal.media/files/lion/SwXkHnSV2Wcnoh8aQ7tqD_output.mp4",
+        prompt,
+        timestamp: new Date(),
+      };
+
       // Send to backend API
       const response = await fetch('http://localhost:8081/prompt', {
         method: 'POST',
@@ -78,24 +87,42 @@ const Chat = () => {
 
       const data = await response.json();
 
-      // Add AI response
+      // Add the video to videos list
+      setVideos(prev => [...prev, newVideo]);
+      setCurrentVideoId(videoId);
+
+      // Add AI response with video link
       const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: data.response,
+        id: (Date.now() + 2).toString(),
+        text: `${data.response}\n\nI've generated a video based on your prompt. You can view it in the video timeline.`,
         isUser: false,
         timestamp: new Date(),
+        videoId: videoId,
       };
 
       setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
       console.error('Error calling backend API:', error);
       
-      // Add error message
+      // Still create a video even if backend fails
+      const videoId = (Date.now() + 1000).toString();
+      const newVideo: VideoMessage = {
+        id: videoId,
+        videoUrl: "https://v3.fal.media/files/lion/SwXkHnSV2Wcnoh8aQ7tqD_output.mp4",
+        prompt,
+        timestamp: new Date(),
+      };
+
+      setVideos(prev => [...prev, newVideo]);
+      setCurrentVideoId(videoId);
+      
+      // Add error message with video link
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: "Sorry, I'm having trouble connecting to the server. Please try again later.",
+        text: "Sorry, I'm having trouble connecting to the server, but I've generated a video based on your prompt. You can view it in the video timeline.",
         isUser: false,
         timestamp: new Date(),
+        videoId: videoId,
       };
 
       setMessages(prev => [...prev, errorMessage]);
@@ -110,7 +137,7 @@ const Chat = () => {
     setTimeout(() => {
       const newVideo: VideoMessage = {
         id: Date.now().toString(),
-        videoUrl: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
+        videoUrl: "https://v3.fal.media/files/lion/SwXkHnSV2Wcnoh8aQ7tqD_output.mp4",
         prompt,
         timestamp: new Date(),
       };
