@@ -63,15 +63,6 @@ const Chat = () => {
     setIsGenerating(true);
 
     try {
-      // Create a video for this message
-      const videoId = (Date.now() + 1000).toString();
-      const newVideo: VideoMessage = {
-        id: videoId,
-        videoUrl: "https://v3.fal.media/files/lion/SwXkHnSV2Wcnoh8aQ7tqD_output.mp4",
-        prompt,
-        timestamp: new Date(),
-      };
-
       // Send to backend API
       const response = await fetch('http://localhost:8081/prompt', {
         method: 'POST',
@@ -87,14 +78,27 @@ const Chat = () => {
 
       const data = await response.json();
 
-      // Add the video to videos list
-      setVideos(prev => [...prev, newVideo]);
-      setCurrentVideoId(videoId);
+      let videoId: string | undefined;
 
-      // Add AI response with video link
+      // Check if backend returned a video URL
+      if (data.video_url) {
+        videoId = (Date.now() + 1000).toString();
+        const newVideo: VideoMessage = {
+          id: videoId,
+          videoUrl: data.video_url,
+          prompt,
+          timestamp: new Date(),
+        };
+
+        // Add the video to videos list
+        setVideos(prev => [...prev, newVideo]);
+        setCurrentVideoId(videoId);
+      }
+
+      // Add AI response
       const aiMessage: Message = {
         id: (Date.now() + 2).toString(),
-        text: `${data.response}\n\nI've generated a video based on your prompt. You can view it in the video timeline.`,
+        text: data.response,
         isUser: false,
         timestamp: new Date(),
         videoId: videoId,
@@ -104,25 +108,12 @@ const Chat = () => {
     } catch (error) {
       console.error('Error calling backend API:', error);
       
-      // Still create a video even if backend fails
-      const videoId = (Date.now() + 1000).toString();
-      const newVideo: VideoMessage = {
-        id: videoId,
-        videoUrl: "https://v3.fal.media/files/lion/SwXkHnSV2Wcnoh8aQ7tqD_output.mp4",
-        prompt,
-        timestamp: new Date(),
-      };
-
-      setVideos(prev => [...prev, newVideo]);
-      setCurrentVideoId(videoId);
-      
-      // Add error message with video link
+      // Add error message
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: "Sorry, I'm having trouble connecting to the server, but I've generated a video based on your prompt. You can view it in the video timeline.",
+        text: "Sorry, I'm having trouble connecting to the server. Please try again.",
         isUser: false,
         timestamp: new Date(),
-        videoId: videoId,
       };
 
       setMessages(prev => [...prev, errorMessage]);
