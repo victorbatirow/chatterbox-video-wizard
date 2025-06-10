@@ -18,6 +18,7 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
   const [videoDuration, setVideoDuration] = useState<{ [key: string]: number }>({});
   const [videoVolume, setVideoVolume] = useState<{ [key: string]: number }>({});
   const [isMuted, setIsMuted] = useState<{ [key: string]: boolean }>({});
+  const [isDragging, setIsDragging] = useState<{ [key: string]: 'progress' | 'volume' | null }>({});
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const videoRefs = useRef<{ [key: string]: HTMLDivElement }>({});
   const videoElementRefs = useRef<{ [key: string]: HTMLVideoElement }>({});
@@ -31,6 +32,42 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
       });
     }
   }, [currentVideoId]);
+
+  // Mouse move and up event listeners
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      Object.entries(isDragging).forEach(([videoId, dragType]) => {
+        if (dragType) {
+          const sliderElement = document.querySelector(`[data-slider="${videoId}-${dragType}"]`) as HTMLElement;
+          if (sliderElement) {
+            const rect = sliderElement.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const percentage = Math.max(0, Math.min(100, (clickX / rect.width) * 100));
+            
+            if (dragType === 'progress') {
+              handleProgressChange(videoId, [percentage]);
+            } else if (dragType === 'volume') {
+              handleVolumeChange(videoId, [percentage]);
+            }
+          }
+        }
+      });
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging({});
+    };
+
+    if (Object.values(isDragging).some(drag => drag !== null)) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging]);
 
   const handlePlayPause = (videoId: string) => {
     const videoElement = videoElementRefs.current[videoId];
@@ -115,6 +152,24 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const handleSliderClick = (e: React.MouseEvent, videoId: string, type: 'progress' | 'volume') => {
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const percentage = (clickX / rect.width) * 100;
+    
+    if (type === 'progress') {
+      handleProgressChange(videoId, [percentage]);
+    } else {
+      handleVolumeChange(videoId, [percentage]);
+    }
+  };
+
+  const handleSliderMouseDown = (e: React.MouseEvent, videoId: string, type: 'progress' | 'volume') => {
+    e.stopPropagation();
+    setIsDragging(prev => ({ ...prev, [videoId]: type }));
+  };
+
   if (videos.length === 0) {
     return (
       <div className="h-screen flex items-center justify-center bg-black/20 backdrop-blur-sm">
@@ -184,14 +239,12 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
                     <div className="absolute bottom-4 left-4 right-4">
                       {/* Progress Bar */}
                       <div className="mb-3">
-                        <div className="relative w-full h-2 bg-white/20 rounded-full cursor-pointer"
-                             onClick={(e) => {
-                               e.stopPropagation();
-                               const rect = e.currentTarget.getBoundingClientRect();
-                               const clickX = e.clientX - rect.left;
-                               const percentage = (clickX / rect.width) * 100;
-                               handleProgressChange(video.id, [percentage]);
-                             }}>
+                        <div 
+                          className="relative w-full h-2 bg-white/20 rounded-full cursor-pointer"
+                          data-slider={`${video.id}-progress`}
+                          onClick={(e) => handleSliderClick(e, video.id, 'progress')}
+                          onMouseDown={(e) => handleSliderMouseDown(e, video.id, 'progress')}
+                        >
                           <div 
                             className="absolute h-full bg-white rounded-full transition-all duration-150"
                             style={{ width: `${videoProgress[video.id] || 0}%` }}
@@ -199,6 +252,7 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
                           <div 
                             className="absolute w-4 h-4 bg-white rounded-full border-2 border-white shadow-lg transform -translate-y-1/2 -translate-x-1/2 top-1/2 cursor-grab active:cursor-grabbing"
                             style={{ left: `${videoProgress[video.id] || 0}%` }}
+                            onMouseDown={(e) => handleSliderMouseDown(e, video.id, 'progress')}
                           />
                         </div>
                         <div className="flex justify-between text-xs text-white/70 mt-1">
@@ -231,14 +285,12 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
                           >
                             {isMuted[video.id] ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
                           </Button>
-                          <div className="relative w-full h-1 bg-white/20 rounded-full cursor-pointer"
-                               onClick={(e) => {
-                                 e.stopPropagation();
-                                 const rect = e.currentTarget.getBoundingClientRect();
-                                 const clickX = e.clientX - rect.left;
-                                 const percentage = (clickX / rect.width) * 100;
-                                 handleVolumeChange(video.id, [percentage]);
-                               }}>
+                          <div 
+                            className="relative w-full h-1 bg-white/20 rounded-full cursor-pointer"
+                            data-slider={`${video.id}-volume`}
+                            onClick={(e) => handleSliderClick(e, video.id, 'volume')}
+                            onMouseDown={(e) => handleSliderMouseDown(e, video.id, 'volume')}
+                          >
                             <div 
                               className="absolute h-full bg-white rounded-full transition-all duration-150"
                               style={{ width: `${videoVolume[video.id] || 100}%` }}
@@ -246,6 +298,7 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
                             <div 
                               className="absolute w-3 h-3 bg-white rounded-full border border-white shadow-lg transform -translate-y-1/2 -translate-x-1/2 top-1/2 cursor-grab active:cursor-grabbing"
                               style={{ left: `${videoVolume[video.id] || 100}%` }}
+                              onMouseDown={(e) => handleSliderMouseDown(e, video.id, 'volume')}
                             />
                           </div>
                         </div>
