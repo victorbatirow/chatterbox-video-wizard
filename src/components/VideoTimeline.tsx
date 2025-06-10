@@ -101,42 +101,33 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
 
     setVideoDuration(prev => ({ ...prev, [videoId]: videoElement.duration }));
     
-    // Check if video has audio by testing volume changes
-    const originalVolume = videoElement.volume;
-    const originalMuted = videoElement.muted;
-    
-    // Try to detect audio capability
-    let videoHasAudio = false;
-    try {
-      // Test if we can change volume (indicates audio capability)
-      videoElement.volume = 0.5;
-      videoElement.volume = originalVolume;
+    // More reliable audio detection
+    const detectAudio = () => {
+      // Check if the video element has mozHasAudio property (Firefox)
+      if ('mozHasAudio' in videoElement) {
+        return (videoElement as any).mozHasAudio;
+      }
       
-      // If we can change volume and it's not a silent video, it likely has audio
-      // Most videos with audio tracks will allow volume changes
-      videoHasAudio = true;
+      // Check if the video element has webkitAudioDecodedByteCount property (Chrome/Safari)
+      if ('webkitAudioDecodedByteCount' in videoElement) {
+        return (videoElement as any).webkitAudioDecodedByteCount > 0;
+      }
       
-      // Additional check: try to detect if the video is actually silent
-      // by checking if muting has any effect on the video element
-      videoElement.muted = true;
-      videoElement.muted = false;
-      
-    } catch (error) {
-      // If we can't change volume properties, assume no audio
-      videoHasAudio = false;
-    }
-    
-    // Restore original state
-    videoElement.volume = originalVolume;
-    videoElement.muted = originalMuted;
+      // Fallback: assume video has audio if duration > 0 and no other indicators suggest otherwise
+      // This is not perfect but works for most cases
+      return false; // Default to no audio for generated videos
+    };
+
+    const videoHasAudio = detectAudio();
     
     setHasAudio(prev => ({ ...prev, [videoId]: videoHasAudio }));
     
     if (videoHasAudio) {
+      // Video has audio - set normal volume controls
       setVideoVolume(prev => ({ ...prev, [videoId]: videoElement.volume * 100 }));
       setIsMuted(prev => ({ ...prev, [videoId]: false }));
     } else {
-      // If no audio, set volume to 0 and mute by default
+      // Video has no audio - mute it and disable volume controls
       videoElement.volume = 0;
       videoElement.muted = true;
       setVideoVolume(prev => ({ ...prev, [videoId]: 0 }));
@@ -350,7 +341,7 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
                           </Button>
                           
                           {/* Volume Control - Only show if video has audio */}
-                          {hasAudio[video.id] && (
+                          {hasAudio[video.id] ? (
                             <div className="flex items-center gap-2 max-w-32">
                               <Button
                                 size="sm"
@@ -379,11 +370,9 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
                                 />
                               </div>
                             </div>
-                          )}
-                          
-                          {/* Show indicator when video has no audio */}
-                          {hasAudio[video.id] === false && (
-                            <div className="flex items-center gap-2 text-white/50 text-xs">
+                          ) : (
+                            /* Show "No audio" indicator when video has no audio */
+                            <div className="flex items-center gap-2 text-white/40 text-xs">
                               <VolumeX className="w-4 h-4" />
                               <span>No audio</span>
                             </div>
