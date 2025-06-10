@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -165,7 +166,7 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
                 onClick={() => onVideoSelect(video.id)}
               >
                 {/* Video Player */}
-                <div className="relative w-full h-80 bg-black rounded-t-lg overflow-hidden">
+                <div className="relative w-full h-64 bg-black rounded-t-lg overflow-hidden">
                   <video
                     ref={(el) => {
                       if (el) {
@@ -222,16 +223,14 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
                           >
                             {isMuted[video.id] ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
                           </Button>
-                          <div className="flex-1">
-                            <Slider
-                              value={[videoVolume[video.id] || 100]}
-                              onValueChange={(value) => handleVolumeChange(video.id, value)}
-                              max={100}
-                              step={1}
-                              className="w-full [&_[data-orientation=horizontal]]:h-2 [&_[role=slider]]:h-4 [&_[role=slider]]:w-4"
-                              onClick={(e) => e.stopPropagation()}
-                            />
-                          </div>
+                          <Slider
+                            value={[videoVolume[video.id] || 100]}
+                            onValueChange={(value) => handleVolumeChange(video.id, value)}
+                            max={100}
+                            step={1}
+                            className="flex-1"
+                            onClick={(e) => e.stopPropagation()}
+                          />
                         </div>
                         
                         <Button
