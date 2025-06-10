@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
-import { X, Settings, User } from "lucide-react";
+import { Settings, User } from "lucide-react";
 
 interface SettingsDialogProps {
   isOpen: boolean;
@@ -35,7 +35,7 @@ const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
           orientation="vertical"
           className="flex w-full h-full"
         >
-          <TabsList className="h-full w-[240px] flex-col gap-0.5 overflow-y-auto px-4 py-6 border-r bg-transparent justify-start items-start flex-shrink-0"
+          <TabsList className="h-full w-[240px] flex-col gap-0.5 overflow-y-auto px-4 py-6 border-r bg-transparent justify-start items-start flex-shrink-0 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/30"
             style={{
               scrollbarWidth: 'thin',
               scrollbarColor: 'rgba(255,255,255,0.3) transparent'
@@ -112,11 +112,7 @@ const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
             {isInProject && (
               <TabsContent
                 value="project"
-                className="h-full w-full overflow-y-auto p-0 m-0"
-                style={{
-                  scrollbarWidth: 'thin',
-                  scrollbarColor: 'rgba(255,255,255,0.3) transparent'
-                }}
+                className="h-full w-full overflow-y-auto p-0 m-0 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/30"
               >
                 <div className="h-full w-full flex flex-col">
                   <div className="border-b p-6">
@@ -236,11 +232,7 @@ const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
 
             <TabsContent
               value="workspace"
-              className="h-full w-full overflow-y-auto p-0 m-0"
-              style={{
-                scrollbarWidth: 'thin',
-                scrollbarColor: 'rgba(255,255,255,0.3) transparent'
-              }}
+              className="h-full w-full overflow-y-auto p-0 m-0 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/30"
             >
               <div className="h-full w-full flex flex-col">
                 <div className="border-b p-6">
@@ -257,11 +249,7 @@ const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
 
             <TabsContent
               value="people"
-              className="h-full w-full overflow-y-auto p-0 m-0"
-              style={{
-                scrollbarWidth: 'thin',
-                scrollbarColor: 'rgba(255,255,255,0.3) transparent'
-              }}
+              className="h-full w-full overflow-y-auto p-0 m-0 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/30"
             >
               <div className="h-full w-full flex flex-col">
                 <div className="border-b p-6">
@@ -278,11 +266,7 @@ const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
 
             <TabsContent
               value="billing"
-              className="h-full w-full overflow-y-auto p-0 m-0"
-              style={{
-                scrollbarWidth: 'thin',
-                scrollbarColor: 'rgba(255,255,255,0.3) transparent'
-              }}
+              className="h-full w-full overflow-y-auto p-0 m-0 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/30"
             >
               <div className="h-full w-full flex flex-col">
                 <div className="border-b p-6">
@@ -299,11 +283,7 @@ const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
 
             <TabsContent
               value="account"
-              className="h-full w-full overflow-y-auto p-0 m-0"
-              style={{
-                scrollbarWidth: 'thin',
-                scrollbarColor: 'rgba(255,255,255,0.3) transparent'
-              }}
+              className="h-full w-full overflow-y-auto p-0 m-0 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/30"
             >
               <div className="h-full w-full flex flex-col">
                 <div className="border-b p-6">

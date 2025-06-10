@@ -68,7 +68,7 @@ const Navbar = ({ isAuthenticated = false }: NavbarProps) => {
                 <DropdownMenuTrigger asChild>
                   <Button 
                     variant="ghost" 
-                    className="flex items-center gap-2 rounded-xl py-2 pl-2 pr-3 hover:bg-white/10 text-white"
+                    className="flex items-center gap-2 rounded-xl py-2 pl-2 pr-3 hover:bg-white/10 text-white hover:text-white"
                   >
                     <Avatar className="h-8 w-8">
                       <AvatarFallback className="bg-purple-600 text-white font-medium text-xs">
