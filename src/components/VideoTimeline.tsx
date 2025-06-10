@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -166,7 +165,7 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
                 onClick={() => onVideoSelect(video.id)}
               >
                 {/* Video Player */}
-                <div className="relative w-full h-64 bg-black rounded-t-lg overflow-hidden">
+                <div className="relative w-full h-80 bg-black rounded-t-lg overflow-hidden">
                   <video
                     ref={(el) => {
                       if (el) {
@@ -185,14 +184,23 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
                     <div className="absolute bottom-4 left-4 right-4">
                       {/* Progress Bar */}
                       <div className="mb-3">
-                        <Slider
-                          value={[videoProgress[video.id] || 0]}
-                          onValueChange={(value) => handleProgressChange(video.id, value)}
-                          max={100}
-                          step={0.1}
-                          className="w-full"
-                          onClick={(e) => e.stopPropagation()}
-                        />
+                        <div className="relative w-full h-2 bg-white/20 rounded-full cursor-pointer"
+                             onClick={(e) => {
+                               e.stopPropagation();
+                               const rect = e.currentTarget.getBoundingClientRect();
+                               const clickX = e.clientX - rect.left;
+                               const percentage = (clickX / rect.width) * 100;
+                               handleProgressChange(video.id, [percentage]);
+                             }}>
+                          <div 
+                            className="absolute h-full bg-white rounded-full transition-all duration-150"
+                            style={{ width: `${videoProgress[video.id] || 0}%` }}
+                          />
+                          <div 
+                            className="absolute w-4 h-4 bg-white rounded-full border-2 border-white shadow-lg transform -translate-y-1/2 -translate-x-1/2 top-1/2 cursor-grab active:cursor-grabbing"
+                            style={{ left: `${videoProgress[video.id] || 0}%` }}
+                          />
+                        </div>
                         <div className="flex justify-between text-xs text-white/70 mt-1">
                           <span>{formatTime((videoProgress[video.id] || 0) * (videoDuration[video.id] || 0) / 100)}</span>
                           <span>{formatTime(videoDuration[video.id] || 0)}</span>
@@ -223,14 +231,23 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
                           >
                             {isMuted[video.id] ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
                           </Button>
-                          <Slider
-                            value={[videoVolume[video.id] || 100]}
-                            onValueChange={(value) => handleVolumeChange(video.id, value)}
-                            max={100}
-                            step={1}
-                            className="flex-1"
-                            onClick={(e) => e.stopPropagation()}
-                          />
+                          <div className="relative w-full h-1 bg-white/20 rounded-full cursor-pointer"
+                               onClick={(e) => {
+                                 e.stopPropagation();
+                                 const rect = e.currentTarget.getBoundingClientRect();
+                                 const clickX = e.clientX - rect.left;
+                                 const percentage = (clickX / rect.width) * 100;
+                                 handleVolumeChange(video.id, [percentage]);
+                               }}>
+                            <div 
+                              className="absolute h-full bg-white rounded-full transition-all duration-150"
+                              style={{ width: `${videoVolume[video.id] || 100}%` }}
+                            />
+                            <div 
+                              className="absolute w-3 h-3 bg-white rounded-full border border-white shadow-lg transform -translate-y-1/2 -translate-x-1/2 top-1/2 cursor-grab active:cursor-grabbing"
+                              style={{ left: `${videoVolume[video.id] || 100}%` }}
+                            />
+                          </div>
                         </div>
                         
                         <Button
