@@ -20,6 +20,7 @@ interface NavbarProps {
 const Navbar = ({ isAuthenticated = false }: NavbarProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,14 +34,17 @@ const Navbar = ({ isAuthenticated = false }: NavbarProps) => {
   }, []);
 
   const handleCreateNewProject = () => {
+    setIsDropdownOpen(false);
     navigate('/chat');
   };
 
   const handleSignOut = () => {
+    setIsDropdownOpen(false);
     navigate('/');
   };
 
   const handleOpenSettings = () => {
+    setIsDropdownOpen(false);
     setIsSettingsOpen(true);
   };
 
@@ -64,11 +68,11 @@ const Navbar = ({ isAuthenticated = false }: NavbarProps) => {
           </div>
           <div className="flex items-center gap-3">
             {isAuthenticated ? (
-              <DropdownMenu>
+              <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
                 <DropdownMenuTrigger asChild>
                   <Button 
                     variant="ghost" 
-                    className="flex items-center gap-2 rounded-xl py-2 pl-2 pr-3 hover:bg-white/10 text-white hover:text-white"
+                    className="flex items-center gap-2 rounded-xl py-2 pl-2 pr-3 hover:bg-white/10 text-white"
                   >
                     <Avatar className="h-8 w-8">
                       <AvatarFallback className="bg-purple-600 text-white font-medium text-xs">
@@ -82,7 +86,7 @@ const Navbar = ({ isAuthenticated = false }: NavbarProps) => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent 
                   align="end" 
-                  className="w-[280px] z-[10000] bg-popover border shadow-md rounded-xl p-1"
+                  className="w-[280px] z-[9999] bg-popover border shadow-md rounded-xl p-1"
                 >
                   {/* User Info Header */}
                   <div className="my-2 flex items-center gap-2 px-1.5">
