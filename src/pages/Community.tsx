@@ -18,7 +18,7 @@ const Community = () => {
       
       <Navbar isAuthenticated={true} />
       
-      <div className="flex flex-col flex-1 relative z-10 pt-8">
+      <div className="flex flex-col flex-1 relative z-10 pt-16">
         <Container>
           <CommunitySection />
         </Container>
