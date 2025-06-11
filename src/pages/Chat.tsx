@@ -1,6 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useAuth0 } from "@auth0/auth0-react";
 import ChatInterface from "@/components/ChatInterface";
 import VideoTimeline from "@/components/VideoTimeline";
 import ProjectMenu from "@/components/ProjectMenu";
@@ -36,6 +36,14 @@ const Chat = () => {
       timestamp: new Date(),
     },
   ]);
+
+  const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      loginWithRedirect();
+    }
+  }, [isAuthenticated, isLoading, loginWithRedirect]);
 
   // Check for initial prompt from URL parameters
   useEffect(() => {
@@ -146,6 +154,18 @@ const Chat = () => {
   const handleOpenSettings = () => {
     setIsSettingsOpen(true);
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null; // Will redirect to Auth0 login
+  }
 
   return (
     <>
