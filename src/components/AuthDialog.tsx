@@ -30,14 +30,8 @@ const AuthDialog = ({ isOpen, onClose }: AuthDialogProps) => {
     });
   };
 
-  const handleOpenChange = (open: boolean) => {
-    if (!open) {
-      onClose();
-    }
-  };
-
   return (
-    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-sm bg-white/10 backdrop-blur-sm border-white/20">
         {/* Custom close button */}
         <button
