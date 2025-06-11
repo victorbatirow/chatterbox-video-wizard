@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import Navbar from "@/components/Navbar";
@@ -15,6 +14,11 @@ const Projects = () => {
       loginWithRedirect();
     }
   }, [isAuthenticated, isLoading, loginWithRedirect]);
+
+  useEffect(() => {
+    // Scroll to top when component mounts
+    window.scrollTo(0, 0);
+  }, []);
 
   if (isLoading) {
     return (

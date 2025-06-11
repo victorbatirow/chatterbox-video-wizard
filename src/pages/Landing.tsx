@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import { Button } from "@/components/ui/button";
@@ -17,10 +17,16 @@ const Landing = () => {
   const { isAuthenticated, isLoading } = useAuth0();
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
 
+  useEffect(() => {
+    // Scroll to top when component mounts
+    window.scrollTo(0, 0);
+  }, []);
+
   const handleGetStarted = (prompt: string) => {
     if (isAuthenticated) {
       // Navigate to the chat page with the prompt as a URL parameter
       navigate(`/chat?prompt=${encodeURIComponent(prompt)}`);
+      window.scrollTo(0, 0);
     } else {
       // Show auth dialog instead of redirecting
       setIsAuthDialogOpen(true);

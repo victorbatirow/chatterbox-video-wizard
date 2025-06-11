@@ -20,6 +20,7 @@ const ProjectMenu = ({ onOpenSettings }: ProjectMenuProps) => {
 
   const handleGoToDashboard = () => {
     navigate('/dashboard');
+    window.scrollTo(0, 0);
   };
 
   const handleSettingsClick = () => {

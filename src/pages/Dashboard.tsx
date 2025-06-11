@@ -19,9 +19,15 @@ const Dashboard = () => {
     }
   }, [isAuthenticated, isLoading, loginWithRedirect]);
 
+  useEffect(() => {
+    // Scroll to top when component mounts
+    window.scrollTo(0, 0);
+  }, []);
+
   const handleCreateVideoFromPrompt = (prompt: string) => {
     // Navigate to chat with the prompt as a URL parameter
     navigate(`/chat?prompt=${encodeURIComponent(prompt)}`);
+    window.scrollTo(0, 0);
   };
 
   if (isLoading) {
@@ -69,3 +75,5 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+</initial_code>

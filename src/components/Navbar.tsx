@@ -1,5 +1,3 @@
-
-
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -44,6 +42,7 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated }: NavbarProps) => {
   const handleCreateNewProject = () => {
     setIsDropdownOpen(false);
     navigate('/chat');
+    window.scrollTo(0, 0);
   };
 
   const handleSignOut = () => {
@@ -87,7 +86,7 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated }: NavbarProps) => {
 
   if (isLoading) {
     return (
-      <nav className="sticky top-0 z-50 w-full border-b border-transparent transition-all duration-200 ease-out bg-slate-900/60 backdrop-blur-lg">
+      <nav className="sticky top-0 z-50 w-full border-b border-transparent transition-all duration-200 ease-out bg-slate-900/40 backdrop-blur-3xl">
         <Container className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-6">
             <Link to="/" className="flex items-center gap-3">
@@ -104,11 +103,11 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated }: NavbarProps) => {
   return (
     <>
       <nav className={`sticky top-0 z-50 w-full border-b border-transparent transition-all duration-200 ease-out ${
-        isScrolled ? 'backdrop-blur-xl bg-slate-900/90' : ''
+        isScrolled ? 'backdrop-blur-3xl bg-slate-900/50' : 'bg-slate-900/40 backdrop-blur-3xl'
       }`}>
         <Container className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-6">
-            <Link to={actualIsAuthenticated ? "/dashboard" : "/"} className="flex items-center gap-3">
+            <Link to={actualIsAuthenticated ? "/dashboard" : "/"} className="flex items-center gap-3" onClick={() => window.scrollTo(0, 0)}>
               <Video className="w-10 h-10 text-purple-400" />
               <span className="text-2xl font-bold text-white">Pamba</span>
             </Link>
@@ -293,4 +292,3 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated }: NavbarProps) => {
 };
 
 export default Navbar;
-

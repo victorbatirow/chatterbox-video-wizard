@@ -7,6 +7,7 @@ const CommunitySection = () => {
 
   const handleViewAll = () => {
     navigate('/community');
+    window.scrollTo(0, 0);
   };
 
   const projects = [
