@@ -87,7 +87,7 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated }: NavbarProps) => {
 
   if (isLoading) {
     return (
-      <nav className="sticky top-0 z-50 w-full border-b border-transparent transition-all duration-200 ease-out bg-slate-900/60 backdrop-blur-lg">
+      <nav className="sticky top-0 z-50 w-full border-b border-transparent transition-all duration-200 ease-out bg-slate-900/80 backdrop-blur-lg">
         <Container className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-6">
             <Link to="/" className="flex items-center gap-3">
