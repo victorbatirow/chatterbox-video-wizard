@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import Navbar from "@/components/Navbar";
@@ -41,7 +42,7 @@ const Projects = () => {
       
       <Navbar isAuthenticated={true} />
       
-      <div className="flex flex-col flex-1 relative z-10">
+      <div className="flex flex-col flex-1 relative z-10 pt-8">
         <Container>
           <RecentProjectsSection />
         </Container>
