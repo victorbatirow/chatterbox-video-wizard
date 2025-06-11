@@ -101,8 +101,10 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
 
     setVideoDuration(prev => ({ ...prev, [videoId]: videoElement.duration }));
     
+    // Wait a bit for the video to load more data, then check for audio
     setTimeout(() => {
       const detectAudio = () => {
+        // Check for browser-specific audio detection properties
         if ('mozHasAudio' in videoElement) {
           return (videoElement as any).mozHasAudio;
         }
@@ -111,16 +113,20 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
           return (videoElement as any).webkitAudioDecodedByteCount > 0;
         }
         
+        // Generic fallback: check if video element reports audio tracks
         if ('audioTracks' in videoElement && (videoElement as any).audioTracks) {
           return (videoElement as any).audioTracks.length > 0;
         }
         
+        // Another fallback: test volume change capability
         const originalVolume = videoElement.volume;
         try {
           videoElement.volume = 0.5;
           const canChangeVolume = videoElement.volume === 0.5;
           videoElement.volume = originalVolume;
           
+          // If we can change volume and the video has a reasonable duration, assume it has audio
+          // For generated videos without audio, this will still work but we'll set them to muted
           return canChangeVolume && videoElement.duration > 0;
         } catch {
           return false;
@@ -133,15 +139,17 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
       setHasAudio(prev => ({ ...prev, [videoId]: videoHasAudio }));
       
       if (videoHasAudio) {
+        // Video has audio - set normal volume controls
         setVideoVolume(prev => ({ ...prev, [videoId]: videoElement.volume * 100 }));
         setIsMuted(prev => ({ ...prev, [videoId]: false }));
       } else {
+        // Video has no audio - mute it and disable volume controls
         videoElement.volume = 0;
         videoElement.muted = true;
         setVideoVolume(prev => ({ ...prev, [videoId]: 0 }));
         setIsMuted(prev => ({ ...prev, [videoId]: true }));
       }
-    }, 100);
+    }, 100); // Small delay to let video load
   };
 
   const handleProgressChange = (videoId: string, value: number[]) => {
@@ -189,21 +197,26 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
 
   const handleDownload = async (videoUrl: string, prompt: string) => {
     try {
+      // Fetch the video as a blob
       const response = await fetch(videoUrl);
       const blob = await response.blob();
       
+      // Create a download link
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.download = `${prompt.slice(0, 30).replace(/[^a-zA-Z0-9]/g, '_')}.mp4`;
       
+      // Trigger download
       document.body.appendChild(link);
       link.click();
       
+      // Cleanup
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error downloading video:', error);
+      // Fallback to direct link if blob fetch fails
       const link = document.createElement('a');
       link.href = videoUrl;
       link.download = `${prompt.slice(0, 30).replace(/[^a-zA-Z0-9]/g, '_')}.mp4`;
@@ -289,7 +302,7 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
                 onClick={() => onVideoSelect(video.id)}
               >
                 {/* Video Player */}
-                <div className="relative w-full h-80 bg-black rounded-t-lg overflow-hidden">
+                <div className="relative w-full h-[80vh] bg-black rounded-t-lg overflow-hidden">
                   <video
                     ref={(el) => {
                       if (el) {
@@ -375,6 +388,7 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
                               </div>
                             </div>
                           ) : (
+                            /* Show "No audio" indicator when video has no audio */
                             <div className="flex items-center gap-2 text-white/40 text-xs">
                               <VolumeX className="w-4 h-4" />
                               <span>No audio</span>
@@ -389,6 +403,7 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
                             className="bg-white/20 hover:bg-white/30 backdrop-blur-sm"
                             onClick={(e) => {
                               e.stopPropagation();
+                              // Add regenerate functionality here
                               console.log('Regenerate video:', video.id);
                             }}
                           >
