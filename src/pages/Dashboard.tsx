@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -12,13 +11,13 @@ import StaticGradientBackground from "@/components/StaticGradientBackground";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading } = useAuth0();
+  const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      navigate('/login');
+      loginWithRedirect();
     }
-  }, [isAuthenticated, isLoading, navigate]);
+  }, [isAuthenticated, isLoading, loginWithRedirect]);
 
   const handleCreateVideoFromPrompt = (prompt: string) => {
     // Navigate to chat with the prompt as a URL parameter
@@ -37,7 +36,7 @@ const Dashboard = () => {
   }
 
   if (!isAuthenticated) {
-    return null; // Will redirect to login
+    return null; // Will redirect to Auth0 login
   }
 
   return (
