@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Video } from "lucide-react";
+import { Video, X } from "lucide-react";
 
 interface AuthDialogProps {
   isOpen: boolean;
@@ -33,6 +33,15 @@ const AuthDialog = ({ isOpen, onClose }: AuthDialogProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-sm bg-white/10 backdrop-blur-sm border-white/20">
+        {/* Custom close button */}
+        <button
+          onClick={onClose}
+          className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none text-white"
+        >
+          <X className="h-4 w-4" />
+          <span className="sr-only">Close</span>
+        </button>
+
         <div className="flex flex-col items-start gap-4">
           <Video className="w-9 h-9 text-purple-400" />
           <DialogHeader className="text-left space-y-1.5">
