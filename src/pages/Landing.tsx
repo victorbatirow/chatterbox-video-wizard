@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth0 } from "@auth0/auth0-react";
 import { Button } from "@/components/ui/button";
 import { Video } from "lucide-react";
 import HeroSection from "@/components/HeroSection";
@@ -9,13 +10,21 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Container from "@/components/Container";
 import StaticGradientBackground from "@/components/StaticGradientBackground";
+import AuthDialog from "@/components/AuthDialog";
 
 const Landing = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, isLoading } = useAuth0();
+  const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
 
   const handleGetStarted = (prompt: string) => {
-    // Navigate to the chat page with the prompt as a URL parameter
-    navigate(`/chat?prompt=${encodeURIComponent(prompt)}`);
+    if (isAuthenticated) {
+      // Navigate to the chat page with the prompt as a URL parameter
+      navigate(`/chat?prompt=${encodeURIComponent(prompt)}`);
+    } else {
+      // Show auth dialog instead of redirecting
+      setIsAuthDialogOpen(true);
+    }
   };
 
   return (
@@ -23,7 +32,7 @@ const Landing = () => {
       <StaticGradientBackground />
       
       {/* Navigation */}
-      <Navbar isAuthenticated={false} />
+      <Navbar isAuthenticated={isAuthenticated && !isLoading} />
 
       <div className="flex flex-col flex-1 relative z-10">
         <Container>
@@ -37,6 +46,12 @@ const Landing = () => {
 
       {/* Footer */}
       <Footer />
+
+      {/* Auth Dialog */}
+      <AuthDialog 
+        isOpen={isAuthDialogOpen} 
+        onClose={() => setIsAuthDialogOpen(false)} 
+      />
     </div>
   );
 };
