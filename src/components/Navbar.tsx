@@ -1,4 +1,5 @@
 
+
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -86,7 +87,7 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated }: NavbarProps) => {
 
   if (isLoading) {
     return (
-      <nav className="sticky top-0 z-50 w-full border-b border-transparent transition-all duration-200 ease-out bg-slate-900/30 backdrop-blur-sm">
+      <nav className="sticky top-0 z-50 w-full border-b border-transparent transition-all duration-200 ease-out bg-slate-900/60 backdrop-blur-lg">
         <Container className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-6">
             <Link to="/" className="flex items-center gap-3">
@@ -103,7 +104,7 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated }: NavbarProps) => {
   return (
     <>
       <nav className={`sticky top-0 z-50 w-full border-b border-transparent transition-all duration-200 ease-out ${
-        isScrolled ? 'backdrop-blur-md bg-slate-900/40' : 'bg-slate-900/30 backdrop-blur-sm'
+        isScrolled ? 'backdrop-blur-lg bg-slate-900/60' : 'bg-slate-900/50 backdrop-blur-lg'
       }`}>
         <Container className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-6">
@@ -292,3 +293,4 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated }: NavbarProps) => {
 };
 
 export default Navbar;
+
