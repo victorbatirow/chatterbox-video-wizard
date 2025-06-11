@@ -24,7 +24,7 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated }: NavbarProps) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
   
-  const { isAuthenticated, user, logout, isLoading } = useAuth0();
+  const { isAuthenticated, user, logout, loginWithRedirect, isLoading } = useAuth0();
   
   // Use Auth0 authentication state if available, otherwise fall back to prop
   const actualIsAuthenticated = isAuthenticated ?? propIsAuthenticated ?? false;
@@ -52,6 +52,18 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated }: NavbarProps) => {
   const handleOpenSettings = () => {
     setIsDropdownOpen(false);
     setIsSettingsOpen(true);
+  };
+
+  const handleLogin = () => {
+    loginWithRedirect();
+  };
+
+  const handleSignup = () => {
+    loginWithRedirect({
+      authorizationParams: {
+        screen_hint: 'signup'
+      }
+    });
   };
 
   // Get user initials for avatar
@@ -258,16 +270,12 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated }: NavbarProps) => {
               </DropdownMenu>
             ) : (
               <>
-                <Link to="/login">
-                  <Button variant="ghost" className="text-white hover:bg-white/10 hover:text-white">
-                    Log in
-                  </Button>
-                </Link>
-                <Link to="/signup">
-                  <Button className="bg-white text-purple-900 hover:bg-white/90">
-                    Sign up
-                  </Button>
-                </Link>
+                <Button variant="ghost" className="text-white hover:bg-white/10 hover:text-white" onClick={handleLogin}>
+                  Log in
+                </Button>
+                <Button className="bg-white text-purple-900 hover:bg-white/90" onClick={handleSignup}>
+                  Sign up
+                </Button>
               </>
             )}
           </div>
@@ -283,3 +291,5 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated }: NavbarProps) => {
 };
 
 export default Navbar;
+
+}
