@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -19,12 +18,16 @@ interface NavbarProps {
   isAuthenticated?: boolean;
 }
 
-const Navbar = ({ isAuthenticated = false }: NavbarProps) => {
-  const { logout, user } = useAuth0();
+const Navbar = ({ isAuthenticated: propIsAuthenticated }: NavbarProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
+  
+  const { isAuthenticated, user, logout, isLoading } = useAuth0();
+  
+  // Use Auth0 authentication state if available, otherwise fall back to prop
+  const actualIsAuthenticated = isAuthenticated ?? propIsAuthenticated ?? false;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -43,17 +46,46 @@ const Navbar = ({ isAuthenticated = false }: NavbarProps) => {
 
   const handleSignOut = () => {
     setIsDropdownOpen(false);
-    if (isAuthenticated && logout) {
-      logout({ logoutParams: { returnTo: window.location.origin } });
-    } else {
-      navigate('/');
-    }
+    logout({ logoutParams: { returnTo: window.location.origin } });
   };
 
   const handleOpenSettings = () => {
     setIsDropdownOpen(false);
     setIsSettingsOpen(true);
   };
+
+  // Get user initials for avatar
+  const getUserInitials = () => {
+    if (user?.name) {
+      return user.name
+        .split(' ')
+        .map(n => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
+    }
+    return 'U';
+  };
+
+  const getUserDisplayName = () => {
+    return user?.name || user?.email || 'User';
+  };
+
+  if (isLoading) {
+    return (
+      <nav className="sticky top-0 z-50 w-full border-b border-transparent transition-all duration-200 ease-out bg-slate-900">
+        <Container className="flex h-16 items-center justify-between">
+          <div className="flex items-center gap-6">
+            <Link to="/" className="flex items-center gap-3">
+              <Video className="w-10 h-10 text-purple-400" />
+              <span className="text-2xl font-bold text-white">Pamba</span>
+            </Link>
+          </div>
+          <div className="text-white">Loading...</div>
+        </Container>
+      </nav>
+    );
+  }
 
   return (
     <>
@@ -62,7 +94,7 @@ const Navbar = ({ isAuthenticated = false }: NavbarProps) => {
       }`}>
         <Container className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-6">
-            <Link to={isAuthenticated ? "/dashboard" : "/"} className="flex items-center gap-3">
+            <Link to={actualIsAuthenticated ? "/dashboard" : "/"} className="flex items-center gap-3">
               <Video className="w-10 h-10 text-purple-400" />
               <span className="text-2xl font-bold text-white">Pamba</span>
             </Link>
@@ -74,7 +106,8 @@ const Navbar = ({ isAuthenticated = false }: NavbarProps) => {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            {isAuthenticated ? (
+            {actualIsAuthenticated ? (
+              
               <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
                 <DropdownMenuTrigger asChild>
                   <Button 
@@ -83,13 +116,11 @@ const Navbar = ({ isAuthenticated = false }: NavbarProps) => {
                   >
                     <Avatar className="h-8 w-8">
                       <AvatarFallback className="bg-purple-600 text-white font-medium text-xs">
-                        {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                        {getUserInitials()}
                       </AvatarFallback>
                     </Avatar>
                     <div className="hidden md:flex flex-col">
-                      <p className="text-sm font-medium min-w-0 max-w-[250px] truncate">
-                        {user?.name || 'User'}'s Pamba
-                      </p>
+                      <p className="text-sm font-medium min-w-0 max-w-[250px] truncate">{getUserDisplayName()}'s Pamba</p>
                     </div>
                   </Button>
                 </DropdownMenuTrigger>
@@ -101,12 +132,12 @@ const Navbar = ({ isAuthenticated = false }: NavbarProps) => {
                   <div className="my-2 flex items-center gap-2 px-1.5">
                     <Avatar className="h-8 w-8">
                       <AvatarFallback className="bg-purple-600 text-white font-medium text-xs">
-                        {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                        {getUserInitials()}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col justify-center gap-[2px] leading-none">
-                      <p className="text-sm font-medium">{user?.name || 'User'}'s Pamba</p>
-                      <p className="text-xs text-muted-foreground">{user?.email || 'user@email.com'}</p>
+                      <p className="text-sm font-medium">{getUserDisplayName()}'s Pamba</p>
+                      <p className="text-xs text-muted-foreground">{user?.email}</p>
                     </div>
                   </div>
 
@@ -160,10 +191,10 @@ const Navbar = ({ isAuthenticated = false }: NavbarProps) => {
                   <div className="flex items-center gap-2 px-2 py-1.5">
                     <Avatar className="h-[26px] w-[26px]">
                       <AvatarFallback className="bg-purple-600 text-white font-medium text-xs">
-                        V
+                        {getUserInitials()}
                       </AvatarFallback>
                     </Avatar>
-                    <p className="min-w-0 truncate text-sm">victor's Pamba</p>
+                    <p className="min-w-0 truncate text-sm">{getUserDisplayName()}'s Pamba</p>
                     <span className="rounded-full px-2 py-px text-[10px] font-medium uppercase bg-purple-600 text-white">
                       Pro
                     </span>

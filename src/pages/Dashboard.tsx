@@ -1,7 +1,7 @@
 
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
-import { useEffect } from "react";
 import HeroSection from "@/components/HeroSection";
 import CommunitySection from "@/components/CommunitySection";
 import RecentProjectsSection from "@/components/RecentProjectsSection";
@@ -16,7 +16,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      navigate("/login");
+      navigate('/login');
     }
   }, [isAuthenticated, isLoading, navigate]);
 
@@ -27,14 +27,17 @@ const Dashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-        <div className="text-white text-xl">Loading...</div>
+      <div className="flex flex-col min-h-full relative">
+        <StaticGradientBackground />
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-white text-xl">Loading...</div>
+        </div>
       </div>
     );
   }
 
   if (!isAuthenticated) {
-    return null;
+    return null; // Will redirect to login
   }
 
   return (
