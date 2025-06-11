@@ -291,5 +291,3 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated }: NavbarProps) => {
 };
 
 export default Navbar;
-
-}
