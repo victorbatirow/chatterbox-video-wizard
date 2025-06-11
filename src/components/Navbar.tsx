@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth0 } from "@auth0/auth0-react";
 import { Button } from "@/components/ui/button";
 import { Video, Settings, UserPlus } from "lucide-react";
 import {
@@ -18,6 +19,7 @@ interface NavbarProps {
 }
 
 const Navbar = ({ isAuthenticated = false }: NavbarProps) => {
+  const { logout, user } = useAuth0();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -40,7 +42,11 @@ const Navbar = ({ isAuthenticated = false }: NavbarProps) => {
 
   const handleSignOut = () => {
     setIsDropdownOpen(false);
-    navigate('/');
+    if (isAuthenticated && logout) {
+      logout({ logoutParams: { returnTo: window.location.origin } });
+    } else {
+      navigate('/');
+    }
   };
 
   const handleOpenSettings = () => {
@@ -76,11 +82,13 @@ const Navbar = ({ isAuthenticated = false }: NavbarProps) => {
                   >
                     <Avatar className="h-8 w-8">
                       <AvatarFallback className="bg-purple-600 text-white font-medium text-xs">
-                        V
+                        {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
                       </AvatarFallback>
                     </Avatar>
                     <div className="hidden md:flex flex-col">
-                      <p className="text-sm font-medium min-w-0 max-w-[250px] truncate">victor's Pamba</p>
+                      <p className="text-sm font-medium min-w-0 max-w-[250px] truncate">
+                        {user?.name || 'User'}'s Pamba
+                      </p>
                     </div>
                   </Button>
                 </DropdownMenuTrigger>
@@ -92,12 +100,12 @@ const Navbar = ({ isAuthenticated = false }: NavbarProps) => {
                   <div className="my-2 flex items-center gap-2 px-1.5">
                     <Avatar className="h-8 w-8">
                       <AvatarFallback className="bg-purple-600 text-white font-medium text-xs">
-                        V
+                        {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col justify-center gap-[2px] leading-none">
-                      <p className="text-sm font-medium">victor's Pamba</p>
-                      <p className="text-xs text-muted-foreground">batirow@gmail.com</p>
+                      <p className="text-sm font-medium">{user?.name || 'User'}'s Pamba</p>
+                      <p className="text-xs text-muted-foreground">{user?.email || 'user@email.com'}</p>
                     </div>
                   </div>
 
@@ -243,3 +251,5 @@ const Navbar = ({ isAuthenticated = false }: NavbarProps) => {
 };
 
 export default Navbar;
+
+</edits_to_apply>

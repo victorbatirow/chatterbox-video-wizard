@@ -1,12 +1,14 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuth0 } from "@auth0/auth0-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Video, Eye, EyeOff } from "lucide-react";
 
 const Login = () => {
+  const { loginWithRedirect, isLoading: auth0Loading } = useAuth0();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -24,6 +26,10 @@ const Login = () => {
     }, 1500);
   };
 
+  const handleAuth0Login = () => {
+    loginWithRedirect();
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center p-6">
       <div className="w-full max-w-md">
@@ -39,6 +45,24 @@ const Login = () => {
             <p className="text-white/60">Sign in to your video creation workspace</p>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* Auth0 Login Button */}
+            <Button
+              onClick={handleAuth0Login}
+              disabled={auth0Loading}
+              className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
+            >
+              {auth0Loading ? "Loading..." : "Sign in with Auth0"}
+            </Button>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-white/20" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-transparent px-2 text-white/60">Or continue with email</span>
+              </div>
+            </div>
+
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
                 <label htmlFor="email" className="text-sm font-medium text-white">

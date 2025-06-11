@@ -1,12 +1,14 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuth0 } from "@auth0/auth0-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Video, Eye, EyeOff } from "lucide-react";
 
 const Signup = () => {
+  const { loginWithRedirect, isLoading: auth0Loading } = useAuth0();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -40,6 +42,14 @@ const Signup = () => {
     }, 1500);
   };
 
+  const handleAuth0Signup = () => {
+    loginWithRedirect({
+      authorizationParams: {
+        screen_hint: "signup"
+      }
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center p-6">
       <div className="w-full max-w-md">
@@ -55,6 +65,24 @@ const Signup = () => {
             <p className="text-white/60">Start creating amazing videos today</p>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* Auth0 Signup Button */}
+            <Button
+              onClick={handleAuth0Signup}
+              disabled={auth0Loading}
+              className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
+            >
+              {auth0Loading ? "Loading..." : "Sign up with Auth0"}
+            </Button>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-white/20" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-transparent px-2 text-white/60">Or continue with email</span>
+              </div>
+            </div>
+
             <form onSubmit={handleSignup} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
