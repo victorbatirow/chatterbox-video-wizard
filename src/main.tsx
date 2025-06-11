@@ -11,8 +11,6 @@ createRoot(document.getElementById("root")!).render(
     authorizationParams={{
       redirect_uri: window.location.origin + '/dashboard'
     }}
-    useRefreshTokens={true}
-    cacheLocation="localstorage"
   >
     <App />
   </Auth0Provider>
