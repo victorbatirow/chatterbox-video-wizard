@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from "react";
+import { useAuth0 } from "@auth0/auth0-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, Sparkles } from "lucide-react";
 import MessageBubble from "@/components/MessageBubble";
+import AuthDialog from "@/components/AuthDialog";
 import { VideoMessage, Message } from "@/pages/Chat";
 
 interface ChatInterfaceProps {
@@ -17,8 +19,10 @@ interface ChatInterfaceProps {
 
 const ChatInterface = ({ onSendMessage, onGenerateVideo, onVideoSelect, isGenerating, videos, messages }: ChatInterfaceProps) => {
   const [inputValue, setInputValue] = useState("");
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const { isAuthenticated } = useAuth0();
 
   const promptSuggestions = [
     "A serene sunset over mountains with birds flying",
@@ -57,6 +61,13 @@ const ChatInterface = ({ onSendMessage, onGenerateVideo, onVideoSelect, isGenera
 
   const handleSendMessage = () => {
     if (!inputValue.trim() || isGenerating) return;
+    
+    // Check if user is authenticated before sending message
+    if (!isAuthenticated) {
+      setShowAuthDialog(true);
+      return;
+    }
+    
     onSendMessage(inputValue);
     setInputValue("");
   };
@@ -165,6 +176,12 @@ const ChatInterface = ({ onSendMessage, onGenerateVideo, onVideoSelect, isGenera
         </div>
         <p className="text-xs text-white/40 mt-2">Press Enter to send, Shift+Enter for new line</p>
       </div>
+
+      {/* Auth Dialog */}
+      <AuthDialog 
+        isOpen={showAuthDialog} 
+        onClose={() => setShowAuthDialog(false)} 
+      />
     </div>
   );
 };
