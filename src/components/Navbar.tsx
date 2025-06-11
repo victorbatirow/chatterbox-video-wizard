@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -251,5 +252,3 @@ const Navbar = ({ isAuthenticated = false }: NavbarProps) => {
 };
 
 export default Navbar;
-
-</edits_to_apply>
