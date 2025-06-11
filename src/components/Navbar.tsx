@@ -104,7 +104,7 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated }: NavbarProps) => {
   return (
     <>
       <nav className={`sticky top-0 z-50 w-full border-b border-transparent transition-all duration-200 ease-out ${
-        isScrolled ? 'backdrop-blur-lg bg-slate-900/60' : 'bg-slate-900/50 backdrop-blur-lg'
+        isScrolled ? 'backdrop-blur-xl bg-slate-900/60' : 'bg-slate-900/50 backdrop-blur-xl'
       }`}>
         <Container className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-6">
