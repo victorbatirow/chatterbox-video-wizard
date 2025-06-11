@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -22,12 +23,34 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated }: NavbarProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [loadingTimeout, setLoadingTimeout] = useState(false);
   const navigate = useNavigate();
   
-  const { isAuthenticated, user, logout, loginWithRedirect, isLoading } = useAuth0();
+  const { isAuthenticated, user, logout, loginWithRedirect, isLoading, error } = useAuth0();
   
   // Use Auth0 authentication state if available, otherwise fall back to prop
   const actualIsAuthenticated = isAuthenticated ?? propIsAuthenticated ?? false;
+
+  // Handle loading timeout - if Auth0 takes too long, show unauthenticated state
+  useEffect(() => {
+    if (isLoading) {
+      const timer = setTimeout(() => {
+        setLoadingTimeout(true);
+        console.warn('Auth0 loading timeout - showing unauthenticated state');
+      }, 5000); // 5 second timeout
+
+      return () => clearTimeout(timer);
+    } else {
+      setLoadingTimeout(false);
+    }
+  }, [isLoading]);
+
+  // Log Auth0 errors for debugging
+  useEffect(() => {
+    if (error) {
+      console.error('Auth0 error:', error);
+    }
+  }, [error]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -47,7 +70,11 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated }: NavbarProps) => {
 
   const handleSignOut = () => {
     setIsDropdownOpen(false);
-    logout({ logoutParams: { returnTo: window.location.origin } });
+    logout({ 
+      logoutParams: { 
+        returnTo: window.location.origin 
+      } 
+    });
   };
 
   const handleOpenSettings = () => {
@@ -56,13 +83,18 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated }: NavbarProps) => {
   };
 
   const handleLogin = () => {
-    loginWithRedirect();
+    loginWithRedirect({
+      authorizationParams: {
+        redirect_uri: window.location.origin + '/dashboard'
+      }
+    });
   };
 
   const handleSignup = () => {
     loginWithRedirect({
       authorizationParams: {
-        screen_hint: 'signup'
+        screen_hint: 'signup',
+        redirect_uri: window.location.origin + '/dashboard'
       }
     });
   };
@@ -84,7 +116,8 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated }: NavbarProps) => {
     return user?.name || user?.email || 'User';
   };
 
-  if (isLoading) {
+  // Show loading state only if Auth0 is loading and we haven't timed out
+  if (isLoading && !loadingTimeout) {
     return (
       <nav className="sticky top-0 z-50 w-full border-b border-transparent transition-all duration-200 ease-out bg-slate-900/40 backdrop-blur-3xl">
         <Container className="flex h-16 items-center justify-between">
