@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -38,21 +37,27 @@ const Chat = () => {
     },
   ]);
 
-  const { isAuthenticated, isLoading } = useAuth0();
+  const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
 
-  // Check for initial prompt from URL parameters (only if authenticated)
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      loginWithRedirect();
+    }
+  }, [isAuthenticated, isLoading, loginWithRedirect]);
+
+  // Check for initial prompt from URL parameters
   useEffect(() => {
     const initialPrompt = searchParams.get('prompt');
-    if (initialPrompt && isAuthenticated) {
+    if (initialPrompt) {
       // Clear the URL parameter
       setSearchParams(new URLSearchParams());
       // Send the initial prompt
       handleSendMessage(initialPrompt);
     }
-  }, [searchParams, isAuthenticated]);
+  }, [searchParams]);
 
   const handleSendMessage = async (prompt: string) => {
-    if (!prompt.trim() || isGenerating || !isAuthenticated) return;
+    if (!prompt.trim() || isGenerating) return;
 
     // Add user message
     const userMessage: Message = {
@@ -156,6 +161,10 @@ const Chat = () => {
         <div className="text-white text-xl">Loading...</div>
       </div>
     );
+  }
+
+  if (!isAuthenticated) {
+    return null; // Will redirect to Auth0 login
   }
 
   return (
