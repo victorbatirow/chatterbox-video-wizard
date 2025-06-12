@@ -1,4 +1,3 @@
-
 import Draggable from "@/components/shared/draggable";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { VIDEOS } from "../data/video";
@@ -93,17 +92,23 @@ const ChatVideoItem = ({
     [video.preview],
   );
 
+  // Structure the data similar to stock videos for proper drag and drop
+  const dragData = React.useMemo(() => ({
+    id: generateId(),
+    type: "video",
+    details: {
+      src: video.videoUrl,
+    },
+    metadata: {
+      previewUrl: video.preview,
+      prompt: video.prompt,
+    },
+    preview: video.preview,
+  }), [video]);
+
   return (
     <Draggable
-      data={{
-        details: {
-          src: video.videoUrl,
-        },
-        metadata: {
-          previewUrl: video.preview,
-          prompt: video.prompt,
-        },
-      }}
+      data={dragData}
       renderCustomPreview={<div style={style} className="draggable" />}
       shouldDisplayPreview={shouldDisplayPreview}
     >
