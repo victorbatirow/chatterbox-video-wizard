@@ -1,3 +1,4 @@
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { IBoxShadow } from "@designcombo/types";
@@ -48,7 +49,6 @@ function Shadow({
                 ></div>
 
                 <Input
-                  variant="secondary"
                   className="pointer-events-none h-8 pl-10"
                   value={localValue.color}
                   onChange={() => {}}
@@ -97,7 +97,6 @@ function Shadow({
         </div>
         <div className="relative w-32">
           <Input
-            variant="secondary"
             className="h-8"
             value={localValue.x}
             onChange={(e) => {
@@ -134,7 +133,6 @@ function Shadow({
         </div>
         <div className="relative w-32">
           <Input
-            variant="secondary"
             className="h-8"
             value={localValue.y}
             onChange={(e) => {
@@ -171,7 +169,6 @@ function Shadow({
         </div>
         <div className="relative w-32">
           <Input
-            variant="secondary"
             className="h-8"
             value={localValue.blur}
             onChange={(e) => {

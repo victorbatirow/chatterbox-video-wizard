@@ -1,3 +1,4 @@
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useEffect, useState } from "react";
@@ -57,7 +58,6 @@ function Outline({
                 ></div>
 
                 <Input
-                  variant="secondary"
                   className="pointer-events-none h-8 pl-10"
                   value={localValueBorderColor}
                   onChange={() => {}}
@@ -101,7 +101,6 @@ function Outline({
         </div>
         <div className="relative w-32">
           <Input
-            variant="secondary"
             type="text"
             className="h-8"
             onChange={(e) => {
