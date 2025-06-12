@@ -1,6 +1,6 @@
+
 import Draggable from "@/components/shared/draggable";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { VIDEOS } from "../data/video";
 import { dispatch } from "@designcombo/events";
 import { ADD_VIDEO } from "@designcombo/state";
 import { generateId } from "@designcombo/timeline";
@@ -8,7 +8,6 @@ import { IVideo } from "@designcombo/types";
 import React from "react";
 import { useIsDraggingOverTimeline } from "../hooks/is-dragging-over-timeline";
 import useVideoStore from "@/stores/use-video-store";
-import { Separator } from "@/components/ui/separator";
 
 export const Videos = () => {
   const isDraggingOverTimeline = useIsDraggingOverTimeline();
@@ -32,12 +31,12 @@ export const Videos = () => {
       <ScrollArea className="flex-1">
         <div className="px-4 pb-4">
           {/* Chat Generated Videos Section */}
-          {chatVideos.length > 0 && (
+          {chatVideos.length > 0 ? (
             <>
               <div className="text-text-secondary text-xs font-medium mb-3 mt-2">
                 Generated Videos
               </div>
-              <div className="masonry-sm mb-4">
+              <div className="masonry-sm">
                 {chatVideos.map((video) => (
                   <ChatVideoItem
                     key={video.id}
@@ -47,26 +46,13 @@ export const Videos = () => {
                   />
                 ))}
               </div>
-              <Separator className="my-4" />
             </>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-32 text-muted-foreground">
+              <div className="text-sm text-center">No videos generated yet</div>
+              <div className="text-xs mt-1 text-center">Generate videos from chat to see them here</div>
+            </div>
           )}
-
-          {/* Default Videos Section */}
-          <div className="text-text-secondary text-xs font-medium mb-3">
-            Stock Videos
-          </div>
-          <div className="masonry-sm">
-            {VIDEOS.map((video, index) => {
-              return (
-                <VideoItem
-                  key={index}
-                  video={video}
-                  shouldDisplayPreview={!isDraggingOverTimeline}
-                  handleAddImage={handleAddVideo}
-                />
-              );
-            })}
-          </div>
         </div>
       </ScrollArea>
     </div>
@@ -140,61 +126,6 @@ const ChatVideoItem = ({
         <div className="mt-1 text-xs text-text-secondary text-center px-1 line-clamp-2">
           {video.prompt}
         </div>
-      </div>
-    </Draggable>
-  );
-};
-
-const VideoItem = ({
-  handleAddImage,
-  video,
-  shouldDisplayPreview,
-}: {
-  handleAddImage: (payload: Partial<IVideo>) => void;
-  video: Partial<IVideo>;
-  shouldDisplayPreview: boolean;
-}) => {
-  const style = React.useMemo(
-    () => ({
-      backgroundImage: `url(${video.preview})`,
-      backgroundSize: "cover",
-      width: "80px",
-      height: "80px",
-    }),
-    [video.preview],
-  );
-
-  return (
-    <Draggable
-      data={{
-        ...video,
-        metadata: {
-          previewUrl: video.preview,
-        },
-      }}
-      renderCustomPreview={<div style={style} className="draggable" />}
-      shouldDisplayPreview={shouldDisplayPreview}
-    >
-      <div
-        onClick={() =>
-          handleAddImage({
-            id: generateId(),
-            details: {
-              src: video.details!.src,
-            },
-            metadata: {
-              previewUrl: video.preview,
-            },
-          } as any)
-        }
-        className="flex w-full items-center justify-center overflow-hidden bg-background pb-2"
-      >
-        <img
-          draggable={false}
-          src={video.preview}
-          className="h-full w-full rounded-md object-cover"
-          alt="image"
-        />
       </div>
     </Draggable>
   );
