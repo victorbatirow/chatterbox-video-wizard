@@ -1,3 +1,4 @@
+
 import { useEffect, useRef, useState } from "react";
 import Header from "./header";
 import Ruler from "./ruler";
@@ -229,6 +230,25 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
     }
   };
 
+  // Add mouse wheel horizontal scrolling
+  const handleWheel = (e: React.WheelEvent) => {
+    // Check if shift is held or if it's a horizontal scroll
+    if (e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+      e.preventDefault();
+      const scrollAmount = e.deltaX || e.deltaY;
+      const currentScrollLeft = horizontalScrollbarVpRef.current?.scrollLeft || 0;
+      const newScrollLeft = currentScrollLeft + scrollAmount;
+      
+      if (horizontalScrollbarVpRef.current) {
+        horizontalScrollbarVpRef.current.scrollLeft = newScrollLeft;
+        setScrollLeft(newScrollLeft);
+        if (canvasRef.current) {
+          canvasRef.current.scrollTo({ scrollLeft: newScrollLeft });
+        }
+      }
+    }
+  };
+
   useEffect(() => {
     const addEvents = subject.pipe(
       filter(({ key }) => key.startsWith(TIMELINE_PREFIX)),
@@ -284,6 +304,7 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
       ref={timelineContainerRef}
       id={"timeline-container"}
       className="relative h-full w-full overflow-hidden bg-sidebar"
+      onWheel={handleWheel}
     >
       <Header />
       <Ruler onClick={onClickRuler} scrollLeft={scrollLeft} />
@@ -303,9 +324,10 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
             style={{
               position: "absolute",
               width: "calc(100vw - 40px)",
-              height: "10px",
+              height: "20px",
+              bottom: "0px",
             }}
-            className="ScrollAreaRootH"
+            className="ScrollAreaRootH bg-background/50 backdrop-blur-sm border-t border-border/50"
             onPointerDown={() => {
               canScrollRef.current = true;
             }}
@@ -326,12 +348,12 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
                       ? size.width + TIMELINE_OFFSET_CANVAS_RIGHT
                       : size.width,
                 }}
-                className="pointer-events-none h-[10px]"
+                className="pointer-events-none h-[20px]"
               ></div>
             </ScrollArea.Viewport>
 
             <ScrollArea.Scrollbar
-              className="ScrollAreaScrollbar"
+              className="ScrollAreaScrollbar bg-border/30 hover:bg-border/50 transition-colors"
               orientation="horizontal"
             >
               <ScrollArea.Thumb
@@ -341,7 +363,7 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
                 onMouseUp={() => {
                   canScrollRef.current = false;
                 }}
-                className="ScrollAreaThumb"
+                className="ScrollAreaThumb bg-foreground/30 hover:bg-foreground/50 transition-colors"
               />
             </ScrollArea.Scrollbar>
           </ScrollArea.Root>
@@ -351,9 +373,10 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
             style={{
               position: "absolute",
               height: canvasSize.height,
-              width: "10px",
+              width: "20px",
+              right: "0px",
             }}
-            className="ScrollAreaRootV"
+            className="ScrollAreaRootV bg-background/50 backdrop-blur-sm border-l border-border/50"
           >
             <ScrollArea.Viewport
               onScroll={handleOnScrollV}
@@ -367,11 +390,11 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
                       ? size.height + 40
                       : canvasSize.height,
                 }}
-                className="pointer-events-none w-[10px]"
+                className="pointer-events-none w-[20px]"
               ></div>
             </ScrollArea.Viewport>
             <ScrollArea.Scrollbar
-              className="ScrollAreaScrollbar"
+              className="ScrollAreaScrollbar bg-border/30 hover:bg-border/50 transition-colors"
               orientation="vertical"
             >
               <ScrollArea.Thumb
@@ -381,7 +404,7 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
                 onMouseUp={() => {
                   canScrollRef.current = false;
                 }}
-                className="ScrollAreaThumb"
+                className="ScrollAreaThumb bg-foreground/30 hover:bg-foreground/50 transition-colors"
               />
             </ScrollArea.Scrollbar>
           </ScrollArea.Root>
