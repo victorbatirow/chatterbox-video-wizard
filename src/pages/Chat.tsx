@@ -6,6 +6,8 @@ import VideoEditor from "@/components/VideoEditor";
 import ProjectMenu from "@/components/ProjectMenu";
 import SettingsDialog from "@/components/SettingsDialog";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+import useVideoStore from "@/stores/use-video-store";
+import useLayoutStore from "@/features/editor/store/use-layout-store";
 
 export interface VideoMessage {
   id: string;
@@ -36,6 +38,9 @@ const Chat = () => {
       timestamp: new Date(),
     },
   ]);
+
+  const { addChatVideo } = useVideoStore();
+  const { setActiveMenuItem, setShowMenuItem } = useLayoutStore();
 
   const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
 
@@ -98,9 +103,22 @@ const Chat = () => {
           timestamp: new Date(),
         };
 
-        // Add the video to videos list
+        // Add to local videos list
         setVideos(prev => [...prev, newVideo]);
         setCurrentVideoId(videoId);
+
+        // Add to shared video store for editor
+        addChatVideo({
+          id: videoId,
+          videoUrl: data.video_url,
+          prompt,
+          timestamp: new Date(),
+          preview: data.video_url // Use video URL as preview for now
+        });
+
+        // Switch to videos panel in editor
+        setActiveMenuItem("videos");
+        setShowMenuItem(true);
       }
 
       // Add AI response
