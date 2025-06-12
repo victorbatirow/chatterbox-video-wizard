@@ -1,4 +1,3 @@
-
 import {
   Popover,
   PopoverContent,
@@ -104,6 +103,7 @@ const CaptionColors = ({
                 ></div>
 
                 <Input
+                  variant="secondary"
                   className="pointer-events-none h-8 pl-10"
                   value={localAppearedColor}
                   onChange={() => {}}
@@ -143,6 +143,7 @@ const CaptionColors = ({
                 ></div>
 
                 <Input
+                  variant="secondary"
                   className="pointer-events-none h-8 pl-10"
                   value={localActiveColor}
                   onChange={() => {}}
@@ -182,6 +183,7 @@ const CaptionColors = ({
                 ></div>
 
                 <Input
+                  variant="secondary"
                   className="pointer-events-none h-8 pl-10"
                   value={localActiveFillColor}
                   onChange={() => {}}

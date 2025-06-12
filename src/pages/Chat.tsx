@@ -93,43 +93,8 @@ const Chat = () => {
 
       let videoId: string | undefined;
 
-      // Check if backend returned video URLs (new format with multiple videos)
-      if (data.video_urls && Array.isArray(data.video_urls) && data.video_urls.length > 0) {
-        // Process multiple videos
-        data.video_urls.forEach((videoUrl: string, index: number) => {
-          const currentVideoId = (Date.now() + index + 1000).toString();
-          const newVideo: VideoMessage = {
-            id: currentVideoId,
-            videoUrl: videoUrl,
-            prompt,
-            timestamp: new Date(),
-          };
-
-          // Add to local videos list
-          setVideos(prev => [...prev, newVideo]);
-
-          // Add to shared video store for editor
-          addChatVideo({
-            id: currentVideoId,
-            videoUrl: videoUrl,
-            prompt,
-            timestamp: new Date(),
-            preview: videoUrl // Use video URL as preview for now
-          });
-
-          // Set the first video as current
-          if (index === 0) {
-            videoId = currentVideoId;
-            setCurrentVideoId(currentVideoId);
-          }
-        });
-
-        // Switch to videos panel in editor
-        setActiveMenuItem("videos");
-        setShowMenuItem(true);
-      }
-      // Fallback: check for single video URL (old format)
-      else if (data.video_url) {
+      // Check if backend returned a video URL
+      if (data.video_url) {
         videoId = (Date.now() + 1000).toString();
         const newVideo: VideoMessage = {
           id: videoId,

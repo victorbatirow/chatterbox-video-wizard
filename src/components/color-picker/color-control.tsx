@@ -1,4 +1,3 @@
-
 import { FC, useEffect, useState } from "react";
 import tinycolor from "tinycolor2";
 import { checkFormat } from "./utils";
@@ -108,6 +107,7 @@ const InputRgba: FC<TProps> = ({
           </PopoverContent>
         </Popover>
         <Input
+          variant="secondary"
           value={color.hex}
           onChange={(e) => onChangeHex(onlyLatins(e.target.value))}
           onBlur={onHandleSubmit}
@@ -121,6 +121,7 @@ const InputRgba: FC<TProps> = ({
       </div>
       <div className="relative">
         <Input
+          variant="secondary"
           value={color.alpha}
           onChange={(e) => onChangeAlpha(onlyDigits(e.target.value))}
           onBlur={onHandleSubmit}

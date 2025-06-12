@@ -1,4 +1,3 @@
-
 import { Input } from "@/components/ui/input";
 
 import { Slider } from "@/components/ui/slider";
@@ -32,6 +31,7 @@ const Volume = ({
         }}
       >
         <Input
+          variant="secondary"
           className="h-8 w-11 px-2 text-center text-sm"
           type="number"
           onChange={(e) => {
