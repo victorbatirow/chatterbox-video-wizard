@@ -99,7 +99,8 @@ class Video extends VideoBase {
     this.transparentCorners = false;
     this.hasBorders = false;
 
-    this.previewUrl = props.metadata?.previewUrl;
+    // Use the preview URL from metadata if available, otherwise fallback to video src
+    this.previewUrl = props.metadata?.previewUrl || props.src;
     this.initOffscreenCanvas();
     this.initialize();
   }
@@ -202,7 +203,12 @@ class Video extends VideoBase {
     return new Promise<void>((resolve) => {
       const img = new Image();
       img.crossOrigin = "anonymous";
-      img.src = fallbackThumbnail + "?t=" + Date.now();
+      
+      // For generated videos, try to use the preview URL directly
+      // For other videos, append timestamp to avoid cache issues
+      const imageUrl = this.metadata?.prompt ? fallbackThumbnail : fallbackThumbnail + "?t=" + Date.now();
+      img.src = imageUrl;
+      
       img.onload = () => {
         // Create a temporary canvas to resize the image
         const canvas = document.createElement("canvas");
@@ -226,6 +232,61 @@ class Video extends VideoBase {
         this.thumbnailCache.setThumbnail("fallback", resizedImg);
         resolve();
       };
+      
+      img.onerror = () => {
+        // If preview image fails, try to use a frame from the video
+        this.loadVideoFrameAsFallback().then(resolve).catch(() => resolve());
+      };
+    });
+  }
+
+  private async loadVideoFrameAsFallback(): Promise<void> {
+    return new Promise((resolve) => {
+      const video = document.createElement('video');
+      video.crossOrigin = 'anonymous';
+      video.src = this.src;
+      video.muted = true;
+      
+      video.addEventListener('loadeddata', () => {
+        video.currentTime = 1; // Seek to 1 second for a good frame
+      });
+      
+      video.addEventListener('seeked', () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d')!;
+        
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0);
+        
+        // Calculate new width maintaining aspect ratio
+        const aspectRatio = video.videoWidth / video.videoHeight;
+        const targetHeight = 40;
+        const targetWidth = Math.round(targetHeight * aspectRatio);
+        
+        // Create resized canvas
+        const resizedCanvas = document.createElement('canvas');
+        const resizedCtx = resizedCanvas.getContext('2d')!;
+        resizedCanvas.height = targetHeight;
+        resizedCanvas.width = targetWidth;
+        
+        resizedCtx.drawImage(canvas, 0, 0, targetWidth, targetHeight);
+        
+        // Create new image from resized canvas
+        const resizedImg = new Image();
+        resizedImg.src = resizedCanvas.toDataURL();
+        
+        // Update aspect ratio and cache the resized image
+        this.aspectRatio = aspectRatio;
+        this.thumbnailWidth = targetWidth;
+        this.thumbnailCache.setThumbnail("fallback", resizedImg);
+        
+        resolve();
+      });
+      
+      video.addEventListener('error', () => {
+        resolve(); // Resolve even on error to prevent hanging
+      });
     });
   }
 
