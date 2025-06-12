@@ -8,22 +8,7 @@ export default function MenuList() {
     useLayoutStore();
   return (
     <div className="flex w-14 flex-col items-center gap-1 border-r border-border/80 py-2">
-      <Button
-        onClick={() => {
-          setActiveMenuItem("texts");
-          setShowMenuItem(true);
-        }}
-        className={cn(
-          showMenuItem && activeMenuItem === "texts"
-            ? "bg-secondary"
-            : "text-muted-foreground",
-        )}
-        variant={"ghost"}
-        size={"icon"}
-      >
-        <Icons.type width={16} />
-      </Button>
-
+      {/* Videos moved to the top */}
       <Button
         onClick={() => {
           setActiveMenuItem("videos");
@@ -38,6 +23,22 @@ export default function MenuList() {
         size={"icon"}
       >
         <Icons.video width={16} />
+      </Button>
+
+      <Button
+        onClick={() => {
+          setActiveMenuItem("texts");
+          setShowMenuItem(true);
+        }}
+        className={cn(
+          showMenuItem && activeMenuItem === "texts"
+            ? "bg-secondary"
+            : "text-muted-foreground",
+        )}
+        variant={"ghost"}
+        size={"icon"}
+      >
+        <Icons.type width={16} />
       </Button>
 
       <Button
