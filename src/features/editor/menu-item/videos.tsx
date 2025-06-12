@@ -26,12 +26,12 @@ export const Videos = () => {
   };
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex flex-1 flex-col h-full">
       <div className="text-text-primary flex h-12 flex-none items-center px-4 text-sm font-medium">
         Videos
       </div>
-      <ScrollArea>
-        <div className="px-4">
+      <ScrollArea className="flex-1">
+        <div className="px-4 pb-4">
           {/* Chat Generated Videos Section */}
           {chatVideos.length > 0 && (
             <>
