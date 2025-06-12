@@ -1,4 +1,5 @@
 
+
 import {
   Audio as AudioBase,
   AudioProps,
@@ -41,7 +42,7 @@ class Audio extends AudioBase {
     this.initialize();
   }
 
-  // Update the _render method to remove the infinite render loop
+  // Fixed render method to prevent visual glitching
   public _render(ctx: CanvasRenderingContext2D) {
     super._render(ctx);
     this.drawTextIdentity(ctx);
@@ -55,26 +56,42 @@ class Audio extends AudioBase {
     ctx.rect(0, 0, this.width, this.height);
     ctx.clip();
 
-    this.renderToOffscreen();
-
-    // Draw only the visible portion
-    const displayFromInUnits = timeMsToUnits(this.display!.from, this.tScale);
-    const scrollLeft = this.scrollLeft + displayFromInUnits;
-    const visibleStart = Math.max(0, -scrollLeft) - CANVAS_SAFE_DRAWING;
-    ctx.drawImage(
-      this.offscreenCanvas!,
-      0,
-      0,
-      this.offscreenCanvas!.width,
-      this.height,
-      visibleStart,
-      0,
-      this.offscreenCanvas!.width,
-      this.height,
-    );
+    // Draw the waveform directly instead of using offscreen canvas
+    this.drawWaveform(ctx);
 
     ctx.restore();
-    // Removed the requestRenderAll() call that was causing infinite render loop
+  }
+
+  private drawWaveform(ctx: CanvasRenderingContext2D) {
+    if (!this.bars || this.bars.length === 0) return;
+
+    // Calculate the offset caused by trimming
+    const trimFromSize = timeMsToUnits(
+      this.trim.from,
+      this.tScale,
+      this.playbackRate,
+    );
+
+    ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+    ctx.imageSmoothingEnabled = false;
+
+    // Draw waveform bars directly
+    ctx.beginPath();
+    const barWidth = 4; // 1px bar + 3px space
+    
+    for (let i = 0; i < this.bars.length; i++) {
+      const bar = this.bars[i];
+      if (bar) {
+        const x = Math.round(i * barWidth - trimFromSize);
+        if (x >= -barWidth && x < this.width + barWidth) {
+          const amplitude = bar.amplitude || 0;
+          const height = Math.round(amplitude * 15);
+          const y = Math.round((20 - height) / 2 + 8);
+          ctx.rect(x, y, 1, height);
+        }
+      }
+    }
+    ctx.fill();
   }
 
   private async initialize() {
@@ -109,7 +126,6 @@ class Audio extends AudioBase {
       numberOfSamples: Math.round(durationInUnits / 4),
     });
 
-    // Cache the result
     return bars;
   }
 
@@ -170,79 +186,26 @@ class Audio extends AudioBase {
 
   public calculateOffscreenWidth({ scrollLeft }: { scrollLeft: number }) {
     const offscreenWidth = Math.min(this.left + scrollLeft, 0);
-
     return Math.abs(offscreenWidth);
   }
 
   public onScrollChange({ scrollLeft }: { scrollLeft: number }) {
     this.scrollLeft = scrollLeft;
-    this.isDirty = true; // Mark as dirty after preparing new thumbnails
+    this.isDirty = true;
   }
 
+  // Simplified method - no longer needed for offscreen rendering
   public renderToOffscreen(force?: boolean) {
-    if (!this.offscreenCtx) return;
-    if (!this.isDirty && !force) return;
-
-    this.offscreenCanvas!.width = MAX_CANVAS_WIDTH;
-    this.offscreenCanvas!.height = this.height;
-
-    const ctx = this.offscreenCtx;
-    // Calculate visible range
-    const displayFromInUnits = timeMsToUnits(this.display!.from, this.tScale);
-    const scrollLeft = this.scrollLeft + displayFromInUnits;
-    // Calculate the offset caused by the trimming
-    const trimFromSize = timeMsToUnits(
-      this.trim.from,
-      this.tScale,
-      this.playbackRate,
-    );
-    const visibleStart =
-      Math.max(0, -scrollLeft) - CANVAS_SAFE_DRAWING + trimFromSize;
-    const visibleWidth = MAX_CANVAS_WIDTH;
-
-    const bars = this.bars;
-    if (!bars) return;
-
-    // Clear the offscreen canvas
-    ctx.clearRect(0, 0, this.offscreenCanvas!.width, this.height);
-
-    // Clip with rounded corners
-    ctx.beginPath();
-    ctx.roundRect(0, 0, this.offscreenCanvas!.width, this.height, this.rx);
-    ctx.clip();
-
-    // Draw waveform
-    ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-    ctx.imageSmoothingEnabled = false;
-
-    // Calculate which bars are visible
-    const barWidth = 4; // 1px bar + 3px space
-    let startBarIndex = Math.floor(visibleStart / barWidth);
-    let endBarIndex = Math.ceil((visibleStart + visibleWidth) / barWidth);
-    // Only draw visible bars
-    ctx.beginPath();
-    for (let i = startBarIndex; i < endBarIndex && i < bars.length; i++) {
-      const bar = bars[i];
-      if (bar) {
-        const x = Math.round(i * barWidth - visibleStart);
-        if (x >= 0 && x < this.offscreenCanvas!.width) {
-          const amplitude = bar.amplitude || 0;
-          const height = Math.round(amplitude * 15);
-          const y = Math.round((20 - height) / 2 + 8);
-          ctx.rect(x, y, 1, height);
-        }
-      }
-    }
-    ctx.fill();
+    // This method is kept for compatibility but no longer used
     this.isDirty = false;
   }
 
   public onResizeSnap() {
-    this.renderToOffscreen(true);
+    this.canvas?.requestRenderAll();
   }
 
   public onResize() {
-    this.renderToOffscreen(true);
+    this.canvas?.requestRenderAll();
   }
 
   public onScale() {
@@ -252,3 +215,4 @@ class Audio extends AudioBase {
 }
 
 export default Audio;
+
