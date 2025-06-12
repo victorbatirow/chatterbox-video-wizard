@@ -1,4 +1,5 @@
 
+
 import { useEffect, useRef, useState } from "react";
 import Header from "./header";
 import Ruler from "./ruler";
@@ -215,11 +216,20 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
 
   const handleOnScrollH = (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
     const scrollLeft = e.currentTarget.scrollLeft;
-    if (canScrollRef.current) {
-      const canvas = canvasRef.current!;
-      canvas.scrollTo({ scrollLeft });
+    
+    // Enforce scroll boundaries
+    const maxScrollLeft = Math.max(0, size.width - canvasSize.width + TIMELINE_OFFSET_CANVAS_RIGHT);
+    const constrainedScrollLeft = Math.max(0, Math.min(scrollLeft, maxScrollLeft));
+    
+    if (constrainedScrollLeft !== scrollLeft) {
+      e.currentTarget.scrollLeft = constrainedScrollLeft;
+      return;
     }
-    setScrollLeft(scrollLeft);
+    
+    if (canScrollRef.current && canvasRef.current) {
+      canvasRef.current.scrollTo({ scrollLeft: constrainedScrollLeft });
+    }
+    setScrollLeft(constrainedScrollLeft);
   };
 
   const handleOnScrollV = (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
@@ -227,25 +237,6 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
     if (canScrollRef.current) {
       const canvas = canvasRef.current!;
       canvas.scrollTo({ scrollTop });
-    }
-  };
-
-  // Add mouse wheel horizontal scrolling
-  const handleWheel = (e: React.WheelEvent) => {
-    // Check if shift is held or if it's a horizontal scroll
-    if (e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
-      e.preventDefault();
-      const scrollAmount = e.deltaX || e.deltaY;
-      const currentScrollLeft = horizontalScrollbarVpRef.current?.scrollLeft || 0;
-      const newScrollLeft = currentScrollLeft + scrollAmount;
-      
-      if (horizontalScrollbarVpRef.current) {
-        horizontalScrollbarVpRef.current.scrollLeft = newScrollLeft;
-        setScrollLeft(newScrollLeft);
-        if (canvasRef.current) {
-          canvasRef.current.scrollTo({ scrollLeft: newScrollLeft });
-        }
-      }
     }
   };
 
@@ -299,12 +290,17 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
     }
   }, [scale]);
 
+  // Calculate the actual timeline content width
+  const timelineContentWidth = Math.max(
+    size.width + TIMELINE_OFFSET_CANVAS_RIGHT,
+    canvasSize.width
+  );
+
   return (
     <div
       ref={timelineContainerRef}
       id={"timeline-container"}
       className="relative h-full w-full overflow-hidden bg-sidebar"
-      onWheel={handleWheel}
     >
       <Header />
       <Ruler onClick={onClickRuler} scrollLeft={scrollLeft} />
@@ -323,9 +319,10 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
             type="always"
             style={{
               position: "absolute",
-              width: "calc(100vw - 40px)",
+              width: `${canvasSize.width}px`,
               height: "20px",
               bottom: "0px",
+              left: "0px",
             }}
             className="ScrollAreaRootH bg-background/50 backdrop-blur-sm border-t border-border/50"
             onPointerDown={() => {
@@ -343,10 +340,7 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
             >
               <div
                 style={{
-                  width:
-                    size.width > canvasSize.width
-                      ? size.width + TIMELINE_OFFSET_CANVAS_RIGHT
-                      : size.width,
+                  width: timelineContentWidth,
                 }}
                 className="pointer-events-none h-[20px]"
               ></div>
@@ -415,3 +409,4 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
 };
 
 export default Timeline;
+
