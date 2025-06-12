@@ -1,3 +1,4 @@
+
 import {
   Audio as AudioBase,
   AudioProps,
@@ -40,7 +41,7 @@ class Audio extends AudioBase {
     this.initialize();
   }
 
-  // Update the _render method to handle the visible portion
+  // Update the _render method to remove the infinite render loop
   public _render(ctx: CanvasRenderingContext2D) {
     super._render(ctx);
     this.drawTextIdentity(ctx);
@@ -73,7 +74,7 @@ class Audio extends AudioBase {
     );
 
     ctx.restore();
-    this.canvas?.requestRenderAll();
+    // Removed the requestRenderAll() call that was causing infinite render loop
   }
 
   private async initialize() {
