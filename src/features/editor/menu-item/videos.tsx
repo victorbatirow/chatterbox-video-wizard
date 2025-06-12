@@ -81,6 +81,7 @@ const ChatVideoItem = ({
   return (
     <Draggable
       data={{
+        type: "video",
         details: {
           src: video.videoUrl,
         },
