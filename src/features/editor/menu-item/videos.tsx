@@ -48,9 +48,9 @@ export const Videos = () => {
               </div>
             </>
           ) : (
-            <div className="flex flex-col items-center justify-center h-32 text-text-secondary">
-              <div className="text-sm">No videos generated yet</div>
-              <div className="text-xs mt-1">Generate videos from the chat to see them here</div>
+            <div className="flex flex-col items-center justify-center h-32 text-muted-foreground">
+              <div className="text-sm text-center">No videos generated yet</div>
+              <div className="text-xs mt-1 text-center">Generate videos from chat to see them here</div>
             </div>
           )}
         </div>
