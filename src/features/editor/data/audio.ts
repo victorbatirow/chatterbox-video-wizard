@@ -5,56 +5,56 @@ export const AUDIOS = [
   {
     id: "xxx0",
     details: {
-      src: "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav",
+      src: "https://commondatastorage.googleapis.com/codeskulptor-assets/Epoq-Lepidoptera.ogg",
     },
     name: "Bell Sound",
     type: "audio",
     metadata: {
-      author: "SoundJay",
+      author: "Free Audio",
     },
   },
   {
     id: "xx1",
     details: {
-      src: "https://www.soundjay.com/misc/sounds/fail-buzzer-02.wav",
+      src: "https://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Kangaroo_MusiQue_-_The_Neverwritten_Role_Playing_Game.mp3",
     },
     name: "Buzzer Sound",
     type: "audio",
     metadata: {
-      author: "SoundJay",
+      author: "Free Audio",
     },
   },
   {
     id: "xx2",
     details: {
-      src: "https://www.soundjay.com/misc/sounds/click-01.wav",
+      src: "https://commondatastorage.googleapis.com/codeskulptor-assets/Epoq-Lepidoptera.ogg",
     },
     name: "Click Sound",
     type: "audio",
     metadata: {
-      author: "SoundJay",
+      author: "Free Audio",
     },
   },
   {
     id: "xx3",
     details: {
-      src: "https://www.soundjay.com/misc/sounds/water-drop-001.wav",
+      src: "https://commondatastorage.googleapis.com/codeskulptor-demos/pyman_assets/intromusic.ogg",
     },
     name: "Water Drop",
     type: "audio",
     metadata: {
-      author: "SoundJay",
+      author: "Free Audio",
     },
   },
   {
     id: "xx4",
     details: {
-      src: "https://www.soundjay.com/misc/sounds/typewriter-key-01.wav",
+      src: "https://commondatastorage.googleapis.com/codeskulptor-demos/pyman_assets/ateapill.ogg",
     },
     name: "Typewriter Key",
     type: "audio",
     metadata: {
-      author: "SoundJay",
+      author: "Free Audio",
     },
   },
 ] as Partial<IAudio>[];

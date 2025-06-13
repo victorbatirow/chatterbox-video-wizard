@@ -114,7 +114,7 @@ const FontBackground = ({
 
               <Input
                 variant="outline"
-                type="number"
+                type="text"
                 value={localValue}
                 onChange={() => {}}
               />
@@ -180,7 +180,7 @@ const FontColor = ({
 
               <Input
                 variant="outline"
-                type="number"
+                type="text"
                 value={localValue}
                 onChange={() => {}}
               />
