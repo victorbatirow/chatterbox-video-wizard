@@ -68,34 +68,44 @@ const Ruler = (props: RulerProps) => {
     if (canvas && fontLoaded) {
       const context = canvas.getContext("2d");
       setCanvasContext(context);
-      resize(canvas, context);
+      
+      // Initialize canvas size
+      if (context) {
+        const offsetParent = canvas.offsetParent as HTMLDivElement;
+        const width = offsetParent?.offsetWidth ?? canvas.offsetWidth;
+        canvas.width = width;
+        canvas.height = height;
+        setCanvasSize({ width, height });
+        
+        // Draw with current scale
+        draw(context, scrollPos, width, height, scale);
+      }
     }
-  }, [fontLoaded]);
+  }, [fontLoaded, height, scrollPos, scale]);
 
-  const resize = useCallback((
-    canvas: HTMLCanvasElement | null,
-    context: CanvasRenderingContext2D | null,
-  ) => {
-    if (!canvas || !context || !fontLoaded) return;
+  const resize = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !canvasContext || !fontLoaded) return;
 
     const offsetParent = canvas.offsetParent as HTMLDivElement;
     const width = offsetParent?.offsetWidth ?? canvas.offsetWidth;
-    const height = canvasSize.height;
+    const canvasHeight = canvasSize.height;
 
-    canvas.width = width;
-    canvas.height = height;
-
-    // Get the current scale from the store
-    const currentScale = useStore.getState().scale;
-    draw(context, scrollPos, width, height, currentScale);
-    setCanvasSize({ width, height });
-  }, [fontLoaded, canvasSize.height, scrollPos]);
+    // Only update canvas size if it actually changed
+    if (canvas.width !== width || canvas.height !== canvasHeight) {
+      canvas.width = width;
+      canvas.height = canvasHeight;
+      setCanvasSize({ width, height: canvasHeight });
+      
+      // Redraw with the current scale from store
+      const currentScale = useStore.getState().scale;
+      draw(canvasContext, scrollPos, width, canvasHeight, currentScale);
+    }
+  }, [canvasContext, fontLoaded, canvasSize.height, scrollPos]);
 
   const handleResize = useCallback(() => {
-    if (fontLoaded && canvasContext) {
-      resize(canvasRef.current, canvasContext);
-    }
-  }, [resize, canvasContext, fontLoaded]);
+    resize();
+  }, [resize]);
 
   // Listen to both window resize and timeline container resize
   useEffect(() => {
@@ -126,7 +136,7 @@ const Ruler = (props: RulerProps) => {
     };
   }, [handleResize]);
 
-  // Effect for scale changes - redraw with new scale
+  // Effect for scale and scroll changes - only redraw, don't resize
   useEffect(() => {
     if (canvasContext && fontLoaded) {
       const canvas = canvasRef.current;
