@@ -11,10 +11,11 @@ import useVideoStore from "@/stores/use-video-store";
 
 export const Videos = () => {
   const isDraggingOverTimeline = useIsDraggingOverTimeline();
-  const { chatVideos } = useVideoStore();
+  const { chatVideos, highlightedVideoIds } = useVideoStore();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   console.log('Videos component: chatVideos from store', chatVideos);
+  console.log('Videos component: highlightedVideoIds', highlightedVideoIds);
 
   const handleAddVideo = (payload: Partial<IVideo>) => {
     console.log('Videos component: Adding video to timeline', payload);
@@ -31,12 +32,15 @@ export const Videos = () => {
   useEffect(() => {
     const handleHighlightVideos = (event: CustomEvent<{ videoIds: string[] }>) => {
       const { videoIds } = event.detail;
-      console.log('Received highlight event for videos:', videoIds);
+      console.log('Videos component: Received highlight event for videos:', videoIds);
       
       // Find the first video to scroll to
       if (videoIds.length > 0 && scrollAreaRef.current) {
         const firstVideoId = videoIds[0];
         const videoElement = document.querySelector(`[data-video-id="${firstVideoId}"]`);
+        
+        console.log('Videos component: Looking for video element with ID:', firstVideoId);
+        console.log('Videos component: Found video element:', videoElement);
         
         if (videoElement) {
           videoElement.scrollIntoView({ 
@@ -75,6 +79,7 @@ export const Videos = () => {
                     video={video}
                     shouldDisplayPreview={!isDraggingOverTimeline}
                     handleAddVideo={handleAddVideo}
+                    isHighlighted={highlightedVideoIds.includes(video.id)}
                   />
                 ))}
               </div>
@@ -95,10 +100,12 @@ const ChatVideoItem = ({
   handleAddVideo,
   video,
   shouldDisplayPreview,
+  isHighlighted,
 }: {
   handleAddVideo: (payload: Partial<IVideo>) => void;
   video: any;
   shouldDisplayPreview: boolean;
+  isHighlighted?: boolean;
 }) => {
   const style = React.useMemo(
     () => ({
@@ -144,7 +151,9 @@ const ChatVideoItem = ({
             },
           } as any)
         }
-        className="flex w-full flex-col items-center justify-center overflow-hidden bg-background pb-2 transition-all duration-300"
+        className={`flex w-full flex-col items-center justify-center overflow-hidden bg-background pb-2 transition-all duration-300 ${
+          isHighlighted ? "ring-2 ring-purple-400 bg-purple-100/10" : ""
+        }`}
       >
         <video
           src={video.videoUrl}

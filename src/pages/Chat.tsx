@@ -200,15 +200,21 @@ const Chat = () => {
   };
 
   const handleMessageClick = (message: Message) => {
+    console.log('Chat: handleMessageClick called with message:', message.id, message.videoIds);
+    
     // Only handle clicks on AI messages that have videos
     if (!message.isUser && message.videoIds && message.videoIds.length > 0) {
-      console.log('Message clicked, highlighting videos:', message.videoIds);
+      console.log('Chat: Message clicked, highlighting videos:', message.videoIds);
       
       // Switch to videos panel if not already active
       setActiveMenuItem("videos");
       setShowMenuItem(true);
       
-      // Highlight the videos from this message
+      // Use the scrollToVideos function from the store to handle highlighting and scrolling
+      const { scrollToVideos } = useVideoStore.getState();
+      scrollToVideos(message.videoIds);
+      
+      // Also set local state for highlighting
       setHighlightedVideoIds(message.videoIds);
       
       // Clear highlight after 3 seconds

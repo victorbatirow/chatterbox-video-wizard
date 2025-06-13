@@ -7,6 +7,7 @@ interface Message {
   isUser: boolean;
   timestamp: Date;
   videoId?: string;
+  videoIds?: string[]; // Add array to track multiple videos per message
 }
 
 interface MessageBubbleProps {
@@ -16,6 +17,13 @@ interface MessageBubbleProps {
 }
 
 const MessageBubble = ({ message, onClick, hasVideo }: MessageBubbleProps) => {
+  const handleClick = () => {
+    console.log('MessageBubble clicked:', message.id, 'hasVideo:', hasVideo, 'videoIds:', message.videoIds);
+    if (onClick) {
+      onClick();
+    }
+  };
+
   return (
     <div className={`flex ${message.isUser ? "justify-end" : "justify-start"}`}>
       <div 
@@ -26,7 +34,7 @@ const MessageBubble = ({ message, onClick, hasVideo }: MessageBubbleProps) => {
         } rounded-2xl px-4 py-3 ${
           hasVideo ? "cursor-pointer hover:bg-white/20 transition-colors" : ""
         }`}
-        onClick={onClick}
+        onClick={handleClick}
       >
         <div className="flex items-start gap-2">
           {hasVideo && (

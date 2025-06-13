@@ -85,10 +85,14 @@ const ChatInterface = ({
   };
 
   const handleMessageBubbleClick = (message: Message) => {
+    console.log('ChatInterface: Message clicked', message.id, message.videoIds);
+    
     // Check if message has videos and call the message click handler
     if (message.videoIds && message.videoIds.length > 0) {
+      console.log('ChatInterface: Calling onMessageClick with videoIds:', message.videoIds);
       onMessageClick(message);
     } else if (message.videoId) {
+      console.log('ChatInterface: Single video ID found:', message.videoId);
       onVideoSelect(message.videoId);
     }
   };
@@ -143,7 +147,7 @@ const ChatInterface = ({
 
       {/* Input */}
       <div className="p-6">
-        <div className="w-full bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
+        <div className="w-full bg-white/5 backdrop-blur-sm rounded-2xl p-4">
           <div className="w-full">
             <Textarea
               ref={textareaRef}
