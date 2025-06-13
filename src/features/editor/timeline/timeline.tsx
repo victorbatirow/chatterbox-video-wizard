@@ -1,3 +1,5 @@
+
+
 import { useEffect, useRef, useState } from "react";
 import Header from "./header";
 import Ruler from "./ruler";
@@ -98,30 +100,6 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
     });
   };
 
-  const updateTimelineSize = () => {
-    const canvasEl = canvasElRef.current;
-    const timelineContainerEl = timelineContainerRef.current;
-
-    if (!canvasEl || !timelineContainerEl || !canvasRef.current) return;
-
-    const containerWidth = timelineContainerEl.clientWidth - 40;
-    const containerHeight = timelineContainerEl.clientHeight - 90;
-
-    // Update canvas size
-    setCanvasSize({ width: containerWidth, height: containerHeight });
-    
-    // Resize the timeline canvas
-    canvasRef.current.resize(
-      {
-        width: containerWidth,
-        height: containerHeight,
-      },
-      {
-        force: true,
-      },
-    );
-  };
-
   useEffect(() => {
     const canvasEl = canvasElRef.current;
     const timelineContainerEl = timelineContainerRef.current;
@@ -178,15 +156,6 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
     });
     setTimeline(canvas);
 
-    // Add resize observer to handle container size changes
-    const resizeObserver = new ResizeObserver(() => {
-      updateTimelineSize();
-    });
-
-    if (timelineContainerEl) {
-      resizeObserver.observe(timelineContainerEl);
-    }
-
     const resizeDesignSubscription = stateManager.subscribeToSize(
       (newState) => {
         setState(newState);
@@ -235,7 +204,6 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
 
     return () => {
       canvas.purge();
-      resizeObserver.disconnect();
       scaleSubscription.unsubscribe();
       tracksSubscription.unsubscribe();
       durationSubscription.unsubscribe();
@@ -249,12 +217,8 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
   const handleOnScrollH = (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
     const scrollLeft = e.currentTarget.scrollLeft;
     
-    // Calculate max scroll based on actual content width
-    const timelineContentWidth = Math.max(
-      size.width + TIMELINE_OFFSET_CANVAS_RIGHT,
-      canvasSize.width
-    );
-    const maxScrollLeft = Math.max(0, timelineContentWidth - canvasSize.width);
+    // Enforce scroll boundaries
+    const maxScrollLeft = Math.max(0, size.width - canvasSize.width + TIMELINE_OFFSET_CANVAS_RIGHT);
     const constrainedScrollLeft = Math.max(0, Math.min(scrollLeft, maxScrollLeft));
     
     if (constrainedScrollLeft !== scrollLeft) {
@@ -276,22 +240,14 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
     }
   };
 
-  // Enhanced mouse wheel horizontal scrolling
+  // Add mouse wheel horizontal scrolling that works anywhere in the timeline
   const handleWheel = (e: React.WheelEvent) => {
     // Check if shift is held or if it's a horizontal scroll
     if (e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
       e.preventDefault();
-      e.stopPropagation();
-      
       const scrollAmount = e.deltaX || e.deltaY;
       const currentScrollLeft = horizontalScrollbarVpRef.current?.scrollLeft || 0;
-      
-      // Calculate max scroll based on actual content width
-      const timelineContentWidth = Math.max(
-        size.width + TIMELINE_OFFSET_CANVAS_RIGHT,
-        canvasSize.width
-      );
-      const maxScrollLeft = Math.max(0, timelineContentWidth - canvasSize.width);
+      const maxScrollLeft = Math.max(0, size.width - canvasSize.width + TIMELINE_OFFSET_CANVAS_RIGHT);
       const newScrollLeft = Math.max(0, Math.min(currentScrollLeft + scrollAmount, maxScrollLeft));
       
       if (horizontalScrollbarVpRef.current) {
@@ -354,7 +310,7 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
     }
   }, [scale]);
 
-  // Calculate the actual timeline content width based on current size
+  // Calculate the actual timeline content width
   const timelineContentWidth = Math.max(
     size.width + TIMELINE_OFFSET_CANVAS_RIGHT,
     canvasSize.width
@@ -389,7 +345,7 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
               bottom: "0px",
               left: "0px",
             }}
-            className="ScrollAreaRootH overflow-hidden"
+            className="ScrollAreaRootH"
             onPointerDown={() => {
               canScrollRef.current = true;
             }}
@@ -399,10 +355,10 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
           >
             <ScrollArea.Viewport
               onScroll={handleOnScrollH}
-              className="ScrollAreaViewport overflow-hidden"
+              className="ScrollAreaViewport"
               id="viewportH"
               ref={horizontalScrollbarVpRef}
-              style={{ height: "12px", width: `${canvasSize.width}px` }}
+              style={{ height: "12px" }}
             >
               <div
                 style={{
@@ -414,7 +370,7 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
             </ScrollArea.Viewport>
 
             <ScrollArea.Scrollbar
-              className="ScrollAreaScrollbar bg-transparent hover:bg-transparent transition-colors h-3 overflow-hidden"
+              className="ScrollAreaScrollbar bg-transparent hover:bg-transparent transition-colors h-3"
               orientation="horizontal"
             >
               <ScrollArea.Thumb
@@ -437,13 +393,13 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
               width: "12px",
               right: "0px",
             }}
-            className="ScrollAreaRootV overflow-hidden"
+            className="ScrollAreaRootV"
           >
             <ScrollArea.Viewport
               onScroll={handleOnScrollV}
-              className="ScrollAreaViewport overflow-hidden"
+              className="ScrollAreaViewport"
               ref={verticalScrollbarVpRef}
-              style={{ width: "12px", height: `${canvasSize.height}px` }}
+              style={{ width: "12px" }}
             >
               <div
                 style={{
@@ -457,7 +413,7 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
               ></div>
             </ScrollArea.Viewport>
             <ScrollArea.Scrollbar
-              className="ScrollAreaScrollbar bg-transparent hover:bg-transparent transition-colors w-3 overflow-hidden"
+              className="ScrollAreaScrollbar bg-transparent hover:bg-transparent transition-colors w-3"
               orientation="vertical"
             >
               <ScrollArea.Thumb
@@ -478,3 +434,4 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
 };
 
 export default Timeline;
+
