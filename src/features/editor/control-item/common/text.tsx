@@ -113,8 +113,8 @@ const FontBackground = ({
               ></div>
 
               <Input
-                variant="secondary"
-                className="pointer-events-none h-8 pl-10"
+                variant="outline"
+                type="number"
                 value={localValue}
                 onChange={() => {}}
               />
@@ -179,8 +179,8 @@ const FontColor = ({
               ></div>
 
               <Input
-                variant="secondary"
-                className="pointer-events-none h-8 pl-10"
+                variant="outline"
+                type="number"
                 value={localValue}
                 onChange={() => {}}
               />
@@ -252,7 +252,8 @@ const FontSize = ({
       </div>
       <div className="relative w-32">
         <Input
-          variant="secondary"
+          variant="outline"
+          type="number"
           className="h-8"
           value={localValue}
           onChange={(e) => {

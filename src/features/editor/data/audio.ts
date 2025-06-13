@@ -1,60 +1,60 @@
+
 import { IAudio } from "@designcombo/types";
 
 export const AUDIOS = [
-  // https://ik.imagekit.io/pablituuu/like_a_player.mp3?updatedAt=1722278521488
   {
     id: "xxx0",
     details: {
-      src: "https://cdn.designcombo.dev/audio/OpenAI%20CEO%20on%20Artificial%20Intelligence%20Changing%20Society.mp3",
+      src: "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav",
     },
-    name: "Open AI",
+    name: "Bell Sound",
     type: "audio",
     metadata: {
-      author: "Open AI",
+      author: "SoundJay",
     },
   },
   {
     id: "xx1",
     details: {
-      src: "https://cdn.designcombo.dev/audio/Dawn%20of%20change.mp3",
+      src: "https://www.soundjay.com/misc/sounds/fail-buzzer-02.wav",
     },
-    name: "Dawn of change",
+    name: "Buzzer Sound",
     type: "audio",
     metadata: {
-      author: "Roman Senyk",
+      author: "SoundJay",
     },
   },
   {
     id: "xx2",
     details: {
-      src: "https://cdn.designcombo.dev/audio/Hope.mp3",
+      src: "https://www.soundjay.com/misc/sounds/click-01.wav",
     },
-    name: "Hope",
+    name: "Click Sound",
     type: "audio",
     metadata: {
-      author: "Hugo Dujardin",
+      author: "SoundJay",
     },
   },
   {
     id: "xx3",
     details: {
-      src: "https://cdn.designcombo.dev/audio/Tenderness.mp3",
+      src: "https://www.soundjay.com/misc/sounds/water-drop-001.wav",
     },
-    name: "Tenderness",
+    name: "Water Drop",
     type: "audio",
     metadata: {
-      author: "Benjamin Tissot",
+      author: "SoundJay",
     },
   },
   {
     id: "xx4",
     details: {
-      src: "https://cdn.designcombo.dev/audio/Piano%20Moment.mp3",
+      src: "https://www.soundjay.com/misc/sounds/typewriter-key-01.wav",
     },
-    name: "Piano moment",
+    name: "Typewriter Key",
     type: "audio",
     metadata: {
-      author: "Benjamin Tissot",
+      author: "SoundJay",
     },
   },
 ] as Partial<IAudio>[];
