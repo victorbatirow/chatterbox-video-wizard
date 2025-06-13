@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -127,7 +128,7 @@ const ChatInterface = ({ onSendMessage, onGenerateVideo, onVideoSelect, isGenera
       )}
 
       {/* Input */}
-      <div className="p-6 border-t border-white/10">
+      <div className="p-6">
         <div className="w-full bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
           <div className="w-full">
             <Textarea
@@ -136,7 +137,6 @@ const ChatInterface = ({ onSendMessage, onGenerateVideo, onVideoSelect, isGenera
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Type your message here..."
-              disabled={isGenerating}
               className="bg-transparent border-none text-white placeholder:text-white/40 w-full resize-none p-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-base"
               style={{
                 minHeight: '24px',
@@ -163,7 +163,6 @@ const ChatInterface = ({ onSendMessage, onGenerateVideo, onVideoSelect, isGenera
             </Button>
           </div>
         </div>
-        <p className="text-xs text-white/40 mt-2">Press Enter to send, Shift+Enter for new line</p>
       </div>
     </div>
   );
