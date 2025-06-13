@@ -26,11 +26,11 @@ interface RulerProps {
 
 const Ruler = (props: RulerProps) => {
   const {
-    height = 40,
+    height = 40, // Increased height to give space for the text
     longLineSize = 8,
     shortLineSize = 10,
     offsetX = TIMELINE_OFFSET_X + TIMELINE_OFFSET_CANVAS_LEFT,
-    textOffsetY = 17,
+    textOffsetY = 17, // Place the text above the lines but inside the canvas
     textFormat = formatTimelineUnit,
     scrollLeft: scrollPos = 0,
     onClick,
@@ -41,7 +41,7 @@ const Ruler = (props: RulerProps) => {
     useState<CanvasRenderingContext2D | null>(null);
   const [canvasSize, setCanvasSize] = useState({
     width: 0,
-    height: height,
+    height: height, // Increased height for text space
   });
   const [fontLoaded, setFontLoaded] = useState(false);
 
@@ -78,32 +78,12 @@ const Ruler = (props: RulerProps) => {
     }
   }, [canvasContext, scrollPos, fontLoaded]);
 
-  // Listen to both window resize and timeline container resize
   useEffect(() => {
     const resizeHandler = debounce(handleResize, 200);
-    
-    // Listen to window resize
     window.addEventListener("resize", resizeHandler);
-
-    // Listen to timeline container resize using ResizeObserver
-    const canvas = canvasRef.current;
-    let resizeObserver: ResizeObserver | null = null;
-    
-    if (canvas) {
-      const timelineContainer = document.getElementById("timeline-container");
-      if (timelineContainer) {
-        resizeObserver = new ResizeObserver(() => {
-          resizeHandler();
-        });
-        resizeObserver.observe(timelineContainer);
-      }
-    }
 
     return () => {
       window.removeEventListener("resize", resizeHandler);
-      if (resizeObserver) {
-        resizeObserver.disconnect();
-      }
     };
   }, [handleResize]);
 
