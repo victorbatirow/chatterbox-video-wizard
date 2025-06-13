@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Sparkles } from "lucide-react";
+import { Send } from "lucide-react";
 import MessageBubble from "@/components/MessageBubble";
 import { VideoMessage, Message } from "@/pages/Chat";
 
@@ -111,7 +111,7 @@ const ChatInterface = ({ onSendMessage, onGenerateVideo, onVideoSelect, isGenera
 
       {/* Suggestions */}
       {messages.length === 1 && (
-        <div className="p-6 border-t border-white/10">
+        <div className="p-6">
           <p className="text-sm text-white/60 mb-3">Try these prompts:</p>
           <div className="grid grid-cols-1 gap-2">
             {promptSuggestions.map((suggestion, index) => (
@@ -148,11 +148,7 @@ const ChatInterface = ({ onSendMessage, onGenerateVideo, onVideoSelect, isGenera
               }}
             />
           </div>
-          <div className="flex justify-between items-center mt-3 pt-2 border-t border-white/20">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-purple-400" />
-              <span className="text-sm text-white/60">Public</span>
-            </div>
+          <div className="flex justify-end items-center mt-3">
             <Button 
               onClick={handleSendMessage}
               disabled={!inputValue.trim() || isGenerating}
