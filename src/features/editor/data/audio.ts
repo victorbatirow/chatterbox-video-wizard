@@ -1,60 +1,60 @@
-
 import { IAudio } from "@designcombo/types";
 
 export const AUDIOS = [
+  // https://ik.imagekit.io/pablituuu/like_a_player.mp3?updatedAt=1722278521488
   {
     id: "xxx0",
     details: {
-      src: "https://commondatastorage.googleapis.com/codeskulptor-assets/Epoq-Lepidoptera.ogg",
+      src: "https://cdn.designcombo.dev/audio/OpenAI%20CEO%20on%20Artificial%20Intelligence%20Changing%20Society.mp3",
     },
-    name: "Bell Sound",
+    name: "Open AI",
     type: "audio",
     metadata: {
-      author: "Free Audio",
+      author: "Open AI",
     },
   },
   {
     id: "xx1",
     details: {
-      src: "https://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Kangaroo_MusiQue_-_The_Neverwritten_Role_Playing_Game.mp3",
+      src: "https://cdn.designcombo.dev/audio/Dawn%20of%20change.mp3",
     },
-    name: "Buzzer Sound",
+    name: "Dawn of change",
     type: "audio",
     metadata: {
-      author: "Free Audio",
+      author: "Roman Senyk",
     },
   },
   {
     id: "xx2",
     details: {
-      src: "https://commondatastorage.googleapis.com/codeskulptor-assets/Epoq-Lepidoptera.ogg",
+      src: "https://cdn.designcombo.dev/audio/Hope.mp3",
     },
-    name: "Click Sound",
+    name: "Hope",
     type: "audio",
     metadata: {
-      author: "Free Audio",
+      author: "Hugo Dujardin",
     },
   },
   {
     id: "xx3",
     details: {
-      src: "https://commondatastorage.googleapis.com/codeskulptor-demos/pyman_assets/intromusic.ogg",
+      src: "https://cdn.designcombo.dev/audio/Tenderness.mp3",
     },
-    name: "Water Drop",
+    name: "Tenderness",
     type: "audio",
     metadata: {
-      author: "Free Audio",
+      author: "Benjamin Tissot",
     },
   },
   {
     id: "xx4",
     details: {
-      src: "https://commondatastorage.googleapis.com/codeskulptor-demos/pyman_assets/ateapill.ogg",
+      src: "https://cdn.designcombo.dev/audio/Piano%20Moment.mp3",
     },
-    name: "Typewriter Key",
+    name: "Piano moment",
     type: "audio",
     metadata: {
-      author: "Free Audio",
+      author: "Benjamin Tissot",
     },
   },
 ] as Partial<IAudio>[];
