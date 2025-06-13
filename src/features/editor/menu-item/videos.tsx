@@ -69,10 +69,10 @@ export const Videos = () => {
           {/* Chat Generated Videos Section */}
           {chatVideos.length > 0 ? (
             <>
-              <div className="text-text-secondary text-xs font-medium mb-3 mt-2">
+              <div className="text-text-secondary text-xs font-medium mb-4 mt-2">
                 Generated Videos ({chatVideos.length})
               </div>
-              <div className="masonry-sm">
+              <div className="grid grid-cols-2 gap-3">
                 {chatVideos.map((video) => (
                   <ChatVideoItem
                     key={video.id}
@@ -151,13 +151,13 @@ const ChatVideoItem = ({
             },
           } as any)
         }
-        className={`flex w-full flex-col items-center justify-center overflow-hidden bg-background pb-2 transition-all duration-300 ${
+        className={`flex flex-col overflow-hidden bg-background rounded-lg transition-all duration-300 hover:bg-white/5 cursor-pointer ${
           isHighlighted ? "ring-2 ring-purple-400 bg-purple-100/10" : ""
         }`}
       >
         <video
           src={video.videoUrl}
-          className="h-20 w-full rounded-md object-cover"
+          className="w-full aspect-square rounded-lg object-cover"
           muted
           playsInline
           onMouseEnter={(e) => {
@@ -165,9 +165,6 @@ const ChatVideoItem = ({
             target.currentTime = 1; // Show frame at 1 second for preview
           }}
         />
-        <div className="mt-1 text-xs text-text-secondary text-center px-1 line-clamp-2">
-          {video.prompt}
-        </div>
       </div>
     </Draggable>
   );
