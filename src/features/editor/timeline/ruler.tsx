@@ -76,7 +76,7 @@ const Ruler = (props: RulerProps) => {
         canvas.height = height;
         setCanvasSize({ width, height });
         
-        // Draw with current scale
+        // Draw with current scale and scroll position
         draw(context, scrollPos, width, height, scale);
       }
     }
@@ -96,7 +96,7 @@ const Ruler = (props: RulerProps) => {
       canvas.height = canvasHeight;
       setCanvasSize({ width, height: canvasHeight });
       
-      // Redraw with the current scale from store
+      // Redraw with the current scale from store and current scroll position
       const currentScale = useStore.getState().scale;
       draw(canvasContext, scrollPos, width, canvasHeight, currentScale);
     }
@@ -144,6 +144,16 @@ const Ruler = (props: RulerProps) => {
       }
     }
   }, [canvasContext, scale, fontLoaded]);
+
+  // Effect for scroll changes - redraw with new scroll position
+  useEffect(() => {
+    if (canvasContext && fontLoaded) {
+      const canvas = canvasRef.current;
+      if (canvas) {
+        draw(canvasContext, scrollPos, canvas.width, canvas.height, scale);
+      }
+    }
+  }, [scrollPos]);
 
   const draw = (
     context: CanvasRenderingContext2D,
