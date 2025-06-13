@@ -107,19 +107,12 @@ const Ruler = (props: RulerProps) => {
     };
   }, [handleResize]);
 
-  // Effect for scale changes - this handles zoom changes
+  // Single effect for both scale and scroll changes - only redraw, don't resize
   useEffect(() => {
-    if (canvasContext && fontLoaded) {
+    if (canvasContext && fontLoaded && canvasSize.width > 0 && canvasSize.height > 0) {
       draw(canvasContext, scrollPos, canvasSize.width, canvasSize.height);
     }
-  }, [scale, canvasContext, fontLoaded, canvasSize.width, canvasSize.height]);
-
-  // Effect for scroll position changes - only redraw, don't resize
-  useEffect(() => {
-    if (canvasContext && fontLoaded) {
-      draw(canvasContext, scrollPos, canvasSize.width, canvasSize.height);
-    }
-  }, [scrollPos, canvasContext, fontLoaded, canvasSize.width, canvasSize.height]);
+  }, [scale, scrollPos, canvasContext, fontLoaded, canvasSize.width, canvasSize.height]);
 
   const resize = (
     canvas: HTMLCanvasElement | null,

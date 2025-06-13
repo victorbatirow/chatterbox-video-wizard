@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { AspectRatio as AspectRatioType } from "@/constants/aspect-ratios";
 
@@ -16,6 +17,7 @@ const AspectRatio = ({
     <div className="flex flex-wrap gap-2">
       {ratios.map((ratio) => (
         <Button
+          key={ratio}
           onClick={() => setAspectRatio(ratio)}
           variant={aspectRatio === ratio ? "default" : "outline"}
           size="sm"

@@ -1,3 +1,4 @@
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +21,7 @@ interface TextProps {
   selectedFont: Font | null;
   onFontFamilySelect: (font: Font) => void;
 }
+
 const Text = (props: TextProps) => {
   const { fonts, selectedFont, onFontFamilySelect } = props;
   const [fontLoaded, setFontLoaded] = useState(false);
@@ -87,3 +89,4 @@ const Text = (props: TextProps) => {
 };
 
 export default Text;
+export { Text as TextControls };
