@@ -1,3 +1,4 @@
+
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
@@ -25,11 +26,11 @@ interface RulerProps {
 
 const Ruler = (props: RulerProps) => {
   const {
-    height = 40,
+    height = 40, // Increased height to give space for the text
     longLineSize = 8,
     shortLineSize = 10,
     offsetX = TIMELINE_OFFSET_X + TIMELINE_OFFSET_CANVAS_LEFT,
-    textOffsetY = 17,
+    textOffsetY = 17, // Place the text above the lines but inside the canvas
     textFormat = formatTimelineUnit,
     scrollLeft: scrollPos = 0,
     onClick,
@@ -40,7 +41,7 @@ const Ruler = (props: RulerProps) => {
     useState<CanvasRenderingContext2D | null>(null);
   const [canvasSize, setCanvasSize] = useState({
     width: 0,
-    height: height,
+    height: height, // Increased height for text space
   });
   const [fontLoaded, setFontLoaded] = useState(false);
 
@@ -67,104 +68,58 @@ const Ruler = (props: RulerProps) => {
     if (canvas && fontLoaded) {
       const context = canvas.getContext("2d");
       setCanvasContext(context);
-      
-      // Initialize canvas size
-      if (context) {
-        const offsetParent = canvas.offsetParent as HTMLDivElement;
-        const width = offsetParent?.offsetWidth ?? canvas.offsetWidth;
-        canvas.width = width;
-        canvas.height = height;
-        setCanvasSize({ width, height });
-        
-        // Draw with current scale and scroll position
-        draw(context, scrollPos, width, height, scale);
-      }
+      resize(canvas, context, scrollPos);
     }
-  }, [fontLoaded, height]);
-
-  const resize = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || !canvasContext || !fontLoaded) return;
-
-    const offsetParent = canvas.offsetParent as HTMLDivElement;
-    const width = offsetParent?.offsetWidth ?? canvas.offsetWidth;
-    const canvasHeight = canvasSize.height;
-
-    // Only update canvas size if it actually changed
-    if (canvas.width !== width || canvas.height !== canvasHeight) {
-      canvas.width = width;
-      canvas.height = canvasHeight;
-      setCanvasSize({ width, height: canvasHeight });
-      
-      // Redraw with the current scale from store and current scroll position
-      const currentScale = useStore.getState().scale;
-      draw(canvasContext, scrollPos, width, canvasHeight, currentScale);
-    }
-  }, [canvasContext, fontLoaded, canvasSize.height, scrollPos]);
+  }, [fontLoaded]);
 
   const handleResize = useCallback(() => {
-    resize();
-  }, [resize]);
-
-  // Listen to both window resize and timeline container resize
-  useEffect(() => {
-    const resizeHandler = debounce(handleResize, 100);
-    
-    // Listen to window resize
-    window.addEventListener("resize", resizeHandler);
-
-    // Listen to timeline container resize using ResizeObserver
-    const canvas = canvasRef.current;
-    let resizeObserver: ResizeObserver | null = null;
-    
-    if (canvas) {
-      const timelineContainer = document.getElementById("timeline-container");
-      if (timelineContainer) {
-        resizeObserver = new ResizeObserver(() => {
-          resizeHandler();
-        });
-        resizeObserver.observe(timelineContainer);
-      }
+    if (fontLoaded) {
+      resize(canvasRef.current, canvasContext, scrollPos);
     }
+  }, [canvasContext, scrollPos, fontLoaded]);
+
+  useEffect(() => {
+    const resizeHandler = debounce(handleResize, 200);
+    window.addEventListener("resize", resizeHandler);
 
     return () => {
       window.removeEventListener("resize", resizeHandler);
-      if (resizeObserver) {
-        resizeObserver.disconnect();
-      }
     };
   }, [handleResize]);
 
-  // Effect for scale changes ONLY - no scroll redraw
   useEffect(() => {
     if (canvasContext && fontLoaded) {
-      const canvas = canvasRef.current;
-      if (canvas) {
-        draw(canvasContext, scrollPos, canvas.width, canvas.height, scale);
-      }
+      resize(canvasRef.current, canvasContext, scrollPos);
     }
-  }, [canvasContext, scale, fontLoaded]);
+  }, [canvasContext, scrollPos, scale, fontLoaded]);
 
-  // Effect for scroll changes - redraw with new scroll position
-  useEffect(() => {
-    if (canvasContext && fontLoaded) {
-      const canvas = canvasRef.current;
-      if (canvas) {
-        draw(canvasContext, scrollPos, canvas.width, canvas.height, scale);
-      }
-    }
-  }, [scrollPos]);
+  const resize = (
+    canvas: HTMLCanvasElement | null,
+    context: CanvasRenderingContext2D | null,
+    scrollPos: number,
+  ) => {
+    if (!canvas || !context || !fontLoaded) return;
+
+    const offsetParent = canvas.offsetParent as HTMLDivElement;
+    const width = offsetParent?.offsetWidth ?? canvas.offsetWidth;
+    const height = canvasSize.height;
+
+    canvas.width = width;
+    canvas.height = height;
+
+    draw(context, scrollPos, width, height);
+    setCanvasSize({ width, height });
+  };
 
   const draw = (
     context: CanvasRenderingContext2D,
     scrollPos: number,
     width: number,
     height: number,
-    currentScale = scale,
   ) => {
-    const zoom = currentScale.zoom;
-    const unit = currentScale.unit;
-    const segments = currentScale.segments;
+    const zoom = scale.zoom;
+    const unit = scale.unit;
+    const segments = scale.segments;
     context.clearRect(0, 0, width, height);
     context.save();
     context.strokeStyle = "#71717a";

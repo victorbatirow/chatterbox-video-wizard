@@ -378,7 +378,7 @@ const TextDecoration = ({
             onValueChange={(v) =>
               onChange(v.filter((v) => v !== "none").join(" "))
             }
-            variant="outline"
+            variant={"secondary"}
           >
             <ToggleGroupItem
               size="sm"

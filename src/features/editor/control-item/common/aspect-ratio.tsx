@@ -1,4 +1,3 @@
-
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useState } from "react";
 
@@ -19,7 +18,7 @@ export default function AspectRatio() {
           className="grid h-8 grid-cols-2 text-sm"
           type="single"
           onValueChange={onChangeAligment}
-          variant="outline"
+          variant={"secondary"}
         >
           <ToggleGroupItem value="locked" aria-label="Toggle italic">
             Yes
