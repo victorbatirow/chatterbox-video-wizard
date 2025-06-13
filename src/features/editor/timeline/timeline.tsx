@@ -1,3 +1,4 @@
+
 import { useEffect, useRef, useState } from "react";
 import Header from "./header";
 import Ruler from "./ruler";
@@ -249,12 +250,21 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
   const handleOnScrollH = (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
     const scrollLeft = e.currentTarget.scrollLeft;
     
+    // Calculate the actual content width that needs scrolling
+    const actualContentWidth = size.width + TIMELINE_OFFSET_CANVAS_LEFT + TIMELINE_OFFSET_CANVAS_RIGHT;
+    
+    // Only allow scrolling if content is wider than canvas
+    if (actualContentWidth <= canvasSize.width) {
+      e.currentTarget.scrollLeft = 0;
+      setScrollLeft(0);
+      if (canvasRef.current) {
+        canvasRef.current.scrollTo({ scrollLeft: 0 });
+      }
+      return;
+    }
+    
     // Calculate max scroll based on actual content width
-    const timelineContentWidth = Math.max(
-      size.width + TIMELINE_OFFSET_CANVAS_RIGHT,
-      canvasSize.width
-    );
-    const maxScrollLeft = Math.max(0, timelineContentWidth - canvasSize.width);
+    const maxScrollLeft = Math.max(0, actualContentWidth - canvasSize.width);
     const constrainedScrollLeft = Math.max(0, Math.min(scrollLeft, maxScrollLeft));
     
     if (constrainedScrollLeft !== scrollLeft) {
@@ -286,12 +296,16 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
       const scrollAmount = e.deltaX || e.deltaY;
       const currentScrollLeft = horizontalScrollbarVpRef.current?.scrollLeft || 0;
       
+      // Calculate the actual content width that needs scrolling
+      const actualContentWidth = size.width + TIMELINE_OFFSET_CANVAS_LEFT + TIMELINE_OFFSET_CANVAS_RIGHT;
+      
+      // Only allow scrolling if content is wider than canvas
+      if (actualContentWidth <= canvasSize.width) {
+        return;
+      }
+      
       // Calculate max scroll based on actual content width
-      const timelineContentWidth = Math.max(
-        size.width + TIMELINE_OFFSET_CANVAS_RIGHT,
-        canvasSize.width
-      );
-      const maxScrollLeft = Math.max(0, timelineContentWidth - canvasSize.width);
+      const maxScrollLeft = Math.max(0, actualContentWidth - canvasSize.width);
       const newScrollLeft = Math.max(0, Math.min(currentScrollLeft + scrollAmount, maxScrollLeft));
       
       if (horizontalScrollbarVpRef.current) {
@@ -355,10 +369,12 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
   }, [scale]);
 
   // Calculate the actual timeline content width based on current size
-  const timelineContentWidth = Math.max(
-    size.width + TIMELINE_OFFSET_CANVAS_RIGHT,
-    canvasSize.width
-  );
+  const actualContentWidth = size.width + TIMELINE_OFFSET_CANVAS_LEFT + TIMELINE_OFFSET_CANVAS_RIGHT;
+  
+  // Only show scrollable area if content is wider than canvas
+  const timelineContentWidth = actualContentWidth > canvasSize.width 
+    ? actualContentWidth 
+    : canvasSize.width;
 
   return (
     <div
