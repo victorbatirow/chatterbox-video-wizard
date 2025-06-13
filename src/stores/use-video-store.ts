@@ -19,9 +19,16 @@ interface VideoStore {
 const useVideoStore = create<VideoStore>((set, get) => ({
   chatVideos: [],
   
-  addChatVideo: (video) => set((state) => ({
-    chatVideos: [...state.chatVideos, video]
-  })),
+  addChatVideo: (video) => {
+    console.log('Video store: Adding video', video);
+    set((state) => {
+      const newState = {
+        chatVideos: [...state.chatVideos, video]
+      };
+      console.log('Video store: New state', newState);
+      return newState;
+    });
+  },
   
   removeChatVideo: (id) => set((state) => ({
     chatVideos: state.chatVideos.filter(v => v.id !== id)

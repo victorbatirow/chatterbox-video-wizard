@@ -91,11 +91,14 @@ const Chat = () => {
       }
 
       const data = await response.json();
+      console.log('Backend response data:', data);
 
       let videoId: string | undefined;
 
       // Check if backend returned video URLs (new format with clip_urls array)
       if (data.clip_urls && Array.isArray(data.clip_urls) && data.clip_urls.length > 0) {
+        console.log('Processing clip_urls:', data.clip_urls);
+        
         // Process each video URL in the array
         data.clip_urls.forEach((videoUrl: string, index: number) => {
           const currentVideoId = (Date.now() + 1000 + index).toString();
@@ -106,28 +109,40 @@ const Chat = () => {
             timestamp: new Date(),
           };
 
+          console.log('Adding video to local state:', newVideo);
           // Add to local videos list
-          setVideos(prev => [...prev, newVideo]);
+          setVideos(prev => {
+            const updated = [...prev, newVideo];
+            console.log('Updated videos state:', updated);
+            return updated;
+          });
 
           // Add to shared video store for editor
-          addChatVideo({
+          const chatVideo = {
             id: currentVideoId,
             videoUrl: videoUrl,
             prompt: `${prompt} (${index + 1}/${data.clip_urls.length})`,
             timestamp: new Date(),
             preview: videoUrl // Use video URL as preview for now
-          });
+          };
+          
+          console.log('Adding video to store:', chatVideo);
+          addChatVideo(chatVideo);
 
           // Set the first video as current
           if (index === 0) {
             videoId = currentVideoId;
             setCurrentVideoId(currentVideoId);
+            console.log('Set current video ID:', currentVideoId);
           }
         });
 
         // Switch to videos panel in editor
+        console.log('Switching to videos panel');
         setActiveMenuItem("videos");
         setShowMenuItem(true);
+      } else {
+        console.log('No clip_urls found in response or empty array');
       }
 
       // Add AI response (use 'text' field from new format, fallback to 'response' for backward compatibility)

@@ -8,7 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import useDataState from "../../store/use-data-state";
 import { dispatch } from "@designcombo/events";
 import { EDIT_OBJECT } from "@designcombo/state";
-import { ChevronDown, Search, Strikethrough, Underline, X } from "lucide-react";
+import { ChevronDown, Search, Strikethrough, Underline, X, Type, Palette } from "lucide-react";
 import { useEffect, useState } from "react";
 import Opacity from "./opacity";
 import { Input } from "@/components/ui/input";
@@ -319,7 +319,7 @@ const FontStyle = ({
           <PopoverTrigger asChild>
             <Button
               className="flex h-8 w-full items-center justify-between text-sm"
-              variant="secondary"
+              variant="outline"
             >
               <div className="w-full overflow-hidden text-left">
                 <p className="truncate"> {selectedFont.name}</p>
@@ -378,7 +378,7 @@ const TextDecoration = ({
             onValueChange={(v) =>
               onChange(v.filter((v) => v !== "none").join(" "))
             }
-            variant={"secondary"}
+            variant={"outline"}
           >
             <ToggleGroupItem
               size="sm"
@@ -444,7 +444,7 @@ const Alignment = ({
             <PopoverTrigger asChild>
               <Button
                 className="flex h-8 w-full items-center justify-between text-sm"
-                variant="secondary"
+                variant="outline"
               >
                 <div className="w-full overflow-hidden text-left">
                   <p className="truncate">{localValue}</p>
@@ -507,7 +507,7 @@ const FontCase = ({ id }: { id: string }) => {
             <PopoverTrigger asChild>
               <Button
                 className="flex h-8 w-full items-center justify-between text-sm"
-                variant="secondary"
+                variant="outline"
               >
                 <div className="w-full overflow-hidden text-left">
                   <p className="truncate">{value}</p>

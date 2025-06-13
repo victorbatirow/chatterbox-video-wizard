@@ -13,7 +13,10 @@ export const Videos = () => {
   const isDraggingOverTimeline = useIsDraggingOverTimeline();
   const { chatVideos } = useVideoStore();
 
+  console.log('Videos component: chatVideos from store', chatVideos);
+
   const handleAddVideo = (payload: Partial<IVideo>) => {
+    console.log('Videos component: Adding video to timeline', payload);
     dispatch(ADD_VIDEO, {
       payload,
       options: {
@@ -34,7 +37,7 @@ export const Videos = () => {
           {chatVideos.length > 0 ? (
             <>
               <div className="text-text-secondary text-xs font-medium mb-3 mt-2">
-                Generated Videos
+                Generated Videos ({chatVideos.length})
               </div>
               <div className="masonry-sm">
                 {chatVideos.map((video) => (
