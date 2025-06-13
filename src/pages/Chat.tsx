@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -43,7 +42,7 @@ const Chat = () => {
     },
   ]);
 
-  const { addChatVideo } = useVideoStore();
+  const { addChatVideo, scrollToVideos, clearHighlights } = useVideoStore();
   const { setActiveMenuItem, setShowMenuItem } = useLayoutStore();
 
   const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
@@ -210,17 +209,8 @@ const Chat = () => {
       setActiveMenuItem("videos");
       setShowMenuItem(true);
       
-      // Use the scrollToVideos function from the store to handle highlighting and scrolling
-      const { scrollToVideos } = useVideoStore.getState();
+      // Clear any existing highlights and set new ones
       scrollToVideos(message.videoIds);
-      
-      // Also set local state for highlighting
-      setHighlightedVideoIds(message.videoIds);
-      
-      // Clear highlight after 3 seconds
-      setTimeout(() => {
-        setHighlightedVideoIds([]);
-      }, 3000);
     }
   };
 

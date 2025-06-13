@@ -36,18 +36,21 @@ export const Videos = () => {
       
       // Find the first video to scroll to
       if (videoIds.length > 0 && scrollAreaRef.current) {
-        const firstVideoId = videoIds[0];
-        const videoElement = document.querySelector(`[data-video-id="${firstVideoId}"]`);
-        
-        console.log('Videos component: Looking for video element with ID:', firstVideoId);
-        console.log('Videos component: Found video element:', videoElement);
-        
-        if (videoElement) {
-          videoElement.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'center' 
-          });
-        }
+        // Use setTimeout to ensure the DOM is updated before scrolling
+        setTimeout(() => {
+          const firstVideoId = videoIds[0];
+          const videoElement = document.querySelector(`[data-video-id="${firstVideoId}"]`);
+          
+          console.log('Videos component: Looking for video element with ID:', firstVideoId);
+          console.log('Videos component: Found video element:', videoElement);
+          
+          if (videoElement) {
+            videoElement.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'center' 
+            });
+          }
+        }, 100);
       }
     };
 

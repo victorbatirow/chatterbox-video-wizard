@@ -13,16 +13,19 @@ export interface ChatVideo {
 interface VideoStore {
   chatVideos: ChatVideo[];
   highlightedVideoIds: string[];
+  highlightTimeoutId: NodeJS.Timeout | null;
   addChatVideo: (video: ChatVideo) => void;
   removeChatVideo: (id: string) => void;
   getChatVideo: (id: string) => ChatVideo | undefined;
   setHighlightedVideoIds: (ids: string[]) => void;
   scrollToVideos: (videoIds: string[]) => void;
+  clearHighlights: () => void;
 }
 
 const useVideoStore = create<VideoStore>((set, get) => ({
   chatVideos: [],
   highlightedVideoIds: [],
+  highlightTimeoutId: null,
   
   addChatVideo: (video) => {
     console.log('Video store: Adding video', video);
@@ -45,20 +48,51 @@ const useVideoStore = create<VideoStore>((set, get) => ({
   
   setHighlightedVideoIds: (ids) => set({ highlightedVideoIds: ids }),
   
+  clearHighlights: () => {
+    const state = get();
+    if (state.highlightTimeoutId) {
+      clearTimeout(state.highlightTimeoutId);
+    }
+    set({ 
+      highlightedVideoIds: [], 
+      highlightTimeoutId: null 
+    });
+  },
+  
   scrollToVideos: (videoIds) => {
-    // Dispatch custom event for video highlighting
+    console.log('Video store: scrollToVideos called with:', videoIds);
+    
+    // Clear any existing highlights and timeouts
+    const state = get();
+    if (state.highlightTimeoutId) {
+      console.log('Video store: Clearing existing timeout');
+      clearTimeout(state.highlightTimeoutId);
+    }
+    
+    // Set new highlighted videos immediately
+    console.log('Video store: Setting highlighted videos:', videoIds);
+    set({ 
+      highlightedVideoIds: videoIds,
+      highlightTimeoutId: null
+    });
+    
+    // Dispatch custom event for video highlighting and scrolling
     const event = new CustomEvent('highlightVideos', { 
       detail: { videoIds } 
     });
     window.dispatchEvent(event);
     
-    // Set highlighted videos
-    set({ highlightedVideoIds: videoIds });
-    
-    // Clear highlight after 3 seconds
-    setTimeout(() => {
-      set({ highlightedVideoIds: [] });
+    // Set up new timeout to clear highlights after exactly 3 seconds
+    const timeoutId = setTimeout(() => {
+      console.log('Video store: Clearing highlights after 3 seconds');
+      set({ 
+        highlightedVideoIds: [], 
+        highlightTimeoutId: null 
+      });
     }, 3000);
+    
+    // Store the timeout ID so we can clear it if needed
+    set({ highlightTimeoutId: timeoutId });
   }
 }));
 
