@@ -1,5 +1,4 @@
 
-
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -81,43 +80,38 @@ const ChatInterface = ({ onSendMessage, onGenerateVideo, onVideoSelect, isGenera
   };
 
   return (
-    <div className="flex flex-col h-screen bg-slate-900 relative">
+    <div className="flex flex-col h-screen bg-slate-900">
       {/* Header - spacing for the absolutely positioned ProjectMenu */}
       <div className="h-16 flex-shrink-0"></div>
 
-      {/* Messages Container with relative positioning for layering */}
-      <div className="flex-1 relative overflow-hidden">
-        <ScrollArea ref={scrollAreaRef} className="h-full">
-          <div className="p-6 pb-40 space-y-4">
-            {messages.map((message) => (
-              <MessageBubble 
-                key={message.id} 
-                message={message} 
-                onClick={() => handleMessageClick(message)}
-                hasVideo={!!message.videoId}
-              />
-            ))}
-            
-            {isGenerating && (
-              <div className="flex items-center gap-2 text-white/60">
-                <div className="flex gap-1">
-                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce delay-100"></div>
-                  <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce delay-200"></div>
-                </div>
-                <span className="text-sm">Thinking...</span>
+      {/* Messages */}
+      <ScrollArea ref={scrollAreaRef} className="flex-1 p-6">
+        <div className="space-y-4">
+          {messages.map((message) => (
+            <MessageBubble 
+              key={message.id} 
+              message={message} 
+              onClick={() => handleMessageClick(message)}
+              hasVideo={!!message.videoId}
+            />
+          ))}
+          
+          {isGenerating && (
+            <div className="flex items-center gap-2 text-white/60">
+              <div className="flex gap-1">
+                <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce delay-100"></div>
+                <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce delay-200"></div>
               </div>
-            )}
-          </div>
-        </ScrollArea>
+              <span className="text-sm">Thinking...</span>
+            </div>
+          )}
+        </div>
+      </ScrollArea>
 
-        {/* Gradient fade effect at the bottom */}
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-slate-900 via-slate-900/90 to-transparent pointer-events-none z-10"></div>
-      </div>
-
-      {/* Suggestions - Fixed position above input */}
+      {/* Suggestions */}
       {messages.length === 1 && (
-        <div className="absolute bottom-32 left-0 right-0 p-6 z-20">
+        <div className="p-6 border-t border-white/10">
           <p className="text-sm text-white/60 mb-3">Try these prompts:</p>
           <div className="grid grid-cols-1 gap-2">
             {promptSuggestions.map((suggestion, index) => (
@@ -133,8 +127,8 @@ const ChatInterface = ({ onSendMessage, onGenerateVideo, onVideoSelect, isGenera
         </div>
       )}
 
-      {/* Fixed Input at bottom */}
-      <div className="fixed bottom-0 left-0 right-0 p-6 bg-slate-900 z-30">
+      {/* Input */}
+      <div className="p-6">
         <div className="w-full bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
           <div className="w-full">
             <Textarea
@@ -175,4 +169,3 @@ const ChatInterface = ({ onSendMessage, onGenerateVideo, onVideoSelect, isGenera
 };
 
 export default ChatInterface;
-
