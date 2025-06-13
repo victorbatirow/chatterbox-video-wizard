@@ -110,7 +110,11 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
     // Update canvas size
     setCanvasSize({ width: containerWidth, height: containerHeight });
     
-    // Resize the timeline canvas
+    // Calculate proper bounding width based on content or minimum canvas width
+    const hasContent = trackItemIds && trackItemIds.length > 0;
+    const boundingWidth = hasContent ? Math.max(containerWidth, size.width) : containerWidth;
+    
+    // Resize the timeline canvas with proper bounding
     canvasRef.current.resize(
       {
         width: containerWidth,
@@ -120,6 +124,12 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
         force: true,
       },
     );
+
+    // Update the bounding separately to ensure proper scroll calculation
+    canvasRef.current.setBounding({
+      width: boundingWidth,
+      height: containerHeight,
+    });
   };
 
   useEffect(() => {
@@ -249,15 +259,19 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
   const handleOnScrollH = (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
     const scrollLeft = e.currentTarget.scrollLeft;
     
-    // Only allow scrolling if there's actual content that overflows
-    if (timelineContentWidth <= canvasSize.width) {
+    // Check if there's actual content that needs scrolling
+    const hasContent = trackItemIds && trackItemIds.length > 0;
+    const contentWidth = hasContent ? Math.max(size.width + TIMELINE_OFFSET_CANVAS_RIGHT, canvasSize.width) : canvasSize.width;
+    
+    // Only allow scrolling if content is wider than canvas
+    if (contentWidth <= canvasSize.width) {
       e.currentTarget.scrollLeft = 0;
       setScrollLeft(0);
       return;
     }
     
     // Calculate max scroll based on actual content width
-    const maxScrollLeft = Math.max(0, timelineContentWidth - canvasSize.width);
+    const maxScrollLeft = Math.max(0, contentWidth - canvasSize.width);
     const constrainedScrollLeft = Math.max(0, Math.min(scrollLeft, maxScrollLeft));
     
     if (constrainedScrollLeft !== scrollLeft) {
