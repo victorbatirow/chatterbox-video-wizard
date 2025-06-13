@@ -28,7 +28,6 @@ interface VideoProps extends VideoPropsBase {
   aspectRatio: number;
   metadata: Partial<IMetadata> & {
     previewUrl: string;
-    prompt?: string; // Make prompt optional in metadata
   };
 }
 class Video extends VideoBase {
@@ -44,7 +43,7 @@ class Video extends VideoBase {
   declare duration: number;
   public prevDuration: number;
   public itemType = "video";
-  public metadata?: Partial<IMetadata> & { prompt?: string };
+  public metadata?: Partial<IMetadata>;
   declare src: string;
 
   public aspectRatio = 1;
@@ -350,7 +349,6 @@ class Video extends VideoBase {
     this.set("fill", fillPattern);
     this.canvas?.requestRenderAll();
   }
-
   public async loadAndRenderThumbnails() {
     if (this.isFetchingThumbnails || !this.clip) return;
     // set segmentDrawn to segmentToDraw
