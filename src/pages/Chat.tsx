@@ -99,15 +99,13 @@ const Chat = () => {
       if (data.clip_urls && Array.isArray(data.clip_urls) && data.clip_urls.length > 0) {
         console.log('Processing clip_urls:', data.clip_urls);
         
-        // Process each video URL in the array with unique IDs
-        const baseTimestamp = Date.now();
+        // Process each video URL in the array
         data.clip_urls.forEach((videoUrl: string, index: number) => {
-          // Create truly unique ID using timestamp + random component + index
-          const currentVideoId = `${baseTimestamp}_${Math.random().toString(36).substr(2, 9)}_${index}`;
+          const currentVideoId = (Date.now() + 1000 + index).toString();
           const newVideo: VideoMessage = {
             id: currentVideoId,
             videoUrl: videoUrl,
-            prompt: data.clip_urls.length > 1 ? `${prompt} (${index + 1}/${data.clip_urls.length})` : prompt,
+            prompt: `${prompt} (${index + 1}/${data.clip_urls.length})`,
             timestamp: new Date(),
           };
 
@@ -123,7 +121,7 @@ const Chat = () => {
           const chatVideo = {
             id: currentVideoId,
             videoUrl: videoUrl,
-            prompt: data.clip_urls.length > 1 ? `${prompt} (${index + 1}/${data.clip_urls.length})` : prompt,
+            prompt: `${prompt} (${index + 1}/${data.clip_urls.length})`,
             timestamp: new Date(),
             preview: videoUrl // Use video URL as preview for now
           };
