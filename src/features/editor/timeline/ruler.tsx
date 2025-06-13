@@ -1,4 +1,3 @@
-
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
@@ -76,7 +75,7 @@ const Ruler = (props: RulerProps) => {
     if (fontLoaded && canvasContext) {
       resize(canvasRef.current, canvasContext, scrollPos);
     }
-  }, [canvasContext, scrollPos, fontLoaded, scale]); // Add scale as dependency
+  }, [canvasContext, scrollPos, fontLoaded]); // Remove scale dependency to prevent glitchy scrolling
 
   // Listen to both window resize and timeline container resize
   useEffect(() => {
@@ -107,11 +106,19 @@ const Ruler = (props: RulerProps) => {
     };
   }, [handleResize]);
 
+  // Separate effect for scale changes - this handles zoom changes
   useEffect(() => {
     if (canvasContext && fontLoaded) {
       resize(canvasRef.current, canvasContext, scrollPos);
     }
-  }, [canvasContext, scrollPos, scale, fontLoaded]);
+  }, [scale, fontLoaded]); // Only trigger on scale changes, not scroll position
+
+  // Separate effect for scroll position changes
+  useEffect(() => {
+    if (canvasContext && fontLoaded) {
+      resize(canvasRef.current, canvasContext, scrollPos);
+    }
+  }, [scrollPos, fontLoaded]); // Only trigger on scroll changes
 
   const resize = (
     canvas: HTMLCanvasElement | null,
