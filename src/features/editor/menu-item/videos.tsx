@@ -5,13 +5,14 @@ import { dispatch } from "@designcombo/events";
 import { ADD_VIDEO } from "@designcombo/state";
 import { generateId } from "@designcombo/timeline";
 import { IVideo } from "@designcombo/types";
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { useIsDraggingOverTimeline } from "../hooks/is-dragging-over-timeline";
 import useVideoStore from "@/stores/use-video-store";
 
 export const Videos = () => {
   const isDraggingOverTimeline = useIsDraggingOverTimeline();
   const { chatVideos } = useVideoStore();
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   console.log('Videos component: chatVideos from store', chatVideos);
 
@@ -26,12 +27,40 @@ export const Videos = () => {
     });
   };
 
+  // Listen for highlight events from chat messages
+  useEffect(() => {
+    const handleHighlightVideos = (event: CustomEvent<{ videoIds: string[] }>) => {
+      const { videoIds } = event.detail;
+      console.log('Received highlight event for videos:', videoIds);
+      
+      // Find the first video to scroll to
+      if (videoIds.length > 0 && scrollAreaRef.current) {
+        const firstVideoId = videoIds[0];
+        const videoElement = document.querySelector(`[data-video-id="${firstVideoId}"]`);
+        
+        if (videoElement) {
+          videoElement.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+        }
+      }
+    };
+
+    // Custom event listener for video highlighting
+    window.addEventListener('highlightVideos', handleHighlightVideos as EventListener);
+    
+    return () => {
+      window.removeEventListener('highlightVideos', handleHighlightVideos as EventListener);
+    };
+  }, []);
+
   return (
     <div className="flex flex-1 flex-col h-full">
       <div className="text-text-primary flex h-12 flex-none items-center px-4 text-sm font-medium">
         Videos
       </div>
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1" ref={scrollAreaRef}>
         <div className="px-4 pb-4">
           {/* Chat Generated Videos Section */}
           {chatVideos.length > 0 ? (
@@ -102,6 +131,7 @@ const ChatVideoItem = ({
       shouldDisplayPreview={shouldDisplayPreview}
     >
       <div
+        data-video-id={video.id}
         onClick={() =>
           handleAddVideo({
             id: generateId(),
@@ -114,7 +144,7 @@ const ChatVideoItem = ({
             },
           } as any)
         }
-        className="flex w-full flex-col items-center justify-center overflow-hidden bg-background pb-2"
+        className="flex w-full flex-col items-center justify-center overflow-hidden bg-background pb-2 transition-all duration-300"
       >
         <video
           src={video.videoUrl}

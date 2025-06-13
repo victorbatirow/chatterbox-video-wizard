@@ -15,6 +15,7 @@ export interface VideoMessage {
   videoUrl: string;
   prompt: string;
   timestamp: Date;
+  messageId?: string; // Add messageId to track which message generated this video
 }
 
 export interface Message {
@@ -23,6 +24,7 @@ export interface Message {
   isUser: boolean;
   timestamp: Date;
   videoId?: string;
+  videoIds?: string[]; // Add array to track multiple videos per message
 }
 
 const Chat = () => {
@@ -31,6 +33,7 @@ const Chat = () => {
   const [currentVideoId, setCurrentVideoId] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [highlightedVideoIds, setHighlightedVideoIds] = useState<string[]>([]);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -93,7 +96,8 @@ const Chat = () => {
       const data = await response.json();
       console.log('Backend response data:', data);
 
-      let videoId: string | undefined;
+      let videoIds: string[] = [];
+      const aiMessageId = (Date.now() + 2).toString();
 
       // Check if backend returned video URLs (new format with clip_urls array)
       if (data.clip_urls && Array.isArray(data.clip_urls) && data.clip_urls.length > 0) {
@@ -102,11 +106,14 @@ const Chat = () => {
         // Process each video URL in the array
         data.clip_urls.forEach((videoUrl: string, index: number) => {
           const currentVideoId = (Date.now() + 1000 + index).toString();
+          videoIds.push(currentVideoId);
+          
           const newVideo: VideoMessage = {
             id: currentVideoId,
             videoUrl: videoUrl,
             prompt: `${prompt} (${index + 1}/${data.clip_urls.length})`,
             timestamp: new Date(),
+            messageId: aiMessageId, // Link video to the AI message
           };
 
           console.log('Adding video to local state:', newVideo);
@@ -131,7 +138,6 @@ const Chat = () => {
 
           // Set the first video as current
           if (index === 0) {
-            videoId = currentVideoId;
             setCurrentVideoId(currentVideoId);
             console.log('Set current video ID:', currentVideoId);
           }
@@ -147,11 +153,11 @@ const Chat = () => {
 
       // Add AI response (use 'text' field from new format, fallback to 'response' for backward compatibility)
       const aiMessage: Message = {
-        id: (Date.now() + 2).toString(),
+        id: aiMessageId,
         text: data.text || data.response || "I've processed your request.",
         isUser: false,
         timestamp: new Date(),
-        videoId: videoId,
+        videoIds: videoIds.length > 0 ? videoIds : undefined,
       };
 
       setMessages(prev => [...prev, aiMessage]);
@@ -193,6 +199,25 @@ const Chat = () => {
     setCurrentVideoId(videoId);
   };
 
+  const handleMessageClick = (message: Message) => {
+    // Only handle clicks on AI messages that have videos
+    if (!message.isUser && message.videoIds && message.videoIds.length > 0) {
+      console.log('Message clicked, highlighting videos:', message.videoIds);
+      
+      // Switch to videos panel if not already active
+      setActiveMenuItem("videos");
+      setShowMenuItem(true);
+      
+      // Highlight the videos from this message
+      setHighlightedVideoIds(message.videoIds);
+      
+      // Clear highlight after 3 seconds
+      setTimeout(() => {
+        setHighlightedVideoIds([]);
+      }, 3000);
+    }
+  };
+
   const handleOpenSettings = () => {
     setIsSettingsOpen(true);
   };
@@ -224,9 +249,11 @@ const Chat = () => {
               onSendMessage={handleSendMessage}
               onGenerateVideo={handleVideoGeneration}
               onVideoSelect={handleVideoSelect}
+              onMessageClick={handleMessageClick}
               isGenerating={isGenerating}
               videos={videos}
               messages={messages}
+              highlightedVideoIds={highlightedVideoIds}
             />
           </ResizablePanel>
           

@@ -11,12 +11,23 @@ interface ChatInterfaceProps {
   onSendMessage: (prompt: string) => void;
   onGenerateVideo: (prompt: string) => void;
   onVideoSelect: (videoId: string) => void;
+  onMessageClick: (message: Message) => void;
   isGenerating: boolean;
   videos: VideoMessage[];
   messages: Message[];
+  highlightedVideoIds: string[];
 }
 
-const ChatInterface = ({ onSendMessage, onGenerateVideo, onVideoSelect, isGenerating, videos, messages }: ChatInterfaceProps) => {
+const ChatInterface = ({ 
+  onSendMessage, 
+  onGenerateVideo, 
+  onVideoSelect, 
+  onMessageClick,
+  isGenerating, 
+  videos, 
+  messages,
+  highlightedVideoIds 
+}: ChatInterfaceProps) => {
   const [inputValue, setInputValue] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -73,8 +84,11 @@ const ChatInterface = ({ onSendMessage, onGenerateVideo, onVideoSelect, isGenera
     setInputValue(suggestion);
   };
 
-  const handleMessageClick = (message: Message) => {
-    if (message.videoId) {
+  const handleMessageBubbleClick = (message: Message) => {
+    // Check if message has videos and call the message click handler
+    if (message.videoIds && message.videoIds.length > 0) {
+      onMessageClick(message);
+    } else if (message.videoId) {
       onVideoSelect(message.videoId);
     }
   };
@@ -91,8 +105,8 @@ const ChatInterface = ({ onSendMessage, onGenerateVideo, onVideoSelect, isGenera
             <MessageBubble 
               key={message.id} 
               message={message} 
-              onClick={() => handleMessageClick(message)}
-              hasVideo={!!message.videoId}
+              onClick={() => handleMessageBubbleClick(message)}
+              hasVideo={!!(message.videoId || (message.videoIds && message.videoIds.length > 0))}
             />
           ))}
           
