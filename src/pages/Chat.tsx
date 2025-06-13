@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -93,27 +94,35 @@ const Chat = () => {
 
       let videoId: string | undefined;
 
-      // Check if backend returned a video URL
-      if (data.video_url) {
-        videoId = (Date.now() + 1000).toString();
-        const newVideo: VideoMessage = {
-          id: videoId,
-          videoUrl: data.video_url,
-          prompt,
-          timestamp: new Date(),
-        };
+      // Check if backend returned video URLs (new format with clip_urls array)
+      if (data.clip_urls && Array.isArray(data.clip_urls) && data.clip_urls.length > 0) {
+        // Process each video URL in the array
+        data.clip_urls.forEach((videoUrl: string, index: number) => {
+          const currentVideoId = (Date.now() + 1000 + index).toString();
+          const newVideo: VideoMessage = {
+            id: currentVideoId,
+            videoUrl: videoUrl,
+            prompt: `${prompt} (${index + 1}/${data.clip_urls.length})`,
+            timestamp: new Date(),
+          };
 
-        // Add to local videos list
-        setVideos(prev => [...prev, newVideo]);
-        setCurrentVideoId(videoId);
+          // Add to local videos list
+          setVideos(prev => [...prev, newVideo]);
 
-        // Add to shared video store for editor
-        addChatVideo({
-          id: videoId,
-          videoUrl: data.video_url,
-          prompt,
-          timestamp: new Date(),
-          preview: data.video_url // Use video URL as preview for now
+          // Add to shared video store for editor
+          addChatVideo({
+            id: currentVideoId,
+            videoUrl: videoUrl,
+            prompt: `${prompt} (${index + 1}/${data.clip_urls.length})`,
+            timestamp: new Date(),
+            preview: videoUrl // Use video URL as preview for now
+          });
+
+          // Set the first video as current
+          if (index === 0) {
+            videoId = currentVideoId;
+            setCurrentVideoId(currentVideoId);
+          }
         });
 
         // Switch to videos panel in editor
@@ -121,10 +130,10 @@ const Chat = () => {
         setShowMenuItem(true);
       }
 
-      // Add AI response
+      // Add AI response (use 'text' field from new format, fallback to 'response' for backward compatibility)
       const aiMessage: Message = {
         id: (Date.now() + 2).toString(),
-        text: data.response,
+        text: data.text || data.response || "I've processed your request.",
         isUser: false,
         timestamp: new Date(),
         videoId: videoId,

@@ -206,7 +206,8 @@ class Video extends VideoBase {
       
       // For generated videos, try to use the preview URL directly
       // For other videos, append timestamp to avoid cache issues
-      const imageUrl = this.metadata?.prompt ? fallbackThumbnail : fallbackThumbnail + "?t=" + Date.now();
+      const hasPrompt = this.metadata && 'prompt' in this.metadata && this.metadata.prompt;
+      const imageUrl = hasPrompt ? fallbackThumbnail : fallbackThumbnail + "?t=" + Date.now();
       img.src = imageUrl;
       
       img.onload = () => {

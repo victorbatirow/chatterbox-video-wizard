@@ -1,33 +1,32 @@
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Lock, Unlock } from "lucide-react";
 import { useState } from "react";
 
-export default function AspectRatio() {
-  const [value, setValue] = useState("locked");
-  const onChangeAligment = (value: string) => {
-    setValue(value);
-  };
+const AspectRatio = () => {
+  const [isLocked, setIsLocked] = useState(true);
+
   return (
-    <div className="flex gap-2">
-      <div className="flex flex-1 items-center text-sm text-muted-foreground">
-        Lock Ratio
-      </div>
-      <div className="w-32">
-        <ToggleGroup
-          value={value}
+    <div className="flex flex-col gap-2">
+      <Label className="font-sans text-xs font-semibold text-primary">
+        Aspect Ratio
+      </Label>
+      <div className="flex items-center gap-2">
+        <Button
+          variant={isLocked ? "default" : "outline"}
           size="sm"
-          className="grid h-8 grid-cols-2 text-sm"
-          type="single"
-          onValueChange={onChangeAligment}
-          variant={"secondary"}
+          onClick={() => setIsLocked(!isLocked)}
+          className="flex items-center gap-1"
         >
-          <ToggleGroupItem value="locked" aria-label="Toggle italic">
-            Yes
-          </ToggleGroupItem>
-          <ToggleGroupItem size="sm" value="unlocked" aria-label="Toggle left">
-            No
-          </ToggleGroupItem>
-        </ToggleGroup>
+          {isLocked ? <Lock size={14} /> : <Unlock size={14} />}
+          {isLocked ? "Locked" : "Unlocked"}
+        </Button>
       </div>
+      <Separator />
     </div>
   );
-}
+};
+
+export default AspectRatio;

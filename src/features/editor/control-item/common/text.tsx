@@ -535,3 +535,43 @@ const FontCase = ({ id }: { id: string }) => {
     </div>
   );
 };
+
+interface TextProps {
+  trackItem: ITrackItem & any;
+  onUpdate: (v: any) => void;
+}
+
+const Text = ({ trackItem, onUpdate }: TextProps) => {
+  const [showFontPicker, setShowFontPicker] = useState(false);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+
+  return (
+    <div className="flex flex-col gap-2">
+      <Label className="font-sans text-xs font-semibold text-primary">
+        Typography
+      </Label>
+      <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowFontPicker(!showFontPicker)}
+          className="flex items-center gap-1"
+        >
+          <Type size={14} />
+          Font
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowColorPicker(!showColorPicker)}
+          className="flex items-center gap-1"
+        >
+          <Palette size={14} />
+          Color
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+export default Text;
