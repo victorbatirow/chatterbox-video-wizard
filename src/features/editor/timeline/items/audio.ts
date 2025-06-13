@@ -1,4 +1,5 @@
 
+
 import {
   Audio as AudioBase,
   AudioProps,
@@ -29,8 +30,6 @@ class Audio extends AudioBase {
   declare playbackRate: number;
   public bars: any[] = [];
   private isInitialized: boolean = false;
-  private initRetryCount = 0;
-  private maxRetries = 5;
 
   static createControls(): { controls: Record<string, Control> } {
     return { controls: createAudioControls() };
@@ -43,66 +42,13 @@ class Audio extends AudioBase {
     this.initOffscreenCanvas();
   }
 
-  // Override the method that's called when the audio is added to canvas
-  public _set(key: string, value: any) {
-    const result = super._set(key, value);
-    
-    // When the audio gets its canvas context, initialize the waveform
-    if (key === 'canvas' && value && !this.isInitialized) {
-      // Use setTimeout to ensure all timeline properties are set
-      setTimeout(() => {
-        this.initializeWaveform();
-      }, 100);
-    }
-    
-    return result;
-  }
-
-  // Called when timeline scale changes
-  public onScale() {
-    if (!this.isInitialized) {
-      this.initializeWaveform();
-    } else {
-      this.bars = this.getBars(0, 0) as any;
-      this.onScrollChange({ scrollLeft: this.scrollLeft });
-    }
-  }
-
-  private async initializeWaveform() {
-    if (this.isInitialized || this.initRetryCount >= this.maxRetries) return;
-    
-    // Check if we have the required timeline context
-    if (!this.canvas || !this.tScale || !this.duration) {
-      this.initRetryCount++;
-      console.log(`Audio: Missing timeline context, retry ${this.initRetryCount}/${this.maxRetries}`);
-      
-      // Retry after a short delay
-      setTimeout(() => {
-        this.initializeWaveform();
-      }, 200);
-      return;
-    }
-    
-    try {
-      console.log('Audio: Initializing waveform for:', this.src);
-      await this.initialize();
-      this.isInitialized = true;
-      this.initRetryCount = 0;
-      console.log('Audio: Waveform initialization complete');
-    } catch (error) {
-      console.error('Audio: Failed to initialize waveform:', error);
-      this.initRetryCount++;
-      
-      if (this.initRetryCount < this.maxRetries) {
-        setTimeout(() => {
-          this.initializeWaveform();
-        }, 1000);
-      }
-    }
-  }
-
-  // Fixed render method to prevent visual glitching
+  // Override the render method to ensure initialization happens during first render
   public _render(ctx: CanvasRenderingContext2D) {
+    // Try to initialize if not already done and we have timeline context
+    if (!this.isInitialized && this.canvas && this.tScale && this.duration) {
+      this.initializeWaveform();
+    }
+    
     super._render(ctx);
     this.drawTextIdentity(ctx);
     this.updateSelected(ctx);
@@ -115,7 +61,7 @@ class Audio extends AudioBase {
     ctx.rect(0, 0, this.width, this.height);
     ctx.clip();
 
-    // Draw the waveform directly instead of using offscreen canvas
+    // Draw the waveform
     this.drawWaveform(ctx);
 
     ctx.restore();
@@ -153,13 +99,37 @@ class Audio extends AudioBase {
     ctx.fill();
   }
 
+  // Called when timeline scale changes - ensure waveform is updated
+  public onScale() {
+    if (!this.isInitialized && this.canvas && this.tScale && this.duration) {
+      this.initializeWaveform();
+    } else if (this.isInitialized) {
+      this.bars = this.getBars(0, 0) as any;
+      this.onScrollChange({ scrollLeft: this.scrollLeft });
+    }
+  }
+
+  private async initializeWaveform() {
+    if (this.isInitialized) return;
+    
+    try {
+      console.log('Audio: Initializing waveform for:', this.src);
+      await this.initialize();
+      this.isInitialized = true;
+      console.log('Audio: Waveform initialization complete');
+      // Force a render update
+      this.canvas?.requestRenderAll();
+    } catch (error) {
+      console.error('Audio: Failed to initialize waveform:', error);
+    }
+  }
+
   private async initialize() {
     console.log('Audio: Starting waveform initialization for:', this.src);
     const audioData = await getAudioData(this.src);
     this.barData = audioData;
     this.bars = this.getBars(0, 0) as any;
     console.log('Audio: Waveform data loaded, bars count:', this.bars?.length || 0);
-    this.canvas?.requestRenderAll();
     this.onScrollChange({ scrollLeft: 0 });
   }
 
@@ -167,9 +137,8 @@ class Audio extends AudioBase {
     console.log('Audio: Setting new src:', src);
     this.src = src;
     this.isInitialized = false;
-    this.initRetryCount = 0;
     this.initOffscreenCanvas();
-    this.initializeWaveform();
+    // Don't call initializeWaveform here - let it happen during render
     this.setCoords();
     this.canvas?.requestRenderAll();
   }
@@ -274,3 +243,4 @@ class Audio extends AudioBase {
 }
 
 export default Audio;
+
