@@ -1,5 +1,3 @@
-
-
 import {
   Audio as AudioBase,
   AudioProps,
@@ -29,6 +27,7 @@ class Audio extends AudioBase {
   private isDirty: boolean = true;
   declare playbackRate: number;
   public bars: any[] = [];
+  private isInitialized: boolean = false;
 
   static createControls(): { controls: Record<string, Control> } {
     return { controls: createAudioControls() };
@@ -39,7 +38,27 @@ class Audio extends AudioBase {
     this.fill = "#00586c";
     this.objectCaching = false;
     this.initOffscreenCanvas();
-    this.initialize();
+    // Ensure initialization happens immediately
+    this.forceInitialize();
+  }
+
+  private async forceInitialize() {
+    if (this.isInitialized) return;
+    
+    try {
+      console.log('Audio: Force initializing waveform for:', this.src);
+      await this.initialize();
+      this.isInitialized = true;
+      console.log('Audio: Waveform initialization complete');
+    } catch (error) {
+      console.error('Audio: Failed to initialize waveform:', error);
+      // Set a fallback to retry initialization
+      setTimeout(() => {
+        if (!this.isInitialized) {
+          this.forceInitialize();
+        }
+      }, 1000);
+    }
   }
 
   // Fixed render method to prevent visual glitching
@@ -95,17 +114,21 @@ class Audio extends AudioBase {
   }
 
   private async initialize() {
+    console.log('Audio: Starting waveform initialization for:', this.src);
     const audioData = await getAudioData(this.src);
     this.barData = audioData;
     this.bars = this.getBars(0, 0) as any;
+    console.log('Audio: Waveform data loaded, bars count:', this.bars?.length || 0);
     this.canvas?.requestRenderAll();
     this.onScrollChange({ scrollLeft: 0 });
   }
 
   public setSrc(src: string) {
+    console.log('Audio: Setting new src:', src);
     this.src = src;
+    this.isInitialized = false;
     this.initOffscreenCanvas();
-    this.initialize();
+    this.forceInitialize();
     this.setCoords();
     this.canvas?.requestRenderAll();
   }
@@ -215,4 +238,3 @@ class Audio extends AudioBase {
 }
 
 export default Audio;
-
