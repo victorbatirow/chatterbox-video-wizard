@@ -1,4 +1,3 @@
-
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
@@ -107,12 +106,12 @@ const Ruler = (props: RulerProps) => {
     };
   }, [handleResize]);
 
-  // Single effect for both scale and scroll changes - only redraw, don't resize
+  // Only redraw when scale changes, not on scroll
   useEffect(() => {
     if (canvasContext && fontLoaded && canvasSize.width > 0 && canvasSize.height > 0) {
       draw(canvasContext, scrollPos, canvasSize.width, canvasSize.height);
     }
-  }, [scale, scrollPos, canvasContext, fontLoaded, canvasSize.width, canvasSize.height]);
+  }, [scale, canvasContext, fontLoaded, canvasSize.width, canvasSize.height]);
 
   const resize = (
     canvas: HTMLCanvasElement | null,
