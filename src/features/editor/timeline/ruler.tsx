@@ -1,3 +1,4 @@
+
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
@@ -75,11 +76,11 @@ const Ruler = (props: RulerProps) => {
     if (fontLoaded && canvasContext) {
       resize(canvasRef.current, canvasContext, scrollPos);
     }
-  }, [canvasContext, scrollPos, fontLoaded]); // Remove scale dependency to prevent glitchy scrolling
+  }, [canvasContext, fontLoaded, scrollPos]);
 
   // Listen to both window resize and timeline container resize
   useEffect(() => {
-    const resizeHandler = debounce(handleResize, 200);
+    const resizeHandler = debounce(handleResize, 100);
     
     // Listen to window resize
     window.addEventListener("resize", resizeHandler);
@@ -106,19 +107,19 @@ const Ruler = (props: RulerProps) => {
     };
   }, [handleResize]);
 
-  // Separate effect for scale changes - this handles zoom changes
+  // Effect for scale changes - this handles zoom changes
   useEffect(() => {
     if (canvasContext && fontLoaded) {
-      resize(canvasRef.current, canvasContext, scrollPos);
+      draw(canvasContext, scrollPos, canvasSize.width, canvasSize.height);
     }
-  }, [scale, fontLoaded]); // Only trigger on scale changes, not scroll position
+  }, [scale, canvasContext, fontLoaded, canvasSize.width, canvasSize.height]);
 
-  // Separate effect for scroll position changes
+  // Effect for scroll position changes - only redraw, don't resize
   useEffect(() => {
     if (canvasContext && fontLoaded) {
-      resize(canvasRef.current, canvasContext, scrollPos);
+      draw(canvasContext, scrollPos, canvasSize.width, canvasSize.height);
     }
-  }, [scrollPos, fontLoaded]); // Only trigger on scroll changes
+  }, [scrollPos, canvasContext, fontLoaded, canvasSize.width, canvasSize.height]);
 
   const resize = (
     canvas: HTMLCanvasElement | null,
@@ -134,7 +135,6 @@ const Ruler = (props: RulerProps) => {
     canvas.width = width;
     canvas.height = height;
 
-    // Always use the current scale from the store
     draw(context, scrollPos, width, height);
     setCanvasSize({ width, height });
   };
