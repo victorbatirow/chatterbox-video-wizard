@@ -1,3 +1,4 @@
+
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
@@ -42,19 +43,40 @@ const Ruler = (props: RulerProps) => {
     width: 0,
     height: height, // Increased height for text space
   });
+  const [fontLoaded, setFontLoaded] = useState(false);
+
+  // Ensure font is loaded before drawing
+  useEffect(() => {
+    const checkFont = async () => {
+      try {
+        // Try to load the font if not already loaded
+        if (!document.fonts.check(`${SMALL_FONT_SIZE}px ${SECONDARY_FONT}`)) {
+          await document.fonts.load(`${SMALL_FONT_SIZE}px ${SECONDARY_FONT}`);
+        }
+        setFontLoaded(true);
+      } catch (error) {
+        // If font loading fails, proceed anyway
+        setFontLoaded(true);
+      }
+    };
+    
+    checkFont();
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (canvas) {
+    if (canvas && fontLoaded) {
       const context = canvas.getContext("2d");
       setCanvasContext(context);
       resize(canvas, context, scrollPos);
     }
-  }, []);
+  }, [fontLoaded]);
 
   const handleResize = useCallback(() => {
-    resize(canvasRef.current, canvasContext, scrollPos);
-  }, [canvasContext, scrollPos]);
+    if (fontLoaded) {
+      resize(canvasRef.current, canvasContext, scrollPos);
+    }
+  }, [canvasContext, scrollPos, fontLoaded]);
 
   useEffect(() => {
     const resizeHandler = debounce(handleResize, 200);
@@ -66,17 +88,17 @@ const Ruler = (props: RulerProps) => {
   }, [handleResize]);
 
   useEffect(() => {
-    if (canvasContext) {
+    if (canvasContext && fontLoaded) {
       resize(canvasRef.current, canvasContext, scrollPos);
     }
-  }, [canvasContext, scrollPos, scale]);
+  }, [canvasContext, scrollPos, scale, fontLoaded]);
 
   const resize = (
     canvas: HTMLCanvasElement | null,
     context: CanvasRenderingContext2D | null,
     scrollPos: number,
   ) => {
-    if (!canvas || !context) return;
+    if (!canvas || !context || !fontLoaded) return;
 
     const offsetParent = canvas.offsetParent as HTMLDivElement;
     const width = offsetParent?.offsetWidth ?? canvas.offsetWidth;
@@ -103,7 +125,9 @@ const Ruler = (props: RulerProps) => {
     context.strokeStyle = "#71717a";
     context.fillStyle = "#71717a";
     context.lineWidth = 1;
-    context.font = `${SMALL_FONT_SIZE}px ${SECONDARY_FONT}`;
+    
+    // Ensure font is properly set with fallback
+    context.font = `${SMALL_FONT_SIZE}px ${SECONDARY_FONT}, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
     context.textBaseline = "top";
 
     context.translate(0.5, 0);
