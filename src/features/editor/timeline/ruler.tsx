@@ -73,10 +73,10 @@ const Ruler = (props: RulerProps) => {
   }, [fontLoaded]);
 
   const handleResize = useCallback(() => {
-    if (fontLoaded) {
+    if (fontLoaded && canvasContext) {
       resize(canvasRef.current, canvasContext, scrollPos);
     }
-  }, [canvasContext, scrollPos, fontLoaded]);
+  }, [canvasContext, scrollPos, fontLoaded, scale]); // Add scale as dependency
 
   // Listen to both window resize and timeline container resize
   useEffect(() => {
@@ -127,6 +127,7 @@ const Ruler = (props: RulerProps) => {
     canvas.width = width;
     canvas.height = height;
 
+    // Always use the current scale from the store
     draw(context, scrollPos, width, height);
     setCanvasSize({ width, height });
   };
@@ -137,9 +138,11 @@ const Ruler = (props: RulerProps) => {
     width: number,
     height: number,
   ) => {
+    // Always use the current scale from the store
     const zoom = scale.zoom;
     const unit = scale.unit;
     const segments = scale.segments;
+    
     context.clearRect(0, 0, width, height);
     context.save();
     context.strokeStyle = "#71717a";
