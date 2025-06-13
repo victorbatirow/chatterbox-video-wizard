@@ -43,7 +43,7 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
   const canvasRef = useRef<CanvasTimeline | null>(null);
   const verticalScrollbarVpRef = useRef<HTMLDivElement>(null);
   const horizontalScrollbarVpRef = useRef<HTMLDivElement>(null);
-  const { scale, playerRef, fps, duration, setState, timeline, trackItemIds } = useStore();
+  const { scale, playerRef, fps, duration, setState, timeline } = useStore();
   const currentFrame = useCurrentPlayerFrame(playerRef!);
   const [canvasSize, setCanvasSize] = useState(EMPTY_SIZE);
   const [size, setSize] = useState<{ width: number; height: number }>(
@@ -110,11 +110,7 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
     // Update canvas size
     setCanvasSize({ width: containerWidth, height: containerHeight });
     
-    // Calculate proper bounding width based on content or minimum canvas width
-    const hasContent = trackItemIds && trackItemIds.length > 0;
-    const boundingWidth = hasContent ? Math.max(containerWidth, size.width) : containerWidth;
-    
-    // Resize the timeline canvas with proper bounding
+    // Resize the timeline canvas
     canvasRef.current.resize(
       {
         width: containerWidth,
@@ -124,12 +120,6 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
         force: true,
       },
     );
-
-    // Update the bounding separately to ensure proper scroll calculation
-    canvasRef.current.setBounding({
-      width: boundingWidth,
-      height: containerHeight,
-    });
   };
 
   useEffect(() => {
@@ -259,19 +249,12 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
   const handleOnScrollH = (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
     const scrollLeft = e.currentTarget.scrollLeft;
     
-    // Check if there's actual content that needs scrolling
-    const hasContent = trackItemIds && trackItemIds.length > 0;
-    const contentWidth = hasContent ? Math.max(size.width + TIMELINE_OFFSET_CANVAS_RIGHT, canvasSize.width) : canvasSize.width;
-    
-    // Only allow scrolling if content is wider than canvas
-    if (contentWidth <= canvasSize.width) {
-      e.currentTarget.scrollLeft = 0;
-      setScrollLeft(0);
-      return;
-    }
-    
     // Calculate max scroll based on actual content width
-    const maxScrollLeft = Math.max(0, contentWidth - canvasSize.width);
+    const timelineContentWidth = Math.max(
+      size.width + TIMELINE_OFFSET_CANVAS_RIGHT,
+      canvasSize.width
+    );
+    const maxScrollLeft = Math.max(0, timelineContentWidth - canvasSize.width);
     const constrainedScrollLeft = Math.max(0, Math.min(scrollLeft, maxScrollLeft));
     
     if (constrainedScrollLeft !== scrollLeft) {
@@ -295,11 +278,6 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
 
   // Enhanced mouse wheel horizontal scrolling
   const handleWheel = (e: React.WheelEvent) => {
-    // Only allow horizontal scrolling if there's content that overflows
-    if (timelineContentWidth <= canvasSize.width) {
-      return;
-    }
-
     // Check if shift is held or if it's a horizontal scroll
     if (e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
       e.preventDefault();
@@ -309,6 +287,10 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
       const currentScrollLeft = horizontalScrollbarVpRef.current?.scrollLeft || 0;
       
       // Calculate max scroll based on actual content width
+      const timelineContentWidth = Math.max(
+        size.width + TIMELINE_OFFSET_CANVAS_RIGHT,
+        canvasSize.width
+      );
       const maxScrollLeft = Math.max(0, timelineContentWidth - canvasSize.width);
       const newScrollLeft = Math.max(0, Math.min(currentScrollLeft + scrollAmount, maxScrollLeft));
       
@@ -372,23 +354,11 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
     }
   }, [scale]);
 
-  // Calculate the actual timeline content width based on actual content
-  const getTimelineContentWidth = () => {
-    // If there are no track items, return the canvas width (no scrolling needed)
-    if (!trackItemIds || trackItemIds.length === 0) {
-      return canvasSize.width;
-    }
-    
-    // If there's actual content, use the calculated size with some padding
-    const contentWidth = Math.max(
-      size.width + TIMELINE_OFFSET_CANVAS_RIGHT,
-      canvasSize.width
-    );
-    
-    return contentWidth;
-  };
-
-  const timelineContentWidth = getTimelineContentWidth();
+  // Calculate the actual timeline content width based on current size
+  const timelineContentWidth = Math.max(
+    size.width + TIMELINE_OFFSET_CANVAS_RIGHT,
+    canvasSize.width
+  );
 
   return (
     <div
