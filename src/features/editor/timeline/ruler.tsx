@@ -68,19 +68,38 @@ const Ruler = (props: RulerProps) => {
     if (canvas && fontLoaded) {
       const context = canvas.getContext("2d");
       setCanvasContext(context);
-      resize(canvas, context, scrollPos);
+      resize(canvas, context);
     }
   }, [fontLoaded]);
 
+  const resize = useCallback((
+    canvas: HTMLCanvasElement | null,
+    context: CanvasRenderingContext2D | null,
+  ) => {
+    if (!canvas || !context || !fontLoaded) return;
+
+    const offsetParent = canvas.offsetParent as HTMLDivElement;
+    const width = offsetParent?.offsetWidth ?? canvas.offsetWidth;
+    const height = canvasSize.height;
+
+    canvas.width = width;
+    canvas.height = height;
+
+    // Get the current scale from the store
+    const currentScale = useStore.getState().scale;
+    draw(context, scrollPos, width, height, currentScale);
+    setCanvasSize({ width, height });
+  }, [fontLoaded, canvasSize.height, scrollPos]);
+
   const handleResize = useCallback(() => {
-    if (fontLoaded) {
-      resize(canvasRef.current, canvasContext, scrollPos);
+    if (fontLoaded && canvasContext) {
+      resize(canvasRef.current, canvasContext);
     }
-  }, [canvasContext, scrollPos, fontLoaded]);
+  }, [resize, canvasContext, fontLoaded]);
 
   // Listen to both window resize and timeline container resize
   useEffect(() => {
-    const resizeHandler = debounce(handleResize, 200);
+    const resizeHandler = debounce(handleResize, 100);
     
     // Listen to window resize
     window.addEventListener("resize", resizeHandler);
@@ -107,39 +126,26 @@ const Ruler = (props: RulerProps) => {
     };
   }, [handleResize]);
 
+  // Effect for scale changes - redraw with new scale
   useEffect(() => {
     if (canvasContext && fontLoaded) {
-      resize(canvasRef.current, canvasContext, scrollPos);
+      const canvas = canvasRef.current;
+      if (canvas) {
+        draw(canvasContext, scrollPos, canvas.width, canvas.height, scale);
+      }
     }
-  }, [canvasContext, scrollPos, scale, fontLoaded]);
-
-  const resize = (
-    canvas: HTMLCanvasElement | null,
-    context: CanvasRenderingContext2D | null,
-    scrollPos: number,
-  ) => {
-    if (!canvas || !context || !fontLoaded) return;
-
-    const offsetParent = canvas.offsetParent as HTMLDivElement;
-    const width = offsetParent?.offsetWidth ?? canvas.offsetWidth;
-    const height = canvasSize.height;
-
-    canvas.width = width;
-    canvas.height = height;
-
-    draw(context, scrollPos, width, height);
-    setCanvasSize({ width, height });
-  };
+  }, [canvasContext, scale, fontLoaded, scrollPos]);
 
   const draw = (
     context: CanvasRenderingContext2D,
     scrollPos: number,
     width: number,
     height: number,
+    currentScale = scale,
   ) => {
-    const zoom = scale.zoom;
-    const unit = scale.unit;
-    const segments = scale.segments;
+    const zoom = currentScale.zoom;
+    const unit = currentScale.unit;
+    const segments = currentScale.segments;
     context.clearRect(0, 0, width, height);
     context.save();
     context.strokeStyle = "#71717a";
