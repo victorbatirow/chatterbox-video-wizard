@@ -1,3 +1,4 @@
+
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
@@ -72,14 +73,14 @@ const Ruler = (props: RulerProps) => {
   }, [fontLoaded]);
 
   const handleResize = useCallback(() => {
-    if (fontLoaded && canvasContext) {
+    if (fontLoaded) {
       resize(canvasRef.current, canvasContext, scrollPos);
     }
-  }, [canvasContext, fontLoaded, scrollPos]);
+  }, [canvasContext, scrollPos, fontLoaded]);
 
   // Listen to both window resize and timeline container resize
   useEffect(() => {
-    const resizeHandler = debounce(handleResize, 100);
+    const resizeHandler = debounce(handleResize, 200);
     
     // Listen to window resize
     window.addEventListener("resize", resizeHandler);
@@ -106,12 +107,11 @@ const Ruler = (props: RulerProps) => {
     };
   }, [handleResize]);
 
-  // Only redraw when scale changes, not on scroll
   useEffect(() => {
-    if (canvasContext && fontLoaded && canvasSize.width > 0 && canvasSize.height > 0) {
-      draw(canvasContext, scrollPos, canvasSize.width, canvasSize.height);
+    if (canvasContext && fontLoaded) {
+      resize(canvasRef.current, canvasContext, scrollPos);
     }
-  }, [scale, canvasContext, fontLoaded, canvasSize.width, canvasSize.height]);
+  }, [canvasContext, scrollPos, scale, fontLoaded]);
 
   const resize = (
     canvas: HTMLCanvasElement | null,
@@ -137,11 +137,9 @@ const Ruler = (props: RulerProps) => {
     width: number,
     height: number,
   ) => {
-    // Always use the current scale from the store
     const zoom = scale.zoom;
     const unit = scale.unit;
     const segments = scale.segments;
-    
     context.clearRect(0, 0, width, height);
     context.save();
     context.strokeStyle = "#71717a";

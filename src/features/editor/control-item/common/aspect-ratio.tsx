@@ -1,33 +1,33 @@
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
-import { AspectRatio as AspectRatioType } from "@/constants/aspect-ratios";
-
-interface AspectRatioProps {
-  aspectRatio: AspectRatioType;
-  setAspectRatio: (ratio: AspectRatioType) => void;
-  ratios: AspectRatioType[];
-}
-
-const AspectRatio = ({
-  aspectRatio,
-  setAspectRatio,
-  ratios,
-}: AspectRatioProps) => {
+export default function AspectRatio() {
+  const [value, setValue] = useState("locked");
+  const onChangeAligment = (value: string) => {
+    setValue(value);
+  };
   return (
-    <div className="flex flex-wrap gap-2">
-      {ratios.map((ratio) => (
-        <Button
-          key={ratio}
-          onClick={() => setAspectRatio(ratio)}
-          variant={aspectRatio === ratio ? "default" : "outline"}
+    <div className="flex gap-2">
+      <div className="flex flex-1 items-center text-sm text-muted-foreground">
+        Lock Ratio
+      </div>
+      <div className="w-32">
+        <ToggleGroup
+          value={value}
           size="sm"
-          className="flex items-center space-x-2"
+          className="grid h-8 grid-cols-2 text-sm"
+          type="single"
+          onValueChange={onChangeAligment}
+          variant={"secondary"}
         >
-          {ratio}
-        </Button>
-      ))}
+          <ToggleGroupItem value="locked" aria-label="Toggle italic">
+            Yes
+          </ToggleGroupItem>
+          <ToggleGroupItem size="sm" value="unlocked" aria-label="Toggle left">
+            No
+          </ToggleGroupItem>
+        </ToggleGroup>
+      </div>
     </div>
   );
-};
-
-export default AspectRatio;
+}
