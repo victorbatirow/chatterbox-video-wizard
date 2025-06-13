@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import Header from "./header";
 import Ruler from "./ruler";
@@ -47,9 +46,7 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
   const { scale, playerRef, fps, duration, setState, timeline, trackItemIds } = useStore();
   const currentFrame = useCurrentPlayerFrame(playerRef!);
   const [canvasSize, setCanvasSize] = useState(EMPTY_SIZE);
-  const [size, setSize] = useState<{ width: number; height: number }>(
-    EMPTY_SIZE,
-  );
+  const [size, setSize<{ width: number; height: number }>({ width: 0, height: 0 });
 
   const { setTimeline } = useStore();
   const onScroll = (v: { scrollTop: number; scrollLeft: number }) => {
@@ -376,12 +373,6 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
       timeline.scrollTo({ scrollLeft: availableScroll - canvasWidth });
     }
   }, [scale]);
-
-  // Calculate the actual timeline content width based on current size
-  const timelineContentWidth = Math.max(
-    size.width + TIMELINE_OFFSET_CANVAS_RIGHT,
-    canvasSize.width
-  );
 
   return (
     <div
