@@ -29,7 +29,6 @@ class Audio extends AudioBase {
   private isDirty: boolean = true;
   declare playbackRate: number;
   public bars: any[] = [];
-  private isInitialized: boolean = false;
 
   static createControls(): { controls: Record<string, Control> } {
     return { controls: createAudioControls() };
@@ -40,15 +39,11 @@ class Audio extends AudioBase {
     this.fill = "#00586c";
     this.objectCaching = false;
     this.initOffscreenCanvas();
+    this.initialize();
   }
 
-  // Override the render method to ensure initialization happens during first render
+  // Fixed render method to prevent visual glitching
   public _render(ctx: CanvasRenderingContext2D) {
-    // Try to initialize if not already done and we have timeline context
-    if (!this.isInitialized && this.canvas && this.tScale && this.duration) {
-      this.initializeWaveform();
-    }
-    
     super._render(ctx);
     this.drawTextIdentity(ctx);
     this.updateSelected(ctx);
@@ -61,7 +56,7 @@ class Audio extends AudioBase {
     ctx.rect(0, 0, this.width, this.height);
     ctx.clip();
 
-    // Draw the waveform
+    // Draw the waveform directly instead of using offscreen canvas
     this.drawWaveform(ctx);
 
     ctx.restore();
@@ -99,46 +94,18 @@ class Audio extends AudioBase {
     ctx.fill();
   }
 
-  // Called when timeline scale changes - ensure waveform is updated
-  public onScale() {
-    if (!this.isInitialized && this.canvas && this.tScale && this.duration) {
-      this.initializeWaveform();
-    } else if (this.isInitialized) {
-      this.bars = this.getBars(0, 0) as any;
-      this.onScrollChange({ scrollLeft: this.scrollLeft });
-    }
-  }
-
-  private async initializeWaveform() {
-    if (this.isInitialized) return;
-    
-    try {
-      console.log('Audio: Initializing waveform for:', this.src);
-      await this.initialize();
-      this.isInitialized = true;
-      console.log('Audio: Waveform initialization complete');
-      // Force a render update
-      this.canvas?.requestRenderAll();
-    } catch (error) {
-      console.error('Audio: Failed to initialize waveform:', error);
-    }
-  }
-
   private async initialize() {
-    console.log('Audio: Starting waveform initialization for:', this.src);
     const audioData = await getAudioData(this.src);
     this.barData = audioData;
     this.bars = this.getBars(0, 0) as any;
-    console.log('Audio: Waveform data loaded, bars count:', this.bars?.length || 0);
+    this.canvas?.requestRenderAll();
     this.onScrollChange({ scrollLeft: 0 });
   }
 
   public setSrc(src: string) {
-    console.log('Audio: Setting new src:', src);
     this.src = src;
-    this.isInitialized = false;
     this.initOffscreenCanvas();
-    // Don't call initializeWaveform here - let it happen during render
+    this.initialize();
     this.setCoords();
     this.canvas?.requestRenderAll();
   }
@@ -239,6 +206,11 @@ class Audio extends AudioBase {
 
   public onResize() {
     this.canvas?.requestRenderAll();
+  }
+
+  public onScale() {
+    this.bars = this.getBars(0, 0) as any;
+    this.onScrollChange({ scrollLeft: this.scrollLeft });
   }
 }
 
