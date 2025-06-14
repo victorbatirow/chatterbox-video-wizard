@@ -12,9 +12,9 @@ const HeroSection = ({ onSubmit, isDisabled = false }: HeroSectionProps) => {
     <section className="relative py-20 lg:py-32">
       <div className="text-center max-w-4xl mx-auto px-4">
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
-          Create stunning videos with{" "}
+          Create stunning ads with{" "}
           <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-            AI magic
+            Pamba
           </span>
         </h1>
         

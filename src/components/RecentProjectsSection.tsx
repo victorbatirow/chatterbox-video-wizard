@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar, Video, ChevronRight, Plus } from "lucide-react";
@@ -22,6 +23,11 @@ const RecentProjectsSection = ({
     window.scrollTo(0, 0);
   };
 
+  const handleViewAll = () => {
+    navigate('/projects');
+    window.scrollTo(0, 0);
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
@@ -35,8 +41,12 @@ const RecentProjectsSection = ({
       <div className="px-6 py-8 bg-black/50 backdrop-blur-sm rounded-2xl">
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-3xl font-bold text-white">Recent Projects</h2>
-          <Button variant="ghost" className="text-purple-300 hover:text-white hover:bg-white/10">
-            View all
+          <Button 
+            variant="ghost" 
+            className="text-white hover:bg-white/10 hover:text-white flex items-center gap-2"
+            onClick={handleViewAll}
+          >
+            View All
           </Button>
         </div>
         
