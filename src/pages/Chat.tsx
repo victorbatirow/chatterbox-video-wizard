@@ -1,4 +1,5 @@
 
+
 import { useState, useEffect } from "react";
 import { useSearchParams, useParams } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -81,10 +82,15 @@ const Chat = () => {
         return parsed.message;
       }
       
+      // Handle user input format
+      if (parsed.user_input) {
+        return parsed.user_input;
+      }
+      
       // If it's an object but doesn't have expected properties, stringify it nicely
       if (typeof parsed === 'object') {
         // Try to extract any text-like properties
-        const textProps = ['text', 'message', 'content', 'textResponse', 'response'];
+        const textProps = ['text', 'message', 'content', 'textResponse', 'response', 'user_input'];
         for (const prop of textProps) {
           if (parsed[prop] && typeof parsed[prop] === 'string') {
             return parsed[prop];
@@ -101,6 +107,32 @@ const Chat = () => {
     }
   };
 
+  // Helper function to extract video URLs from message content
+  const extractVideoUrls = (content: string): string[] => {
+    if (!content) return [];
+    
+    try {
+      const parsed = JSON.parse(content);
+      
+      // Check for various video URL properties
+      if (parsed.clip_urls && Array.isArray(parsed.clip_urls)) {
+        return parsed.clip_urls;
+      }
+      
+      if (parsed.videoUrls && Array.isArray(parsed.videoUrls)) {
+        return parsed.videoUrls;
+      }
+      
+      if (parsed.videos && Array.isArray(parsed.videos)) {
+        return parsed.videos;
+      }
+      
+      return [];
+    } catch {
+      return [];
+    }
+  };
+
   // Load existing project if projectId is provided
   useEffect(() => {
     const loadProject = async () => {
@@ -112,16 +144,67 @@ const Chat = () => {
         const projectDetails = await getProject(token, projectId);
         
         // Convert backend messages to frontend format with proper text parsing
-        const convertedMessages: Message[] = projectDetails.messages.map(msg => ({
-          id: msg.id,
-          text: parseMessageContent(msg.text_content || ''),
-          isUser: msg.message_type === 'user',
-          timestamp: new Date(msg.created_at),
-          // We'll add video handling here if needed
-        }));
+        const convertedMessages: Message[] = [];
+        const videoMessages: VideoMessage[] = [];
+        
+        for (const msg of projectDetails.messages) {
+          const messageText = parseMessageContent(msg.text_content || '');
+          const videoUrls = extractVideoUrls(msg.text_content || '');
+          
+          const convertedMessage: Message = {
+            id: msg.id,
+            text: messageText,
+            isUser: msg.message_type === 'user',
+            timestamp: new Date(msg.created_at),
+          };
+          
+          // If this is an AI message with videos, process them
+          if (!convertedMessage.isUser && videoUrls.length > 0) {
+            const messageVideoIds: string[] = [];
+            
+            videoUrls.forEach((videoUrl, index) => {
+              const videoId = `${msg.id}_video_${index}`;
+              messageVideoIds.push(videoId);
+              
+              const videoMessage: VideoMessage = {
+                id: videoId,
+                videoUrl: videoUrl,
+                prompt: `${messageText} (${index + 1}/${videoUrls.length})`,
+                timestamp: new Date(msg.created_at),
+                messageId: msg.id,
+              };
+              
+              videoMessages.push(videoMessage);
+              
+              // Add to shared video store for editor
+              const chatVideo = {
+                id: videoId,
+                videoUrl: videoUrl,
+                prompt: `${messageText} (${index + 1}/${videoUrls.length})`,
+                timestamp: new Date(msg.created_at),
+                preview: videoUrl,
+                messageId: msg.id,
+              };
+              
+              addChatVideo(chatVideo);
+            });
+            
+            convertedMessage.videoIds = messageVideoIds;
+          }
+          
+          convertedMessages.push(convertedMessage);
+        }
         
         setMessages(convertedMessages);
+        setVideos(videoMessages);
         setCurrentProjectId(projectId);
+        
+        // If there are videos, set the videos panel as active
+        if (videoMessages.length > 0) {
+          setActiveMenuItem("videos");
+          setShowMenuItem(true);
+        }
+        
       } catch (error) {
         console.error('Error loading project:', error);
         toast({
@@ -135,7 +218,7 @@ const Chat = () => {
     };
 
     loadProject();
-  }, [projectId, isAuthenticated, getAccessTokenSilently]);
+  }, [projectId, isAuthenticated, getAccessTokenSilently, addChatVideo, setActiveMenuItem, setShowMenuItem]);
 
   // Check for initial prompt from URL parameters
   useEffect(() => {
@@ -329,6 +412,10 @@ const Chat = () => {
       setActiveMenuItem("videos");
       setShowMenuItem(true);
       scrollToVideos(message.videoIds);
+    } else if (message.videoId) {
+      setActiveMenuItem("videos");
+      setShowMenuItem(true);
+      setCurrentVideoId(message.videoId);
     }
   };
 
@@ -390,3 +477,4 @@ const Chat = () => {
 };
 
 export default Chat;
+
