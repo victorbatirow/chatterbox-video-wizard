@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useSearchParams, useParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import ChatInterface from "@/components/ChatInterface";
 import VideoEditor from "@/components/VideoEditor";
@@ -8,15 +8,13 @@ import SettingsDialog from "@/components/SettingsDialog";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import useVideoStore from "@/stores/use-video-store";
 import useLayoutStore from "@/features/editor/store/use-layout-store";
-import { createProject, getProject, sendChatMessage, ProjectDetails, ChatMessage } from "@/services/api";
-import { toast } from "@/hooks/use-toast";
 
 export interface VideoMessage {
   id: string;
   videoUrl: string;
   prompt: string;
   timestamp: Date;
-  messageId?: string;
+  messageId?: string; // Add messageId to track which message generated this video
 }
 
 export interface Message {
@@ -25,25 +23,29 @@ export interface Message {
   isUser: boolean;
   timestamp: Date;
   videoId?: string;
-  videoIds?: string[];
+  videoIds?: string[]; // Add array to track multiple videos per message
 }
 
 const Chat = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { projectId } = useParams();
   const [videos, setVideos] = useState<VideoMessage[]>([]);
   const [currentVideoId, setCurrentVideoId] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [highlightedVideoIds, setHighlightedVideoIds] = useState<string[]>([]);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [currentProjectId, setCurrentProjectId] = useState<string | null>(projectId || null);
-  const [isLoadingProject, setIsLoadingProject] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: "1",
+      text: "Hi! I'm your AI assistant. How can I help you today?",
+      isUser: false,
+      timestamp: new Date(),
+    },
+  ]);
 
   const { addChatVideo, scrollToVideos, clearHighlights } = useVideoStore();
   const { setActiveMenuItem, setShowMenuItem } = useLayoutStore();
 
-  const { isAuthenticated, isLoading, loginWithRedirect, getAccessTokenSilently } = useAuth0();
+  const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -51,105 +53,19 @@ const Chat = () => {
     }
   }, [isAuthenticated, isLoading, loginWithRedirect]);
 
-  // Load existing project if projectId is provided
-  useEffect(() => {
-    const loadProject = async () => {
-      if (!projectId || !isAuthenticated) return;
-      
-      setIsLoadingProject(true);
-      try {
-        const token = await getAccessTokenSilently();
-        const projectDetails = await getProject(token, projectId);
-        
-        // Convert backend messages to frontend format
-        const convertedMessages: Message[] = projectDetails.messages.map(msg => ({
-          id: msg.id,
-          text: msg.text_content || '',
-          isUser: msg.message_type === 'user',
-          timestamp: new Date(msg.created_at),
-          // We'll add video handling here if needed
-        }));
-        
-        setMessages(convertedMessages);
-        setCurrentProjectId(projectId);
-      } catch (error) {
-        console.error('Error loading project:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load project",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoadingProject(false);
-      }
-    };
-
-    loadProject();
-  }, [projectId, isAuthenticated, getAccessTokenSilently]);
-
   // Check for initial prompt from URL parameters
   useEffect(() => {
     const initialPrompt = searchParams.get('prompt');
-    if (initialPrompt && !currentProjectId) {
+    if (initialPrompt) {
       // Clear the URL parameter
       setSearchParams(new URLSearchParams());
-      // Create new project with initial prompt
-      handleCreateProjectWithPrompt(initialPrompt);
+      // Send the initial prompt
+      handleSendMessage(initialPrompt);
     }
-  }, [searchParams, currentProjectId]);
-
-  const handleCreateProjectWithPrompt = async (prompt: string) => {
-    if (!isAuthenticated) return;
-    
-    setIsGenerating(true);
-    try {
-      const token = await getAccessTokenSilently();
-      const result = await createProject(token, prompt);
-      
-      setCurrentProjectId(result.project.id);
-      
-      // Add the initial user message
-      const userMessage: Message = {
-        id: Date.now().toString(),
-        text: prompt,
-        isUser: true,
-        timestamp: new Date(),
-      };
-      
-      // Add the AI response
-      const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: result.response.text,
-        isUser: false,
-        timestamp: new Date(),
-      };
-      
-      setMessages([userMessage, aiMessage]);
-      
-      // Handle videos if provided
-      if (result.response.clip_urls && result.response.clip_urls.length > 0) {
-        handleVideoUrls(result.response.clip_urls, prompt, aiMessage.id);
-      }
-      
-    } catch (error) {
-      console.error('Error creating project:', error);
-      toast({
-        title: "Error",
-        description: "Failed to create project",
-        variant: "destructive",
-      });
-    } finally {
-      setIsGenerating(false);
-    }
-  };
+  }, [searchParams]);
 
   const handleSendMessage = async (prompt: string) => {
-    if (!prompt.trim() || isGenerating || !isAuthenticated) return;
-
-    // If no project exists, create one first
-    if (!currentProjectId) {
-      return handleCreateProjectWithPrompt(prompt);
-    }
+    if (!prompt.trim() || isGenerating) return;
 
     // Add user message
     const userMessage: Message = {
@@ -163,94 +79,102 @@ const Chat = () => {
     setIsGenerating(true);
 
     try {
-      const token = await getAccessTokenSilently();
-      const response = await sendChatMessage(token, currentProjectId, prompt);
-      
-      const aiMessageId = (Date.now() + 1).toString();
-      
-      // Add AI response
+      // Send to backend API
+      const response = await fetch('http://localhost:8081/prompt', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ user_input: prompt }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Backend response data:', data);
+
+      let videoIds: string[] = [];
+      const aiMessageId = (Date.now() + 2).toString();
+
+      // Check if backend returned video URLs (new format with clip_urls array)
+      if (data.clip_urls && Array.isArray(data.clip_urls) && data.clip_urls.length > 0) {
+        console.log('Processing clip_urls:', data.clip_urls);
+        
+        // Process each video URL in the array
+        data.clip_urls.forEach((videoUrl: string, index: number) => {
+          const currentVideoId = (Date.now() + 1000 + index).toString();
+          videoIds.push(currentVideoId);
+          
+          const newVideo: VideoMessage = {
+            id: currentVideoId,
+            videoUrl: videoUrl,
+            prompt: `${prompt} (${index + 1}/${data.clip_urls.length})`,
+            timestamp: new Date(),
+            messageId: aiMessageId, // Link video to the AI message
+          };
+
+          console.log('Adding video to local state:', newVideo);
+          // Add to local videos list
+          setVideos(prev => {
+            const updated = [...prev, newVideo];
+            console.log('Updated videos state:', updated);
+            return updated;
+          });
+
+          // Add to shared video store for editor
+          const chatVideo = {
+            id: currentVideoId,
+            videoUrl: videoUrl,
+            prompt: `${prompt} (${index + 1}/${data.clip_urls.length})`,
+            timestamp: new Date(),
+            preview: videoUrl // Use video URL as preview for now
+          };
+          
+          console.log('Adding video to store:', chatVideo);
+          addChatVideo(chatVideo);
+
+          // Set the first video as current
+          if (index === 0) {
+            setCurrentVideoId(currentVideoId);
+            console.log('Set current video ID:', currentVideoId);
+          }
+        });
+
+        // Switch to videos panel in editor
+        console.log('Switching to videos panel');
+        setActiveMenuItem("videos");
+        setShowMenuItem(true);
+      } else {
+        console.log('No clip_urls found in response or empty array');
+      }
+
+      // Add AI response (use 'text' field from new format, fallback to 'response' for backward compatibility)
       const aiMessage: Message = {
         id: aiMessageId,
-        text: response.text,
+        text: data.text || data.response || "I've processed your request.",
         isUser: false,
         timestamp: new Date(),
+        videoIds: videoIds.length > 0 ? videoIds : undefined,
       };
 
       setMessages(prev => [...prev, aiMessage]);
-      
-      // Handle videos if provided
-      if (response.clip_urls && response.clip_urls.length > 0) {
-        handleVideoUrls(response.clip_urls, prompt, aiMessageId);
-      }
-      
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('Error calling backend API:', error);
       
       // Add error message
       const errorMessage: Message = {
-        id: (Date.now() + 2).toString(),
+        id: (Date.now() + 1).toString(),
         text: "Sorry, I'm having trouble connecting to the server. Please try again.",
         isUser: false,
         timestamp: new Date(),
       };
 
       setMessages(prev => [...prev, errorMessage]);
-      
-      toast({
-        title: "Error",
-        description: "Failed to send message",
-        variant: "destructive",
-      });
     } finally {
       setIsGenerating(false);
     }
-  };
-
-  const handleVideoUrls = (clipUrls: string[], prompt: string, messageId: string) => {
-    let videoIds: string[] = [];
-    
-    clipUrls.forEach((videoUrl, index) => {
-      const currentVideoId = (Date.now() + 1000 + index).toString();
-      videoIds.push(currentVideoId);
-      
-      const newVideo: VideoMessage = {
-        id: currentVideoId,
-        videoUrl: videoUrl,
-        prompt: `${prompt} (${index + 1}/${clipUrls.length})`,
-        timestamp: new Date(),
-        messageId: messageId,
-      };
-
-      // Add to local videos list
-      setVideos(prev => [...prev, newVideo]);
-
-      // Add to shared video store for editor
-      const chatVideo = {
-        id: currentVideoId,
-        videoUrl: videoUrl,
-        prompt: `${prompt} (${index + 1}/${clipUrls.length})`,
-        timestamp: new Date(),
-        preview: videoUrl
-      };
-      
-      addChatVideo(chatVideo);
-
-      // Set the first video as current
-      if (index === 0) {
-        setCurrentVideoId(currentVideoId);
-      }
-    });
-
-    // Update the message with video IDs
-    setMessages(prev => prev.map(msg => 
-      msg.id === messageId 
-        ? { ...msg, videoIds: videoIds }
-        : msg
-    ));
-
-    // Switch to videos panel in editor
-    setActiveMenuItem("videos");
-    setShowMenuItem(true);
   };
 
   const handleVideoGeneration = async (prompt: string) => {
@@ -275,9 +199,17 @@ const Chat = () => {
   };
 
   const handleMessageClick = (message: Message) => {
+    console.log('Chat: handleMessageClick called with message:', message.id, message.videoIds);
+    
+    // Only handle clicks on AI messages that have videos
     if (!message.isUser && message.videoIds && message.videoIds.length > 0) {
+      console.log('Chat: Message clicked, highlighting videos:', message.videoIds);
+      
+      // Switch to videos panel if not already active
       setActiveMenuItem("videos");
       setShowMenuItem(true);
+      
+      // Clear any existing highlights and set new ones
       scrollToVideos(message.videoIds);
     }
   };
@@ -286,7 +218,7 @@ const Chat = () => {
     setIsSettingsOpen(true);
   };
 
-  if (isLoading || isLoadingProject) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
         <div className="text-white text-xl">Loading...</div>
