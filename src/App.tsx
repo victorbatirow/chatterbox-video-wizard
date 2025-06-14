@@ -5,34 +5,17 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
-import { useEffect } from "react";
 import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
 import Projects from "./pages/Projects";
 import Community from "./pages/Community";
 import Chat from "./pages/Chat";
 import NotFound from "./pages/NotFound";
-import { createUserIfNeeded } from "./services/api";
 
 const queryClient = new QueryClient();
 
 const AppContent = () => {
-  const { isAuthenticated, user, getAccessTokenSilently, isLoading } = useAuth0();
-
-  useEffect(() => {
-    const createUser = async () => {
-      if (isAuthenticated && user) {
-        try {
-          const token = await getAccessTokenSilently();
-          await createUserIfNeeded(user, token);
-        } catch (error) {
-          console.error('Error creating user:', error);
-        }
-      }
-    };
-
-    createUser();
-  }, [isAuthenticated, user, getAccessTokenSilently]);
+  const { isLoading } = useAuth0();
 
   if (isLoading) {
     return (
