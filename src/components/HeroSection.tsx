@@ -19,7 +19,7 @@ const HeroSection = ({ onSubmit, isDisabled = false }: HeroSectionProps) => {
         </h1>
         
         <p className="text-xl text-white/80 mb-12 max-w-2xl mx-auto leading-relaxed">
-          Transform your ideas into professional videos in seconds. No editing skills required.
+          Transform your ideas into professional videos in seconds.
         </p>
         
         {/* Video Prompt Input */}

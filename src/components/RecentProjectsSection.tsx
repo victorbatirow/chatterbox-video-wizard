@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar, Video, ChevronRight, Plus } from "lucide-react";
@@ -33,7 +32,7 @@ const RecentProjectsSection = ({
 
   return (
     <section className="py-12">
-      <div className="px-6 py-8 bg-black/30 backdrop-blur-sm rounded-2xl">
+      <div className="px-6 py-8 bg-black/50 backdrop-blur-sm rounded-2xl">
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-3xl font-bold text-white">Recent Projects</h2>
           <Button variant="ghost" className="text-purple-300 hover:text-white hover:bg-white/10">
