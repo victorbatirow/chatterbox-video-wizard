@@ -18,6 +18,14 @@ const Landing = () => {
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
 
   useEffect(() => {
+    // Redirect authenticated users to dashboard
+    if (!isLoading && isAuthenticated) {
+      navigate('/dashboard');
+      return;
+    }
+  }, [isAuthenticated, isLoading, navigate]);
+
+  useEffect(() => {
     // Scroll to top when component mounts
     window.scrollTo(0, 0);
   }, []);
@@ -33,12 +41,26 @@ const Landing = () => {
     }
   };
 
+  // Show loading while checking auth status
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
+
+  // Don't render landing page if user is authenticated (will redirect)
+  if (isAuthenticated) {
+    return null;
+  }
+
   return (
     <div className="flex flex-col min-h-full relative">
       <StaticGradientBackground />
       
       {/* Navigation */}
-      <Navbar isAuthenticated={isAuthenticated && !isLoading} />
+      <Navbar isAuthenticated={false} />
 
       <div className="flex flex-col flex-1 relative z-10">
         <Container>
