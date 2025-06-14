@@ -9,7 +9,8 @@ createRoot(document.getElementById("root")!).render(
     domain="auth.pamba.app"
     clientId="hcdMCKsScucHyZcp6mWiKUhL48hdC54I"
     authorizationParams={{
-      redirect_uri: window.location.origin + '/dashboard'
+      redirect_uri: window.location.origin + '/dashboard',
+      audience: 'https://dev-y1uvqekat854n8q4.us.auth0.com/api/v2/'
     }}
   >
     <App />
