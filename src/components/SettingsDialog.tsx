@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import {
@@ -26,7 +27,7 @@ interface SettingsDialogProps {
 
 const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
   const location = useLocation();
-  const isInProject = location.pathname === '/chat';
+  const isInProject = location.pathname.startsWith('/chat');
   const [defaultTab, setDefaultTab] = useState(isInProject ? "project" : "workspace");
 
   return (
