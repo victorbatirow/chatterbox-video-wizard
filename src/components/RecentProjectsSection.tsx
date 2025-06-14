@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar, Video, ChevronRight, Plus } from "lucide-react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Project } from "@/services/api";
 
 interface RecentProjectsSectionProps {
@@ -17,8 +17,6 @@ const RecentProjectsSection = ({
   isCreatingProject = false 
 }: RecentProjectsSectionProps) => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const isProjectsPage = location.pathname === '/projects';
 
   const handleProjectClick = (projectId: string) => {
     navigate(`/chat/${projectId}`);
@@ -42,18 +40,14 @@ const RecentProjectsSection = ({
     <section className="py-12">
       <div className="px-6 py-8 bg-black/50 backdrop-blur-sm rounded-2xl">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl font-bold text-white">
-            {isProjectsPage ? 'All Projects' : 'Recent Projects'}
-          </h2>
-          {!isProjectsPage && (
-            <Button 
-              variant="ghost" 
-              className="text-white hover:bg-white/10 hover:text-white flex items-center gap-2"
-              onClick={handleViewAll}
-            >
-              View All
-            </Button>
-          )}
+          <h2 className="text-3xl font-bold text-white">Recent Projects</h2>
+          <Button 
+            variant="ghost" 
+            className="text-white hover:bg-white/10 hover:text-white flex items-center gap-2"
+            onClick={handleViewAll}
+          >
+            View All
+          </Button>
         </div>
         
         {projects.length === 0 ? (
@@ -85,7 +79,7 @@ const RecentProjectsSection = ({
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {(isProjectsPage ? projects : projects.slice(0, 5)).map((project) => (
+            {projects.slice(0, 5).map((project) => (
               <Card key={project.id} className="bg-white/5 border-white/10 hover:bg-white/10 transition-colors cursor-pointer group">
                 <CardContent 
                   className="p-6"

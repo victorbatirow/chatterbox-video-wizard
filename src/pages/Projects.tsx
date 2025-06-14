@@ -1,20 +1,14 @@
 
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import Navbar from "@/components/Navbar";
 import RecentProjectsSection from "@/components/RecentProjectsSection";
 import Footer from "@/components/Footer";
 import Container from "@/components/Container";
 import StaticGradientBackground from "@/components/StaticGradientBackground";
-import { createProject, getProjects, Project } from "@/services/api";
-import { toast } from "@/hooks/use-toast";
 
 const Projects = () => {
-  const navigate = useNavigate();
-  const { isAuthenticated, isLoading, loginWithRedirect, getAccessTokenSilently } = useAuth0();
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [isCreatingProject, setIsCreatingProject] = useState(false);
+  const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -26,50 +20,6 @@ const Projects = () => {
     // Scroll to top when component mounts
     window.scrollTo(0, 0);
   }, []);
-
-  useEffect(() => {
-    const loadProjects = async () => {
-      if (isAuthenticated) {
-        try {
-          const token = await getAccessTokenSilently();
-          const userProjects = await getProjects(token);
-          setProjects(userProjects);
-        } catch (error) {
-          console.error('Error loading projects:', error);
-          toast({
-            title: "Error",
-            description: "Failed to load projects",
-            variant: "destructive",
-          });
-        }
-      }
-    };
-
-    loadProjects();
-  }, [isAuthenticated, getAccessTokenSilently]);
-
-  const handleCreateNewProject = async () => {
-    if (!isAuthenticated) return;
-    
-    setIsCreatingProject(true);
-    try {
-      const token = await getAccessTokenSilently();
-      const result = await createProject(token);
-      
-      // Navigate to the new project's chat
-      navigate(`/chat/${result.project.id}`);
-      window.scrollTo(0, 0);
-    } catch (error) {
-      console.error('Error creating project:', error);
-      toast({
-        title: "Error",
-        description: "Failed to create project",
-        variant: "destructive",
-      });
-    } finally {
-      setIsCreatingProject(false);
-    }
-  };
 
   if (isLoading) {
     return (
@@ -94,11 +44,7 @@ const Projects = () => {
       
       <div className="flex flex-col flex-1 relative z-10 pt-16">
         <Container>
-          <RecentProjectsSection 
-            projects={projects} 
-            onCreateProject={handleCreateNewProject}
-            isCreatingProject={isCreatingProject}
-          />
+          <RecentProjectsSection />
         </Container>
       </div>
       
