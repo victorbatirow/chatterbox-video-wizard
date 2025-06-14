@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useSearchParams, useParams } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -53,16 +54,46 @@ const Chat = () => {
 
   // Helper function to parse message content
   const parseMessageContent = (content: string): string => {
+    if (!content) return '';
+    
     try {
       // Try to parse as JSON first
       const parsed = JSON.parse(content);
-      if (parsed.textResponse) {
-        return parsed.textResponse;
-      }
+      
+      // Handle different JSON structures
       if (typeof parsed === 'string') {
         return parsed;
       }
-      // If it's an object but doesn't have textResponse, return the original content
+      
+      if (parsed.textResponse) {
+        return parsed.textResponse;
+      }
+      
+      if (parsed.text) {
+        return parsed.text;
+      }
+      
+      if (parsed.content) {
+        return parsed.content;
+      }
+      
+      if (parsed.message) {
+        return parsed.message;
+      }
+      
+      // If it's an object but doesn't have expected properties, stringify it nicely
+      if (typeof parsed === 'object') {
+        // Try to extract any text-like properties
+        const textProps = ['text', 'message', 'content', 'textResponse', 'response'];
+        for (const prop of textProps) {
+          if (parsed[prop] && typeof parsed[prop] === 'string') {
+            return parsed[prop];
+          }
+        }
+        // If no text properties found, return the original content
+        return content;
+      }
+      
       return content;
     } catch {
       // If it's not valid JSON, return as is
