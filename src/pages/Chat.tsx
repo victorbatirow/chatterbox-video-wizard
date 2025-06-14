@@ -51,6 +51,25 @@ const Chat = () => {
     }
   }, [isAuthenticated, isLoading, loginWithRedirect]);
 
+  // Helper function to parse message content
+  const parseMessageContent = (content: string): string => {
+    try {
+      // Try to parse as JSON first
+      const parsed = JSON.parse(content);
+      if (parsed.textResponse) {
+        return parsed.textResponse;
+      }
+      if (typeof parsed === 'string') {
+        return parsed;
+      }
+      // If it's an object but doesn't have textResponse, return the original content
+      return content;
+    } catch {
+      // If it's not valid JSON, return as is
+      return content;
+    }
+  };
+
   // Load existing project if projectId is provided
   useEffect(() => {
     const loadProject = async () => {
@@ -61,10 +80,10 @@ const Chat = () => {
         const token = await getAccessTokenSilently();
         const projectDetails = await getProject(token, projectId);
         
-        // Convert backend messages to frontend format
+        // Convert backend messages to frontend format with proper text parsing
         const convertedMessages: Message[] = projectDetails.messages.map(msg => ({
           id: msg.id,
-          text: msg.text_content || '',
+          text: parseMessageContent(msg.text_content || ''),
           isUser: msg.message_type === 'user',
           timestamp: new Date(msg.created_at),
           // We'll add video handling here if needed
@@ -116,10 +135,10 @@ const Chat = () => {
         timestamp: new Date(),
       };
       
-      // Add the AI response
+      // Add the AI response with proper text parsing
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: result.response.text,
+        text: parseMessageContent(result.response.text),
         isUser: false,
         timestamp: new Date(),
       };
@@ -168,10 +187,10 @@ const Chat = () => {
       
       const aiMessageId = (Date.now() + 1).toString();
       
-      // Add AI response
+      // Add AI response with proper text parsing
       const aiMessage: Message = {
         id: aiMessageId,
-        text: response.text,
+        text: parseMessageContent(response.text),
         isUser: false,
         timestamp: new Date(),
       };
