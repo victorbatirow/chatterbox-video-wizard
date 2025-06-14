@@ -102,7 +102,25 @@ const Chat = () => {
       
       return content;
     } catch {
-      // If it's not valid JSON, return as is
+      // If it's not valid JSON, it might be user text with JSON appended
+      // Look for patterns where user text is followed by JSON instructions
+      const jsonInstructionPattern = /^(.+?)\s*You must answer strictly in the following JSON format:/s;
+      const match = content.match(jsonInstructionPattern);
+      
+      if (match && match[1]) {
+        // Return just the user text part, trimmed
+        return match[1].trim();
+      }
+      
+      // Also check for other JSON instruction patterns
+      const jsonFormatPattern = /^(.+?)\s*\{\s*"textResponse":/s;
+      const formatMatch = content.match(jsonFormatPattern);
+      
+      if (formatMatch && formatMatch[1]) {
+        return formatMatch[1].trim();
+      }
+      
+      // If no patterns match, return as is
       return content;
     }
   };
@@ -477,4 +495,3 @@ const Chat = () => {
 };
 
 export default Chat;
-
