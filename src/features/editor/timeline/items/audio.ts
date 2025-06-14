@@ -1,4 +1,3 @@
-
 import {
   Audio as AudioBase,
   AudioProps,
@@ -26,6 +25,7 @@ class Audio extends AudioBase {
   private isDirty: boolean = true;
   declare playbackRate: number;
   public bars: any[] = [];
+  private isDataLoaded: boolean = false;
 
   static createControls(): { controls: Record<string, Control> } {
     return { controls: createAudioControls() };
@@ -36,11 +36,20 @@ class Audio extends AudioBase {
     this.fill = "#00586c";
     this.objectCaching = false;
     this.initOffscreenCanvas();
-    
-    // Ensure proper timeline bounds are set immediately
-    this.setCoords();
-    
     this.initialize();
+  }
+
+  // Override getBoundingRect to ensure consistent bounds reporting
+  public getBoundingRect() {
+    const rect = super.getBoundingRect();
+    // Ensure the timeline always gets consistent bounds, even before data loads
+    return {
+      ...rect,
+      left: this.left - this.width / 2,
+      top: this.top - this.height / 2,
+      width: this.width,
+      height: this.height
+    };
   }
 
   // Fixed render method to prevent visual glitching
@@ -57,8 +66,10 @@ class Audio extends AudioBase {
     ctx.rect(0, 0, this.width, this.height);
     ctx.clip();
 
-    // Draw the waveform directly instead of using offscreen canvas
-    this.drawWaveform(ctx);
+    // Only draw waveform if data is loaded
+    if (this.isDataLoaded) {
+      this.drawWaveform(ctx);
+    }
 
     ctx.restore();
   }
@@ -100,23 +111,21 @@ class Audio extends AudioBase {
       const audioData = await getAudioData(this.src);
       this.barData = audioData;
       this.bars = this.getBars(0, 0) as any;
+      this.isDataLoaded = true;
       
-      // Update coordinates after data is loaded to ensure proper timeline positioning
-      this.setCoords();
       this.canvas?.requestRenderAll();
       this.onScrollChange({ scrollLeft: 0 });
     } catch (error) {
       console.error('Error loading audio data:', error);
-      // Even if audio data fails to load, ensure the item has proper coordinates
-      this.setCoords();
+      this.isDataLoaded = false;
     }
   }
 
   public setSrc(src: string) {
     this.src = src;
+    this.isDataLoaded = false;
     this.initOffscreenCanvas();
     this.initialize();
-    this.setCoords();
     this.canvas?.requestRenderAll();
   }
 
@@ -219,8 +228,10 @@ class Audio extends AudioBase {
   }
 
   public onScale() {
-    this.bars = this.getBars(0, 0) as any;
-    this.onScrollChange({ scrollLeft: this.scrollLeft });
+    if (this.isDataLoaded) {
+      this.bars = this.getBars(0, 0) as any;
+      this.onScrollChange({ scrollLeft: this.scrollLeft });
+    }
   }
 }
 
