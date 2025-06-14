@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import Navbar from "@/components/Navbar";
-import ProjectsList from "@/components/ProjectsList";
+import RecentProjectsSection from "@/components/RecentProjectsSection";
 import Footer from "@/components/Footer";
 import Container from "@/components/Container";
 import StaticGradientBackground from "@/components/StaticGradientBackground";
@@ -94,7 +94,7 @@ const Projects = () => {
       
       <div className="flex flex-col flex-1 relative z-10 pt-16">
         <Container>
-          <ProjectsList 
+          <RecentProjectsSection 
             projects={projects} 
             onCreateProject={handleCreateNewProject}
             isCreatingProject={isCreatingProject}
