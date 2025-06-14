@@ -1,15 +1,21 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar, Video, ChevronRight } from "lucide-react";
+import { Calendar, Video, ChevronRight, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Project } from "@/services/api";
 
 interface RecentProjectsSectionProps {
   projects?: Project[];
+  onCreateProject?: () => void;
+  isCreatingProject?: boolean;
 }
 
-const RecentProjectsSection = ({ projects = [] }: RecentProjectsSectionProps) => {
+const RecentProjectsSection = ({ 
+  projects = [], 
+  onCreateProject,
+  isCreatingProject = false 
+}: RecentProjectsSectionProps) => {
   const navigate = useNavigate();
 
   const handleProjectClick = (projectId: string) => {
@@ -36,14 +42,35 @@ const RecentProjectsSection = ({ projects = [] }: RecentProjectsSectionProps) =>
         </div>
         
         {projects.length === 0 ? (
-          <div className="text-center py-12">
-            <Video className="w-16 h-16 text-purple-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">No projects yet</h3>
-            <p className="text-white/60">Create your first video project to get started</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Create New Project Card */}
+            <Card 
+              className="bg-white/5 border-white/10 hover:bg-white/10 transition-colors cursor-pointer group border-dashed"
+              onClick={onCreateProject}
+            >
+              <CardContent className="p-6 flex flex-col items-center justify-center h-full min-h-[160px]">
+                <div className="bg-purple-600/20 p-3 rounded-lg mb-4">
+                  <Plus className="w-6 h-6 text-purple-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-purple-300 transition-colors text-center">
+                  {isCreatingProject ? 'Creating...' : 'Create New Project'}
+                </h3>
+                <p className="text-white/60 text-sm text-center">
+                  Start a new video project
+                </p>
+              </CardContent>
+            </Card>
+            
+            {/* Empty State for when there are no projects */}
+            <div className="col-span-full text-center py-12">
+              <Video className="w-16 h-16 text-purple-400 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-white mb-2">No projects yet</h3>
+              <p className="text-white/60">Create your first video project to get started</p>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {projects.slice(0, 6).map((project) => (
+            {projects.slice(0, 5).map((project) => (
               <Card key={project.id} className="bg-white/5 border-white/10 hover:bg-white/10 transition-colors cursor-pointer group">
                 <CardContent 
                   className="p-6"
@@ -67,6 +94,24 @@ const RecentProjectsSection = ({ projects = [] }: RecentProjectsSectionProps) =>
                 </CardContent>
               </Card>
             ))}
+            
+            {/* Create New Project Card */}
+            <Card 
+              className="bg-white/5 border-white/10 hover:bg-white/10 transition-colors cursor-pointer group border-dashed"
+              onClick={onCreateProject}
+            >
+              <CardContent className="p-6 flex flex-col items-center justify-center h-full min-h-[160px]">
+                <div className="bg-purple-600/20 p-3 rounded-lg mb-4">
+                  <Plus className="w-6 h-6 text-purple-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-purple-300 transition-colors text-center">
+                  {isCreatingProject ? 'Creating...' : 'Create New Project'}
+                </h3>
+                <p className="text-white/60 text-sm text-center">
+                  Start a new video project
+                </p>
+              </CardContent>
+            </Card>
           </div>
         )}
       </div>

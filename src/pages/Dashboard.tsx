@@ -2,8 +2,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 import HeroSection from "@/components/HeroSection";
 import CommunitySection from "@/components/CommunitySection";
 import RecentProjectsSection from "@/components/RecentProjectsSection";
@@ -125,20 +123,12 @@ const Dashboard = () => {
           {/* Hero Section with Video Creation Prompt */}
           <HeroSection onSubmit={handleCreateVideoFromPrompt} isDisabled={isCreatingProject} />
 
-          {/* Create New Project Button */}
-          <div className="py-8 flex justify-center">
-            <Button
-              onClick={handleCreateNewProject}
-              disabled={isCreatingProject}
-              className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              {isCreatingProject ? 'Creating...' : 'Create New Project'}
-            </Button>
-          </div>
-
-          {/* Recent Projects */}
-          <RecentProjectsSection projects={projects} />
+          {/* Recent Projects with integrated Create New Project button */}
+          <RecentProjectsSection 
+            projects={projects} 
+            onCreateProject={handleCreateNewProject}
+            isCreatingProject={isCreatingProject}
+          />
 
           {/* Spacing between sections */}
           <div className="py-4" />
