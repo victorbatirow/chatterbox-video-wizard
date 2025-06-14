@@ -1,5 +1,4 @@
 
-
 import {
   Audio as AudioBase,
   AudioProps,
@@ -14,8 +13,6 @@ import {
 import { IDisplay } from "@designcombo/types";
 import { SECONDARY_FONT } from "../../constants/constants";
 import { createAudioControls } from "../controls";
-const MAX_CANVAS_WIDTH = 12000; // Keep canvas size reasonable
-const CANVAS_SAFE_DRAWING = 2000;
 
 class Audio extends AudioBase {
   static type = "Audio";
@@ -39,6 +36,10 @@ class Audio extends AudioBase {
     this.fill = "#00586c";
     this.objectCaching = false;
     this.initOffscreenCanvas();
+    
+    // Ensure proper timeline bounds are set immediately
+    this.setCoords();
+    
     this.initialize();
   }
 
@@ -95,11 +96,20 @@ class Audio extends AudioBase {
   }
 
   private async initialize() {
-    const audioData = await getAudioData(this.src);
-    this.barData = audioData;
-    this.bars = this.getBars(0, 0) as any;
-    this.canvas?.requestRenderAll();
-    this.onScrollChange({ scrollLeft: 0 });
+    try {
+      const audioData = await getAudioData(this.src);
+      this.barData = audioData;
+      this.bars = this.getBars(0, 0) as any;
+      
+      // Update coordinates after data is loaded to ensure proper timeline positioning
+      this.setCoords();
+      this.canvas?.requestRenderAll();
+      this.onScrollChange({ scrollLeft: 0 });
+    } catch (error) {
+      console.error('Error loading audio data:', error);
+      // Even if audio data fails to load, ensure the item has proper coordinates
+      this.setCoords();
+    }
   }
 
   public setSrc(src: string) {
@@ -215,4 +225,3 @@ class Audio extends AudioBase {
 }
 
 export default Audio;
-
