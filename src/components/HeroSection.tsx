@@ -1,28 +1,37 @@
 
+import { useState } from "react";
 import VideoPromptInput from "@/components/VideoPromptInput";
 
 interface HeroSectionProps {
   onSubmit: (prompt: string) => void;
+  isDisabled?: boolean;
 }
 
-const HeroSection = ({ onSubmit }: HeroSectionProps) => {
+const HeroSection = ({ onSubmit, isDisabled = false }: HeroSectionProps) => {
   return (
-    <div className="flex flex-col items-center justify-center px-6 py-20 text-center">
-      <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
-        Dream it, describe it,{" "}
-        <span className="inline-flex items-center gap-2">
-          watch it come alive
-        </span>
-      </h1>
-      <p className="text-xl text-white/70 mb-12 max-w-2xl">
-        Generate stunning videos by chatting with AI
-      </p>
-
-      {/* Prompt Input - Centered */}
-      <div className="mb-12 flex justify-center w-full">
-        <VideoPromptInput onSubmit={onSubmit} />
+    <section className="relative py-20 lg:py-32">
+      <div className="text-center max-w-4xl mx-auto px-4">
+        <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
+          Create stunning ads with{" "}
+          <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            Pamba
+          </span>
+        </h1>
+        
+        <p className="text-xl text-white/80 mb-12 max-w-2xl mx-auto leading-relaxed">
+          Transform your ideas into professional videos in seconds.
+        </p>
+        
+        {/* Video Prompt Input */}
+        <div className="max-w-2xl mx-auto">
+          <VideoPromptInput 
+            onSubmit={onSubmit}
+            placeholder="Describe the video you want to create..."
+            isDisabled={isDisabled}
+          />
+        </div>
       </div>
-    </div>
+    </section>
   );
 };
 
