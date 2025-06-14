@@ -8,9 +8,6 @@ import SettingsDialog from "@/components/SettingsDialog";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import useVideoStore from "@/stores/use-video-store";
 import useLayoutStore from "@/features/editor/store/use-layout-store";
-import { dispatch } from "@designcombo/events";
-import { ADD_VIDEO, CLEAR_TIMELINE } from "@designcombo/state";
-import { generateId } from "@designcombo/timeline";
 
 export interface VideoMessage {
   id: string;
@@ -105,9 +102,6 @@ const Chat = () => {
       if (data.clip_urls && Array.isArray(data.clip_urls) && data.clip_urls.length > 0) {
         console.log('Processing clip_urls:', data.clip_urls);
         
-        // Clear existing videos from timeline before adding new ones
-        dispatch(CLEAR_TIMELINE, {});
-        
         // Process each video URL in the array
         data.clip_urls.forEach((videoUrl: string, index: number) => {
           const currentVideoId = (Date.now() + 1000 + index).toString();
@@ -140,25 +134,6 @@ const Chat = () => {
           
           console.log('Adding video to store:', chatVideo);
           addChatVideo(chatVideo);
-
-          // Add video directly to timeline
-          console.log('Adding video to timeline:', currentVideoId);
-          dispatch(ADD_VIDEO, {
-            payload: {
-              id: generateId(),
-              details: {
-                src: videoUrl,
-              },
-              metadata: {
-                previewUrl: videoUrl,
-                prompt: `${prompt} (${index + 1}/${data.clip_urls.length})`,
-              },
-            },
-            options: {
-              resourceId: "main",
-              scaleMode: "fit",
-            },
-          });
 
           // Set the first video as current
           if (index === 0) {
