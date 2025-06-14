@@ -1,3 +1,5 @@
+
+
 import {
   Audio as AudioBase,
   AudioProps,
@@ -12,6 +14,8 @@ import {
 import { IDisplay } from "@designcombo/types";
 import { SECONDARY_FONT } from "../../constants/constants";
 import { createAudioControls } from "../controls";
+const MAX_CANVAS_WIDTH = 12000; // Keep canvas size reasonable
+const CANVAS_SAFE_DRAWING = 2000;
 
 class Audio extends AudioBase {
   static type = "Audio";
@@ -25,7 +29,6 @@ class Audio extends AudioBase {
   private isDirty: boolean = true;
   declare playbackRate: number;
   public bars: any[] = [];
-  private isDataLoaded: boolean = false;
 
   static createControls(): { controls: Record<string, Control> } {
     return { controls: createAudioControls() };
@@ -37,19 +40,6 @@ class Audio extends AudioBase {
     this.objectCaching = false;
     this.initOffscreenCanvas();
     this.initialize();
-  }
-
-  // Override getBoundingRect to ensure consistent bounds reporting
-  public getBoundingRect() {
-    const rect = super.getBoundingRect();
-    // Ensure the timeline always gets consistent bounds, even before data loads
-    return {
-      ...rect,
-      left: this.left - this.width / 2,
-      top: this.top - this.height / 2,
-      width: this.width,
-      height: this.height
-    };
   }
 
   // Fixed render method to prevent visual glitching
@@ -66,10 +56,8 @@ class Audio extends AudioBase {
     ctx.rect(0, 0, this.width, this.height);
     ctx.clip();
 
-    // Only draw waveform if data is loaded
-    if (this.isDataLoaded) {
-      this.drawWaveform(ctx);
-    }
+    // Draw the waveform directly instead of using offscreen canvas
+    this.drawWaveform(ctx);
 
     ctx.restore();
   }
@@ -107,25 +95,18 @@ class Audio extends AudioBase {
   }
 
   private async initialize() {
-    try {
-      const audioData = await getAudioData(this.src);
-      this.barData = audioData;
-      this.bars = this.getBars(0, 0) as any;
-      this.isDataLoaded = true;
-      
-      this.canvas?.requestRenderAll();
-      this.onScrollChange({ scrollLeft: 0 });
-    } catch (error) {
-      console.error('Error loading audio data:', error);
-      this.isDataLoaded = false;
-    }
+    const audioData = await getAudioData(this.src);
+    this.barData = audioData;
+    this.bars = this.getBars(0, 0) as any;
+    this.canvas?.requestRenderAll();
+    this.onScrollChange({ scrollLeft: 0 });
   }
 
   public setSrc(src: string) {
     this.src = src;
-    this.isDataLoaded = false;
     this.initOffscreenCanvas();
     this.initialize();
+    this.setCoords();
     this.canvas?.requestRenderAll();
   }
 
@@ -228,11 +209,10 @@ class Audio extends AudioBase {
   }
 
   public onScale() {
-    if (this.isDataLoaded) {
-      this.bars = this.getBars(0, 0) as any;
-      this.onScrollChange({ scrollLeft: this.scrollLeft });
-    }
+    this.bars = this.getBars(0, 0) as any;
+    this.onScrollChange({ scrollLeft: this.scrollLeft });
   }
 }
 
 export default Audio;
+
