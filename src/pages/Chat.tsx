@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSearchParams, useParams } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -13,7 +12,7 @@ import useStore from "@/features/editor/store/use-store";
 import { createProject, getProject, sendChatMessage, ProjectDetails, ChatMessage } from "@/services/api";
 import { toast } from "@/hooks/use-toast";
 import { dispatch } from "@designcombo/events";
-import { ADD_TRACK_ITEM } from "@designcombo/state";
+import ADD_TRACK_ITEM from "@designcombo/state";
 
 export interface VideoMessage {
   id: string;
