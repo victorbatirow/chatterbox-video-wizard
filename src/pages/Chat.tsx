@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useSearchParams, useParams } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -12,7 +13,6 @@ import useStore from "@/features/editor/store/use-store";
 import { createProject, getProject, sendChatMessage, ProjectDetails, ChatMessage } from "@/services/api";
 import { toast } from "@/hooks/use-toast";
 import { dispatch } from "@designcombo/events";
-import ADD_TRACK_ITEM from "@designcombo/state";
 
 export interface VideoMessage {
   id: string;
@@ -377,10 +377,57 @@ const Chat = () => {
 
       console.log('Adding video to timeline:', { videoId, videoUrl, startTime, endTime });
       
-      // Use the timeline's built-in method to add video items properly
-      dispatch(ADD_TRACK_ITEM, {
-        payload: {
-          trackItem: {
+      // Use a more direct approach with the timeline's track system
+      // Instead of using ADD_TRACK_ITEM which seems to not be available,
+      // let's use the timeline's existing method for adding items
+      if (timeline.addTrackItem) {
+        timeline.addTrackItem({
+          id: videoId,
+          type: "video",
+          name: `Video ${videoId}`,
+          display: {
+            from: startTime,
+            to: endTime,
+          },
+          details: {
+            src: videoUrl,
+            volume: 100,
+            opacity: 1,
+            borderWidth: 0,
+            borderColor: "#000000",
+            borderRadius: 0,
+            boxShadow: {
+              blur: 0,
+              color: "#000000",
+              offsetX: 0,
+              offsetY: 0,
+              spread: 0,
+            },
+          },
+          trim: {
+            from: 0,
+            to: videoDuration,
+          },
+          metadata: {
+            src: videoUrl,
+            previewUrl: videoUrl,
+          },
+          playbackRate: 1,
+          left: 0,
+          top: 0,
+          width: 200,
+          height: 356,
+          trackId: "main",
+        });
+      } else {
+        console.log('Timeline addTrackItem method not available, trying alternative approach');
+        
+        // Fallback: Try to add the video using the store's setState
+        const currentTracks = timeline?.tracks || [];
+        const mainTrack = currentTracks.find(track => track.id === "main") || currentTracks[0];
+        
+        if (mainTrack) {
+          const newTrackItem = {
             id: videoId,
             type: "video",
             name: `Video ${videoId}`,
@@ -411,20 +458,35 @@ const Chat = () => {
               src: videoUrl,
               previewUrl: videoUrl,
             },
-            // Timeline positioning
             playbackRate: 1,
             left: 0,
             top: 0,
             width: 200,
             height: 356,
-            // Track assignment - use main track or create if needed
-            trackId: "main",
-          },
-          trackId: "main", // Add to main video track
-        },
-      });
+            trackId: mainTrack.id,
+          };
+          
+          // Update the track with the new item
+          const updatedTracks = currentTracks.map(track => {
+            if (track.id === mainTrack.id) {
+              return {
+                ...track,
+                trackItems: [...(track.trackItems || []), newTrackItem]
+              };
+            }
+            return track;
+          });
+          
+          setState({
+            timeline: {
+              ...timeline,
+              tracks: updatedTracks
+            }
+          });
+        }
+      }
       
-      console.log('Video successfully added to timeline via dispatch');
+      console.log('Video successfully added to timeline');
       
     } catch (error) {
       console.error('Error adding video to timeline:', error);
