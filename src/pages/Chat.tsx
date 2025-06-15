@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSearchParams, useParams } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -362,21 +361,26 @@ const Chat = () => {
     }
   };
 
-  const addVideoToTimeline = async (videoUrl: string, videoId: string) => {
+  const addVideoToTimeline = async (videoUrl: string, videoId: string, index: number = 0) => {
     if (!timeline) {
       console.log('Timeline not available, cannot add video');
       return;
     }
 
     try {
+      // Calculate position based on index to avoid overlapping
+      const videoDuration = 5000; // 5 seconds per video
+      const startTime = index * videoDuration;
+      const endTime = startTime + videoDuration;
+
       // Create a proper video track item that matches the timeline's expected format
       const videoItem = {
         id: videoId,
         type: "video" as const,
         name: `Video ${videoId}`,
         display: {
-          from: 0,
-          to: 5000,
+          from: startTime,
+          to: endTime,
         },
         details: {
           src: videoUrl,
@@ -384,14 +388,14 @@ const Chat = () => {
         },
         trim: {
           from: 0,
-          to: 5000,
+          to: videoDuration,
         },
         metadata: {
           src: videoUrl,
           previewUrl: videoUrl,
         },
         // Add required properties for video timeline items
-        duration: 5000,
+        duration: videoDuration,
         aspectRatio: 9/16, // Standard vertical video ratio
         width: 100, // Timeline width
         height: 40, // Timeline height
@@ -449,8 +453,8 @@ const Chat = () => {
       
       addChatVideo(chatVideo);
 
-      // Add video to timeline automatically
-      addVideoToTimeline(videoUrl, currentVideoId);
+      // Add video to timeline automatically with proper indexing
+      addVideoToTimeline(videoUrl, currentVideoId, index);
 
       // Set the first video as current
       if (index === 0) {
