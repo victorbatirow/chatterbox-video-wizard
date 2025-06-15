@@ -1,15 +1,28 @@
-export const download = (url: string, filename: string) => {
+
+export const download = (url: string, filename: string, type?: string) => {
+  // Determine file extension based on type
+  let fileExtension = ".mp4";
+  if (type === "json") {
+    fileExtension = ".json";
+  } else if (type === "mp4") {
+    fileExtension = ".mp4";
+  }
+
+  // Remove existing extension from filename if present
+  const cleanFilename = filename.replace(/\.(mp4|json)$/, "");
+  const fullFilename = `${cleanFilename}${fileExtension}`;
+
   fetch(url)
     .then((response) => response.blob())
     .then((blob) => {
-      const url = window.URL.createObjectURL(blob);
+      const downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `${filename}.mp4`); // Specify the filename for the downloaded video
+      link.href = downloadUrl;
+      link.setAttribute("download", fullFilename);
       document.body.appendChild(link);
       link.click();
       link.parentNode?.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      window.URL.revokeObjectURL(downloadUrl);
     })
     .catch((error) => console.error("Download error:", error));
 };
