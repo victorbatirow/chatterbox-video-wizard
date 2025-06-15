@@ -20,6 +20,7 @@ interface VideoStore {
   setHighlightedVideoIds: (ids: string[]) => void;
   scrollToVideos: (videoIds: string[]) => void;
   clearHighlights: () => void;
+  clearAllChatVideos: () => void;
 }
 
 const useVideoStore = create<VideoStore>((set, get) => ({
@@ -56,6 +57,15 @@ const useVideoStore = create<VideoStore>((set, get) => ({
     set({ 
       highlightedVideoIds: [], 
       highlightTimeoutId: null 
+    });
+  },
+  
+  clearAllChatVideos: () => {
+    console.log('Video store: Clearing all chat videos');
+    set({ 
+      chatVideos: [],
+      highlightedVideoIds: [],
+      highlightTimeoutId: null
     });
   },
   

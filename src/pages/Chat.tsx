@@ -1,5 +1,3 @@
-
-
 import { useState, useEffect } from "react";
 import { useSearchParams, useParams } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -42,7 +40,7 @@ const Chat = () => {
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(projectId || null);
   const [isLoadingProject, setIsLoadingProject] = useState(false);
 
-  const { addChatVideo, scrollToVideos, clearHighlights } = useVideoStore();
+  const { addChatVideo, scrollToVideos, clearHighlights, clearAllChatVideos } = useVideoStore();
   const { setActiveMenuItem, setShowMenuItem } = useLayoutStore();
 
   const { isAuthenticated, isLoading, loginWithRedirect, getAccessTokenSilently } = useAuth0();
@@ -157,6 +155,10 @@ const Chat = () => {
       if (!projectId || !isAuthenticated) return;
       
       setIsLoadingProject(true);
+      
+      // Clear existing videos when loading a new project
+      clearAllChatVideos();
+      
       try {
         const token = await getAccessTokenSilently();
         const projectDetails = await getProject(token, projectId);
@@ -236,7 +238,7 @@ const Chat = () => {
     };
 
     loadProject();
-  }, [projectId, isAuthenticated, getAccessTokenSilently, addChatVideo, setActiveMenuItem, setShowMenuItem]);
+  }, [projectId, isAuthenticated, getAccessTokenSilently, addChatVideo, setActiveMenuItem, setShowMenuItem, clearAllChatVideos]);
 
   // Check for initial prompt from URL parameters
   useEffect(() => {
