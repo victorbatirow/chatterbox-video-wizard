@@ -433,8 +433,8 @@ const Chat = () => {
       },
     };
 
-    // Add the video item to the timeline
-    timeline.addTrackItem("main", videoItem);
+    // Add the video item to the timeline using the correct API
+    timeline.addTrackItem(videoItem);
   };
 
   const handleVideoGeneration = async (prompt: string) => {
