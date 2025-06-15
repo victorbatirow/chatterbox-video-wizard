@@ -8,6 +8,7 @@ import SettingsDialog from "@/components/SettingsDialog";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import useVideoStore from "@/stores/use-video-store";
 import useLayoutStore from "@/features/editor/store/use-layout-store";
+import useStore from "@/features/editor/store/use-store";
 import { createProject, getProject, sendChatMessage, ProjectDetails, ChatMessage } from "@/services/api";
 import { toast } from "@/hooks/use-toast";
 
@@ -42,6 +43,7 @@ const Chat = () => {
 
   const { addChatVideo, scrollToVideos, clearHighlights, clearAllChatVideos } = useVideoStore();
   const { setActiveMenuItem, setShowMenuItem } = useLayoutStore();
+  const { timeline } = useStore();
 
   const { isAuthenticated, isLoading, loginWithRedirect, getAccessTokenSilently } = useAuth0();
 
@@ -388,6 +390,9 @@ const Chat = () => {
       
       addChatVideo(chatVideo);
 
+      // Add video to timeline automatically
+      addVideoToTimeline(videoUrl, currentVideoId);
+
       // Set the first video as current
       if (index === 0) {
         setCurrentVideoId(currentVideoId);
@@ -404,6 +409,32 @@ const Chat = () => {
     // Switch to videos panel in editor
     setActiveMenuItem("videos");
     setShowMenuItem(true);
+  };
+
+  const addVideoToTimeline = (videoUrl: string, videoId: string) => {
+    if (!timeline) return;
+
+    // Add video to timeline on the main video track
+    const videoItem = {
+      id: videoId,
+      type: "video" as const,
+      src: videoUrl,
+      display: {
+        from: 0, // Start at beginning of timeline
+        to: 5000, // Default 5 second duration
+      },
+      details: {
+        src: videoUrl,
+        volume: 100,
+      },
+      trim: {
+        from: 0,
+        to: 5000,
+      },
+    };
+
+    // Add the video item to the timeline
+    timeline.addTrackItem("main", videoItem);
   };
 
   const handleVideoGeneration = async (prompt: string) => {
