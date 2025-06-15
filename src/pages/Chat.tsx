@@ -418,6 +418,7 @@ const Chat = () => {
     const videoItem = {
       id: videoId,
       type: "video" as const,
+      name: `Video ${videoId}`,
       src: videoUrl,
       display: {
         from: 0, // Start at beginning of timeline
@@ -430,6 +431,9 @@ const Chat = () => {
       trim: {
         from: 0,
         to: 5000,
+      },
+      metadata: {
+        src: videoUrl,
       },
     };
 
