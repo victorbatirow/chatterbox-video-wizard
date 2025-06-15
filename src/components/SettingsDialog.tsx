@@ -1,6 +1,5 @@
-
-import { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useLocation, useSearchParams } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -27,17 +26,76 @@ interface SettingsDialogProps {
 
 const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const isInProject = location.pathname.startsWith('/chat');
-  const [defaultTab, setDefaultTab] = useState(isInProject ? "project" : "workspace");
+  
+  // Get settings type and tab from URL params
+  const settingsParam = searchParams.get('settings');
+  const isSettingsOpen = settingsParam !== null;
+  
+  // Determine default tab based on context and URL
+  const getDefaultTab = () => {
+    if (settingsParam === 'project' && isInProject) return 'project';
+    if (settingsParam === 'workspace') return 'workspace';
+    if (settingsParam === 'people') return 'people';
+    if (settingsParam === 'billing') return 'billing';
+    if (settingsParam === 'account') return 'account';
+    
+    // Fallback to context-based default
+    return isInProject ? 'project' : 'workspace';
+  };
+
+  const [activeTab, setActiveTab] = useState(getDefaultTab());
+
+  // Update URL when settings are opened/closed
+  useEffect(() => {
+    if (isOpen && !isSettingsOpen) {
+      // Open settings - add appropriate settings param
+      const newParams = new URLSearchParams(searchParams);
+      const defaultSetting = isInProject ? 'project' : 'workspace';
+      newParams.set('settings', defaultSetting);
+      setSearchParams(newParams);
+      setActiveTab(defaultSetting);
+    } else if (!isOpen && isSettingsOpen) {
+      // Close settings - remove settings param
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('settings');
+      setSearchParams(newParams);
+    }
+  }, [isOpen, isSettingsOpen, isInProject, searchParams, setSearchParams]);
+
+  // Update URL when tab changes
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set('settings', value);
+    setSearchParams(newParams);
+  };
+
+  // Handle dialog close
+  const handleClose = () => {
+    const newParams = new URLSearchParams(searchParams);
+    newParams.delete('settings');
+    setSearchParams(newParams);
+    onClose();
+  };
+
+  // Sync with URL changes
+  useEffect(() => {
+    if (settingsParam && settingsParam !== activeTab) {
+      setActiveTab(settingsParam);
+    }
+  }, [settingsParam, activeTab]);
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="fixed left-[50%] top-[50%] z-[10001] max-w-[95vw] translate-x-[-50%] translate-y-[-50%] gap-0 rounded-xl border bg-background p-0 shadow-lg duration-300 md:max-w-[1200px] flex h-[90dvh] max-h-[640px] w-[95dvw] flex-1 overflow-hidden [&>div:first-child]:bg-black/5">
         <DialogTitle className="sr-only">Settings</DialogTitle>
         <DialogDescription className="sr-only">Manage your project and account settings</DialogDescription>
 
         <Tabs
-          defaultValue={defaultTab}
+          value={activeTab}
+          onValueChange={handleTabChange}
           orientation="vertical"
           className="flex w-full h-full"
         >
