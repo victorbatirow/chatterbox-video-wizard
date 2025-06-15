@@ -375,6 +375,34 @@ const Chat = () => {
 
       console.log('Adding video to timeline:', { videoId, videoUrl, startTime, endTime });
       
+      // Get video dimensions by creating a temporary video element
+      const getVideoDimensions = (): Promise<{ width: number; height: number }> => {
+        return new Promise((resolve) => {
+          const video = document.createElement('video');
+          video.crossOrigin = 'anonymous';
+          video.src = videoUrl;
+          video.muted = true;
+          
+          video.addEventListener('loadedmetadata', () => {
+            const width = video.videoWidth || 1080;
+            const height = video.videoHeight || 1920;
+            resolve({ width, height });
+          });
+          
+          video.addEventListener('error', () => {
+            // Fallback dimensions if video fails to load
+            resolve({ width: 1080, height: 1920 });
+          });
+          
+          // Set a timeout as fallback
+          setTimeout(() => {
+            resolve({ width: 1080, height: 1920 });
+          }, 2000);
+        });
+      };
+
+      const { width, height } = await getVideoDimensions();
+      
       // Create the track item with proper interface compliance
       const trackItem = {
         id: videoId,
@@ -397,8 +425,9 @@ const Chat = () => {
         metadata: {
           resourceId: videoId,
           duration: videoDuration,
-          width: 1080,
-          height: 1920,
+          width: Math.max(width, 1), // Ensure positive width
+          height: Math.max(height, 1), // Ensure positive height
+          previewUrl: videoUrl,
         },
       };
 
