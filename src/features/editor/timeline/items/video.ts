@@ -1,3 +1,4 @@
+
 import {
   Control,
   Pattern,
@@ -112,6 +113,27 @@ class Video extends VideoBase {
 
     // Use the preview URL from metadata if available, otherwise fallback to video src
     this.previewUrl = props.metadata?.previewUrl || props.src;
+    
+    // Ensure width and height are valid numbers before initializing offscreen canvas
+    console.log('Video constructor dimensions:', { 
+      width: this.width, 
+      height: this.height, 
+      propsWidth: props.width,
+      propsHeight: props.height
+    });
+    
+    // If width/height are NaN, set them to safe defaults based on aspect ratio
+    if (isNaN(this.width) || isNaN(this.height)) {
+      console.warn('Video constructor received NaN dimensions, using defaults');
+      if (this.aspectRatio && this.aspectRatio > 0) {
+        this.height = 40; // Standard thumbnail height
+        this.width = this.height * this.aspectRatio;
+      } else {
+        this.width = 100;
+        this.height = 40;
+      }
+    }
+    
     this.initOffscreenCanvas();
     this.initialize();
   }
