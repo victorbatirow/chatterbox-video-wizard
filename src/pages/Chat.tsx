@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSearchParams, useParams } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -377,113 +376,63 @@ const Chat = () => {
 
       console.log('Adding video to timeline:', { videoId, videoUrl, startTime, endTime });
       
-      // Use a more direct approach with the timeline's track system
-      // Instead of using ADD_TRACK_ITEM which seems to not be available,
-      // let's use the timeline's existing method for adding items
-      if (timeline.addTrackItem) {
-        timeline.addTrackItem({
-          id: videoId,
-          type: "video",
-          name: `Video ${videoId}`,
-          display: {
-            from: startTime,
-            to: endTime,
-          },
-          details: {
-            src: videoUrl,
-            volume: 100,
-            opacity: 1,
-            borderWidth: 0,
-            borderColor: "#000000",
-            borderRadius: 0,
-            boxShadow: {
-              blur: 0,
-              color: "#000000",
-              offsetX: 0,
-              offsetY: 0,
-              spread: 0,
-            },
-          },
-          trim: {
-            from: 0,
-            to: videoDuration,
-          },
-          metadata: {
-            src: videoUrl,
-            previewUrl: videoUrl,
-          },
-          playbackRate: 1,
-          left: 0,
-          top: 0,
-          width: 200,
-          height: 356,
-          trackId: "main",
-        });
+      // Use the timeline's native add method
+      const trackItem = {
+        id: videoId,
+        type: "video" as const,
+        name: `Video ${videoId}`,
+        display: {
+          from: startTime,
+          to: endTime,
+        },
+        details: {
+          src: videoUrl,
+          volume: 100,
+          opacity: 1,
+        },
+        trim: {
+          from: 0,
+          to: videoDuration,
+        },
+        trackId: "main",
+      };
+
+      // Try to add using timeline's add method
+      if (timeline.add) {
+        timeline.add(trackItem);
       } else {
-        console.log('Timeline addTrackItem method not available, trying alternative approach');
+        // Fallback: Use setState to add the video to the main track
+        const currentState = setState.getState ? setState.getState() : { timeline: timeline };
+        const currentTracks = currentState.timeline?.tracks || [];
         
-        // Fallback: Try to add the video using the store's setState
-        const currentTracks = timeline?.tracks || [];
-        const mainTrack = currentTracks.find(track => track.id === "main") || currentTracks[0];
-        
-        if (mainTrack) {
-          const newTrackItem = {
-            id: videoId,
+        // Find or create main track
+        let mainTrack = currentTracks.find(track => track.id === "main");
+        if (!mainTrack) {
+          mainTrack = {
+            id: "main",
+            name: "Main Track",
             type: "video",
-            name: `Video ${videoId}`,
-            display: {
-              from: startTime,
-              to: endTime,
-            },
-            details: {
-              src: videoUrl,
-              volume: 100,
-              opacity: 1,
-              borderWidth: 0,
-              borderColor: "#000000",
-              borderRadius: 0,
-              boxShadow: {
-                blur: 0,
-                color: "#000000",
-                offsetX: 0,
-                offsetY: 0,
-                spread: 0,
-              },
-            },
-            trim: {
-              from: 0,
-              to: videoDuration,
-            },
-            metadata: {
-              src: videoUrl,
-              previewUrl: videoUrl,
-            },
-            playbackRate: 1,
-            left: 0,
-            top: 0,
-            width: 200,
-            height: 356,
-            trackId: mainTrack.id,
+            items: []
           };
-          
-          // Update the track with the new item
-          const updatedTracks = currentTracks.map(track => {
-            if (track.id === mainTrack.id) {
-              return {
-                ...track,
-                trackItems: [...(track.trackItems || []), newTrackItem]
-              };
-            }
-            return track;
-          });
-          
-          setState({
-            timeline: {
-              ...timeline,
-              tracks: updatedTracks
-            }
-          });
         }
+
+        // Add the video item to the track
+        const updatedTrack = {
+          ...mainTrack,
+          items: [...(mainTrack.items || []), trackItem]
+        };
+
+        // Update tracks array
+        const updatedTracks = currentTracks.filter(track => track.id !== "main");
+        updatedTracks.push(updatedTrack);
+
+        // Update the state
+        setState({
+          timeline: {
+            ...timeline,
+            tracks: updatedTracks
+          }
+        });
       }
       
       console.log('Video successfully added to timeline');
