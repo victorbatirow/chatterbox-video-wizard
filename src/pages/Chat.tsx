@@ -47,6 +47,46 @@ const Chat = () => {
 
   const { isAuthenticated, isLoading, loginWithRedirect, getAccessTokenSilently } = useAuth0();
 
+  // Helper function to ensure a value is a valid unsigned long integer
+  const ensureValidUnsignedLong = (value: any, fallback: number): number => {
+    const num = Number(value);
+    if (isNaN(num) || num < 0 || !Number.isInteger(num) || num > 4294967295) {
+      return fallback;
+    }
+    return Math.floor(num);
+  };
+
+  // Helper function to load video metadata
+  const loadVideoMetadata = (videoUrl: string): Promise<{ width: number; height: number; duration: number }> => {
+    return new Promise((resolve) => {
+      const video = document.createElement('video');
+      video.crossOrigin = 'anonymous';
+      
+      const onLoadedMetadata = () => {
+        const width = ensureValidUnsignedLong(video.videoWidth, 1080);
+        const height = ensureValidUnsignedLong(video.videoHeight, 1920);
+        const duration = ensureValidUnsignedLong(video.duration * 1000, 5000); // Convert to milliseconds
+        
+        console.log('Video metadata loaded:', { width, height, duration, originalWidth: video.videoWidth, originalHeight: video.videoHeight });
+        
+        video.removeEventListener('loadedmetadata', onLoadedMetadata);
+        video.removeEventListener('error', onError);
+        resolve({ width, height, duration });
+      };
+      
+      const onError = () => {
+        console.warn('Failed to load video metadata, using fallback dimensions');
+        video.removeEventListener('loadedmetadata', onLoadedMetadata);
+        video.removeEventListener('error', onError);
+        resolve({ width: 1080, height: 1920, duration: 5000 });
+      };
+      
+      video.addEventListener('loadedmetadata', onLoadedMetadata);
+      video.addEventListener('error', onError);
+      video.src = videoUrl;
+    });
+  };
+
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       loginWithRedirect();
@@ -368,20 +408,27 @@ const Chat = () => {
     }
 
     try {
+      console.log('Loading video metadata for:', videoUrl);
+      
+      // Load video metadata to get actual dimensions
+      const { width, height, duration } = await loadVideoMetadata(videoUrl);
+      
       // Calculate position based on index to avoid overlapping
-      const videoDuration = 5000; // 5 seconds per video
+      const videoDuration = duration || 5000; // Use actual duration or 5 seconds fallback
       const startTime = index * videoDuration;
       const endTime = startTime + videoDuration;
 
-      console.log('Adding video to timeline:', { videoId, videoUrl, startTime, endTime });
+      console.log('Adding video to timeline:', { 
+        videoId, 
+        videoUrl, 
+        startTime, 
+        endTime, 
+        width, 
+        height, 
+        duration: videoDuration 
+      });
       
-      // Set safe integer dimensions for OffscreenCanvas
-      const safeWidth = 1080;
-      const safeHeight = 1920;
-      
-      console.log('Using safe dimensions:', { safeWidth, safeHeight });
-      
-      // Create the track item with all required properties and safe dimensions
+      // Create the track item with validated dimensions
       const trackItem = {
         id: videoId,
         type: "video" as const,
@@ -400,21 +447,16 @@ const Chat = () => {
           to: videoDuration,
         },
         trackId: "main",
-        // Ensure all dimension properties are safe integers
-        width: safeWidth,
-        height: safeHeight,
+        // Use validated dimensions
+        width: width,
+        height: height,
         metadata: {
           resourceId: videoId,
           duration: videoDuration,
-          width: safeWidth,
-          height: safeHeight,
+          width: width,
+          height: height,
           previewUrl: videoUrl,
         },
-        // Add additional dimension properties that the library might be looking for
-        videoWidth: safeWidth,
-        videoHeight: safeHeight,
-        naturalWidth: safeWidth,
-        naturalHeight: safeHeight,
       };
 
       console.log('Track item before adding:', JSON.stringify(trackItem, null, 2));
