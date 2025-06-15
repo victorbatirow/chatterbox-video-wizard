@@ -11,7 +11,6 @@ import useLayoutStore from "@/features/editor/store/use-layout-store";
 import useStore from "@/features/editor/store/use-store";
 import { createProject, getProject, sendChatMessage, ProjectDetails, ChatMessage } from "@/services/api";
 import { toast } from "@/hooks/use-toast";
-import { dispatch } from "@designcombo/events";
 
 export interface VideoMessage {
   id: string;
@@ -376,7 +375,7 @@ const Chat = () => {
 
       console.log('Adding video to timeline:', { videoId, videoUrl, startTime, endTime });
       
-      // Use the timeline's native add method
+      // Create the track item with proper numeric dimensions
       const trackItem = {
         id: videoId,
         type: "video" as const,
@@ -395,15 +394,22 @@ const Chat = () => {
           to: videoDuration,
         },
         trackId: "main",
+        // Add explicit dimensions as numbers to prevent OffscreenCanvas errors
+        width: 1080,
+        height: 1920,
       };
 
-      // Try to add using timeline's add method
-      if (timeline.add) {
-        timeline.add(trackItem);
+      // Use the timeline's addTrackItem method if available
+      if (timeline.addTrackItem && typeof timeline.addTrackItem === 'function') {
+        await timeline.addTrackItem(trackItem);
+        console.log('Video added via timeline.addTrackItem');
       } else {
-        // Fallback: Use setState to add the video to the main track
-        const currentState = setState.getState ? setState.getState() : { timeline: timeline };
-        const currentTracks = currentState.timeline?.tracks || [];
+        // Fallback: manually update the state
+        console.log('Using fallback method to add video');
+        
+        // Get current state from the store
+        const currentState = useStore.getState();
+        const currentTracks = currentState.tracks || [];
         
         // Find or create main track
         let mainTrack = currentTracks.find(track => track.id === "main");
@@ -427,11 +433,13 @@ const Chat = () => {
         updatedTracks.push(updatedTrack);
 
         // Update the state
-        setState({
-          timeline: {
-            ...timeline,
-            tracks: updatedTracks
-          }
+        await setState({
+          tracks: updatedTracks,
+          trackItemsMap: {
+            ...currentState.trackItemsMap,
+            [trackItem.id]: trackItem
+          },
+          trackItemIds: [...(currentState.trackItemIds || []), trackItem.id]
         });
       }
       
