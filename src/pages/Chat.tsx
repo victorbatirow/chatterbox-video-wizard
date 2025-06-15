@@ -375,35 +375,11 @@ const Chat = () => {
 
       console.log('Adding video to timeline:', { videoId, videoUrl, startTime, endTime });
       
-      // Get video dimensions by creating a temporary video element
-      const getVideoDimensions = (): Promise<{ width: number; height: number }> => {
-        return new Promise((resolve) => {
-          const video = document.createElement('video');
-          video.crossOrigin = 'anonymous';
-          video.src = videoUrl;
-          video.muted = true;
-          
-          video.addEventListener('loadedmetadata', () => {
-            const width = video.videoWidth || 1080;
-            const height = video.videoHeight || 1920;
-            resolve({ width, height });
-          });
-          
-          video.addEventListener('error', () => {
-            // Fallback dimensions if video fails to load
-            resolve({ width: 1080, height: 1920 });
-          });
-          
-          // Set a timeout as fallback
-          setTimeout(() => {
-            resolve({ width: 1080, height: 1920 });
-          }, 2000);
-        });
-      };
-
-      const { width, height } = await getVideoDimensions();
+      // Set default dimensions that are safe for OffscreenCanvas
+      const defaultWidth = 1080;
+      const defaultHeight = 1920;
       
-      // Create the track item with proper interface compliance
+      // Create the track item with proper interface compliance and safe dimensions
       const trackItem = {
         id: videoId,
         type: "video" as const,
@@ -422,11 +398,14 @@ const Chat = () => {
           to: videoDuration,
         },
         trackId: "main",
+        // Set initial safe dimensions for OffscreenCanvas
+        width: defaultWidth,
+        height: defaultHeight,
         metadata: {
           resourceId: videoId,
           duration: videoDuration,
-          width: Math.max(width, 1), // Ensure positive width
-          height: Math.max(height, 1), // Ensure positive height
+          width: defaultWidth,
+          height: defaultHeight,
           previewUrl: videoUrl,
         },
       };
