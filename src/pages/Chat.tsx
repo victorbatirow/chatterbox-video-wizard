@@ -379,6 +379,7 @@ const Chat = () => {
       const trackItem = {
         id: videoId,
         type: "video" as const,
+        name: `Video ${index + 1}`,
         display: {
           from: startTime,
           to: endTime,
