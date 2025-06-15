@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useSearchParams, useParams } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -11,6 +12,8 @@ import useLayoutStore from "@/features/editor/store/use-layout-store";
 import useStore from "@/features/editor/store/use-store";
 import { createProject, getProject, sendChatMessage, ProjectDetails, ChatMessage } from "@/services/api";
 import { toast } from "@/hooks/use-toast";
+import { dispatch } from "@designcombo/events";
+import { ADD_TRACK_ITEM } from "@designcombo/state";
 
 export interface VideoMessage {
   id: string;
@@ -373,50 +376,56 @@ const Chat = () => {
       const startTime = index * videoDuration;
       const endTime = startTime + videoDuration;
 
-      // Create a proper video track item that matches the timeline's expected format
-      const videoItem = {
-        id: videoId,
-        type: "video" as const,
-        name: `Video ${videoId}`,
-        display: {
-          from: startTime,
-          to: endTime,
-        },
-        details: {
-          src: videoUrl,
-          volume: 100,
-        },
-        trim: {
-          from: 0,
-          to: videoDuration,
-        },
-        metadata: {
-          src: videoUrl,
-          previewUrl: videoUrl,
-        },
-        // Add required properties for video timeline items
-        duration: videoDuration,
-        aspectRatio: 9/16, // Standard vertical video ratio
-        width: 100, // Timeline width
-        height: 40, // Timeline height
-        left: 0,
-        top: 0,
-        playbackRate: 1,
-        // Add required fabric.js properties
-        fill: "#27272a",
-        strokeWidth: 0,
-        rx: 4,
-        ry: 4,
-        // Add timeline scale
-        tScale: timeline.scale?.zoom || 1,
-      };
-
-      console.log('Adding video to timeline:', videoItem);
+      console.log('Adding video to timeline:', { videoId, videoUrl, startTime, endTime });
       
-      // Use the timeline's addTrackItem method
-      await timeline.addTrackItem(videoItem);
+      // Use the timeline's built-in method to add video items properly
+      dispatch(ADD_TRACK_ITEM, {
+        payload: {
+          trackItem: {
+            id: videoId,
+            type: "video",
+            name: `Video ${videoId}`,
+            display: {
+              from: startTime,
+              to: endTime,
+            },
+            details: {
+              src: videoUrl,
+              volume: 100,
+              opacity: 1,
+              borderWidth: 0,
+              borderColor: "#000000",
+              borderRadius: 0,
+              boxShadow: {
+                blur: 0,
+                color: "#000000",
+                offsetX: 0,
+                offsetY: 0,
+                spread: 0,
+              },
+            },
+            trim: {
+              from: 0,
+              to: videoDuration,
+            },
+            metadata: {
+              src: videoUrl,
+              previewUrl: videoUrl,
+            },
+            // Timeline positioning
+            playbackRate: 1,
+            left: 0,
+            top: 0,
+            width: 200,
+            height: 356,
+            // Track assignment - use main track or create if needed
+            trackId: "main",
+          },
+          trackId: "main", // Add to main video track
+        },
+      });
       
-      console.log('Video successfully added to timeline');
+      console.log('Video successfully added to timeline via dispatch');
       
     } catch (error) {
       console.error('Error adding video to timeline:', error);
