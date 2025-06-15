@@ -375,11 +375,13 @@ const Chat = () => {
 
       console.log('Adding video to timeline:', { videoId, videoUrl, startTime, endTime });
       
-      // Set default dimensions that are safe for OffscreenCanvas
-      const defaultWidth = 1080;
-      const defaultHeight = 1920;
+      // Set safe integer dimensions for OffscreenCanvas
+      const safeWidth = 1080;
+      const safeHeight = 1920;
       
-      // Create the track item with proper interface compliance and safe dimensions
+      console.log('Using safe dimensions:', { safeWidth, safeHeight });
+      
+      // Create the track item with all required properties and safe dimensions
       const trackItem = {
         id: videoId,
         type: "video" as const,
@@ -398,20 +400,28 @@ const Chat = () => {
           to: videoDuration,
         },
         trackId: "main",
-        // Set initial safe dimensions for OffscreenCanvas
-        width: defaultWidth,
-        height: defaultHeight,
+        // Ensure all dimension properties are safe integers
+        width: safeWidth,
+        height: safeHeight,
         metadata: {
           resourceId: videoId,
           duration: videoDuration,
-          width: defaultWidth,
-          height: defaultHeight,
+          width: safeWidth,
+          height: safeHeight,
           previewUrl: videoUrl,
         },
+        // Add additional dimension properties that the library might be looking for
+        videoWidth: safeWidth,
+        videoHeight: safeHeight,
+        naturalWidth: safeWidth,
+        naturalHeight: safeHeight,
       };
+
+      console.log('Track item before adding:', JSON.stringify(trackItem, null, 2));
 
       // Use the timeline's addTrackItem method if available
       if (timeline.addTrackItem && typeof timeline.addTrackItem === 'function') {
+        console.log('Using timeline.addTrackItem method');
         await timeline.addTrackItem(trackItem);
         console.log('Video added via timeline.addTrackItem');
       } else {
@@ -451,12 +461,21 @@ const Chat = () => {
           },
           trackItemIds: [...(currentState.trackItemIds || []), trackItem.id]
         });
+        
+        console.log('Video added via fallback method');
       }
       
       console.log('Video successfully added to timeline');
       
     } catch (error) {
       console.error('Error adding video to timeline:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        videoId,
+        videoUrl,
+        index
+      });
     }
   };
 
