@@ -30,6 +30,17 @@ interface VideoProps extends VideoPropsBase {
     previewUrl: string;
   };
 }
+
+// Helper function to ensure a value is a valid unsigned long integer for OffscreenCanvas
+const ensureValidCanvasDimension = (value: any, fallback: number = 100): number => {
+  const num = Number(value);
+  if (isNaN(num) || num <= 0 || !Number.isInteger(num) || num > 32767) {
+    console.warn(`Invalid canvas dimension ${value}, using fallback ${fallback}`);
+    return fallback;
+  }
+  return Math.floor(Math.max(1, num));
+};
+
 class Video extends VideoBase {
   static type = "Video";
   public clip?: MP4Clip | null;
@@ -106,19 +117,43 @@ class Video extends VideoBase {
   }
 
   private initOffscreenCanvas() {
-    if (!this.offscreenCanvas) {
-      this.offscreenCanvas = new OffscreenCanvas(this.width, this.height);
-      this.offscreenCtx = this.offscreenCanvas.getContext("2d");
-    }
+    try {
+      // Ensure width and height are valid for OffscreenCanvas
+      const safeWidth = ensureValidCanvasDimension(this.width, 100);
+      const safeHeight = ensureValidCanvasDimension(this.height, 40);
+      
+      console.log('Video initOffscreenCanvas:', { 
+        originalWidth: this.width, 
+        originalHeight: this.height, 
+        safeWidth, 
+        safeHeight 
+      });
 
-    // Resize if dimensions changed
-    if (
-      this.offscreenCanvas.width !== this.width ||
-      this.offscreenCanvas.height !== this.height
-    ) {
-      this.offscreenCanvas.width = this.width;
-      this.offscreenCanvas.height = this.height;
-      this.isDirty = true;
+      if (!this.offscreenCanvas) {
+        this.offscreenCanvas = new OffscreenCanvas(safeWidth, safeHeight);
+        this.offscreenCtx = this.offscreenCanvas.getContext("2d");
+      } else {
+        // Resize if dimensions changed
+        const currentWidth = ensureValidCanvasDimension(this.offscreenCanvas.width, 100);
+        const currentHeight = ensureValidCanvasDimension(this.offscreenCanvas.height, 40);
+        
+        if (currentWidth !== safeWidth || currentHeight !== safeHeight) {
+          this.offscreenCanvas.width = safeWidth;
+          this.offscreenCanvas.height = safeHeight;
+          this.isDirty = true;
+        }
+      }
+    } catch (error) {
+      console.error('Error creating OffscreenCanvas:', error);
+      // Fallback to safe defaults
+      try {
+        this.offscreenCanvas = new OffscreenCanvas(100, 40);
+        this.offscreenCtx = this.offscreenCanvas.getContext("2d");
+      } catch (fallbackError) {
+        console.error('Fallback OffscreenCanvas creation failed:', fallbackError);
+        this.offscreenCanvas = null;
+        this.offscreenCtx = null;
+      }
     }
   }
 
@@ -419,7 +454,9 @@ class Video extends VideoBase {
 
     this.renderToOffscreen();
 
-    ctx.drawImage(this.offscreenCanvas!, 0, 0);
+    if (this.offscreenCanvas) {
+      ctx.drawImage(this.offscreenCanvas, 0, 0);
+    }
 
     ctx.restore();
     // this.drawTextIdentity(ctx);
@@ -440,17 +477,27 @@ class Video extends VideoBase {
     this.onScale();
   }
   public onResizeSnap() {
+    this.initOffscreenCanvas(); // Reinitialize with new dimensions
     this.renderToOffscreen(true);
   }
   public onResize() {
+    this.initOffscreenCanvas(); // Reinitialize with new dimensions
     this.renderToOffscreen(true);
   }
 
   public renderToOffscreen(force?: boolean) {
-    if (!this.offscreenCtx) return;
+    if (!this.offscreenCtx || !this.offscreenCanvas) return;
     if (!this.isDirty && !force) return;
 
-    this.offscreenCanvas!.width = this.width;
+    // Ensure canvas dimensions are valid before rendering
+    const safeWidth = ensureValidCanvasDimension(this.width, 100);
+    const safeHeight = ensureValidCanvasDimension(this.height, 40);
+    
+    if (this.offscreenCanvas.width !== safeWidth || this.offscreenCanvas.height !== safeHeight) {
+      this.offscreenCanvas.width = safeWidth;
+      this.offscreenCanvas.height = safeHeight;
+    }
+
     const ctx = this.offscreenCtx;
     const { startTime, offset, thumbnailsCount } = this.currentFilmstrip;
     const thumbnailWidth = this.thumbnailWidth;
@@ -471,11 +518,11 @@ class Video extends VideoBase {
     );
 
     // Clear the offscreen canvas
-    ctx.clearRect(0, 0, this.width, this.height);
+    ctx.clearRect(0, 0, safeWidth, safeHeight);
 
     // Clip with rounded corners
     ctx.beginPath();
-    ctx.roundRect(0, 0, this.width, this.height, this.rx);
+    ctx.roundRect(0, 0, safeWidth, safeHeight, this.rx);
     ctx.clip();
     // Draw thumbnails
     for (let i = 0; i < thumbnailsCount; i++) {
