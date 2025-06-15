@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useSearchParams, useParams } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -43,7 +44,7 @@ const Chat = () => {
 
   const { addChatVideo, scrollToVideos, clearHighlights, clearAllChatVideos } = useVideoStore();
   const { setActiveMenuItem, setShowMenuItem } = useLayoutStore();
-  const { timeline } = useStore();
+  const { timeline, setState } = useStore();
 
   const { isAuthenticated, isLoading, loginWithRedirect, getAccessTokenSilently } = useAuth0();
 
@@ -274,7 +275,7 @@ const Chat = () => {
       // Add the AI response with proper text parsing
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: parseMessageContent(result.response.text),
+        text: parseMessageContent(result.response.text || ''),
         isUser: false,
         timestamp: new Date(),
       };
@@ -326,7 +327,7 @@ const Chat = () => {
       // Add AI response with proper text parsing
       const aiMessage: Message = {
         id: aiMessageId,
-        text: parseMessageContent(response.text),
+        text: parseMessageContent(response.text || ''),
         isUser: false,
         timestamp: new Date(),
       };
@@ -361,6 +362,53 @@ const Chat = () => {
     }
   };
 
+  const addVideoToTimeline = async (videoUrl: string, videoId: string) => {
+    if (!timeline) {
+      console.log('Timeline not available, cannot add video');
+      return;
+    }
+
+    try {
+      // Create a proper video track item that matches the timeline's expected format
+      const videoItem = {
+        id: videoId,
+        type: "video" as const,
+        name: `Video ${videoId}`,
+        display: {
+          from: 0, // Start at beginning of timeline
+          to: 5000, // Default 5 second duration
+        },
+        details: {
+          src: videoUrl,
+          volume: 100,
+          width: 1080,
+          height: 1920,
+        },
+        trim: {
+          from: 0,
+          to: 5000,
+        },
+        metadata: {
+          src: videoUrl,
+        },
+        animations: {
+          in: null,
+          out: null,
+        }
+      };
+
+      console.log('Adding video to timeline:', videoItem);
+      
+      // Use the timeline's addTrackItem method
+      await timeline.addTrackItem(videoItem);
+      
+      console.log('Video successfully added to timeline');
+      
+    } catch (error) {
+      console.error('Error adding video to timeline:', error);
+    }
+  };
+
   const handleVideoUrls = (clipUrls: string[], prompt: string, messageId: string) => {
     let videoIds: string[] = [];
     
@@ -385,7 +433,8 @@ const Chat = () => {
         videoUrl: videoUrl,
         prompt: `${prompt} (${index + 1}/${clipUrls.length})`,
         timestamp: new Date(),
-        preview: videoUrl
+        preview: videoUrl,
+        messageId: messageId,
       };
       
       addChatVideo(chatVideo);
@@ -409,36 +458,6 @@ const Chat = () => {
     // Switch to videos panel in editor
     setActiveMenuItem("videos");
     setShowMenuItem(true);
-  };
-
-  const addVideoToTimeline = (videoUrl: string, videoId: string) => {
-    if (!timeline) return;
-
-    // Add video to timeline on the main video track
-    const videoItem = {
-      id: videoId,
-      type: "video" as const,
-      name: `Video ${videoId}`,
-      src: videoUrl,
-      display: {
-        from: 0, // Start at beginning of timeline
-        to: 5000, // Default 5 second duration
-      },
-      details: {
-        src: videoUrl,
-        volume: 100,
-      },
-      trim: {
-        from: 0,
-        to: 5000,
-      },
-      metadata: {
-        src: videoUrl,
-      },
-    };
-
-    // Add the video item to the timeline using the correct API
-    timeline.addTrackItem(videoItem);
   };
 
   const handleVideoGeneration = async (prompt: string) => {
