@@ -375,11 +375,10 @@ const Chat = () => {
 
       console.log('Adding video to timeline:', { videoId, videoUrl, startTime, endTime });
       
-      // Create the track item with proper numeric dimensions
+      // Create the track item with proper interface compliance
       const trackItem = {
         id: videoId,
         type: "video" as const,
-        name: `Video ${videoId}`,
         display: {
           from: startTime,
           to: endTime,
@@ -394,9 +393,12 @@ const Chat = () => {
           to: videoDuration,
         },
         trackId: "main",
-        // Add explicit dimensions as numbers to prevent OffscreenCanvas errors
-        width: 1080,
-        height: 1920,
+        metadata: {
+          resourceId: videoId,
+          duration: videoDuration,
+          width: 1080,
+          height: 1920,
+        },
       };
 
       // Use the timeline's addTrackItem method if available
@@ -416,23 +418,22 @@ const Chat = () => {
         if (!mainTrack) {
           mainTrack = {
             id: "main",
-            name: "Main Track",
             type: "video",
             items: []
           };
         }
 
-        // Add the video item to the track
+        // Add the video item ID to the track (tracks only store IDs)
         const updatedTrack = {
           ...mainTrack,
-          items: [...(mainTrack.items || []), trackItem]
+          items: [...(mainTrack.items || []), videoId]
         };
 
         // Update tracks array
         const updatedTracks = currentTracks.filter(track => track.id !== "main");
         updatedTracks.push(updatedTrack);
 
-        // Update the state
+        // Update the state with track items stored separately
         await setState({
           tracks: updatedTracks,
           trackItemsMap: {
