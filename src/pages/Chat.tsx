@@ -375,14 +375,12 @@ const Chat = () => {
         type: "video" as const,
         name: `Video ${videoId}`,
         display: {
-          from: 0, // Start at beginning of timeline
-          to: 5000, // Default 5 second duration
+          from: 0,
+          to: 5000,
         },
         details: {
           src: videoUrl,
           volume: 100,
-          width: 1080,
-          height: 1920,
         },
         trim: {
           from: 0,
@@ -390,11 +388,23 @@ const Chat = () => {
         },
         metadata: {
           src: videoUrl,
+          previewUrl: videoUrl,
         },
-        animations: {
-          in: null,
-          out: null,
-        }
+        // Add required properties for video timeline items
+        duration: 5000,
+        aspectRatio: 9/16, // Standard vertical video ratio
+        width: 100, // Timeline width
+        height: 40, // Timeline height
+        left: 0,
+        top: 0,
+        playbackRate: 1,
+        // Add required fabric.js properties
+        fill: "#27272a",
+        strokeWidth: 0,
+        rx: 4,
+        ry: 4,
+        // Add timeline scale
+        tScale: timeline.scale?.zoom || 1,
       };
 
       console.log('Adding video to timeline:', videoItem);
