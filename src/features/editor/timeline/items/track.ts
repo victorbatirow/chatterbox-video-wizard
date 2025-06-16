@@ -1,3 +1,4 @@
+
 import { Track as TrackBase, TrackItemProps } from "@designcombo/timeline";
 
 class Track extends TrackBase {
@@ -6,6 +7,11 @@ class Track extends TrackBase {
   constructor(props: TrackItemProps) {
     super(props);
     this.fill = "#18181b";
+    
+    // Prevent creating additional tracks beyond the main track
+    if (props.id !== "main") {
+      throw new Error("Only the main track is allowed");
+    }
   }
 
   // add custom text to the track item
@@ -22,7 +28,7 @@ class Track extends TrackBase {
       ctx.fillStyle = "#A0A4A2";
       ctx.textAlign = "left";
       ctx.clip();
-      ctx.fillText("Drag and drop media here", 32, 12);
+      ctx.fillText("Drag and drop videos here", 32, 12);
 
       ctx.translate(8, 1);
 

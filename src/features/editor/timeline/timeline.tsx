@@ -164,19 +164,15 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
         audio: 36,
         customTrack: 40,
         customTrack2: 40,
+        main: 60, // Make the main track taller since it's the only one
       },
       acceptsMap: {
-        text: ["text", "caption"],
-        image: ["image", "video"],
-        video: ["video", "image"],
-        audio: ["audio"],
-        caption: ["caption", "text"],
-        template: ["template"],
-        customTrack: ["video", "image"],
-        customTrack2: ["video", "image"],
-        main: ["video", "image"],
+        main: ["video"], // Only allow videos on the main track
       },
       guideLineColor: "#ffffff",
+      // Disable creating new tracks
+      allowNewTracks: false,
+      maxTracks: 1,
     });
 
     canvasRef.current = canvas;
