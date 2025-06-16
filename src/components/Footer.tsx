@@ -26,27 +26,19 @@ const Footer = () => {
             <div className="max-sm:text-center">
               <p className="mb-3 font-medium text-white">Product</p>
               <ul className="space-y-3 font-normal text-white/60">
-                <li><a className="hover:underline hover:text-white/80" href="#">Import from Figma</a></li>
                 <li><a className="hover:underline hover:text-white/80" href="#">Videos</a></li>
                 <li><a className="hover:underline hover:text-white/80" href="#">Roadmap</a></li>
                 <li><a className="hover:underline hover:text-white/80" href="#">Status</a></li>
-                <li><a className="hover:underline hover:text-white/80" href="#">Changelog</a></li>
                 <li><a className="hover:underline hover:text-white/80" href="#">Pricing</a></li>
-                <li><a className="hover:underline hover:text-white/80" href="#">Solutions</a></li>
-                <li><a className="hover:underline hover:text-white/80" href="#">Hire a Partner</a></li>
-                <li><a className="hover:underline hover:text-white/80" href="#">Become a Partner</a></li>
               </ul>
             </div>
             
             <div className="max-sm:text-center">
               <p className="mb-3 font-medium text-white">Resources</p>
               <ul className="space-y-3 font-normal text-white/60">
-                <li><a className="flex items-center gap-1 hover:underline hover:text-white/80 max-sm:justify-center" href="#">Launched</a></li>
                 <li><a className="flex items-center gap-1 hover:underline hover:text-white/80 max-sm:justify-center" href="#">Enterprise</a></li>
                 <li><a className="flex items-center gap-1 hover:underline hover:text-white/80 max-sm:justify-center" href="#">Learn</a></li>
                 <li><a className="flex items-center gap-1 hover:underline hover:text-white/80 max-sm:justify-center" href="#">Support</a></li>
-                <li><a className="flex items-center gap-1 hover:underline hover:text-white/80 max-sm:justify-center" href="#">Integrations</a></li>
-                <li><a className="flex items-center gap-1 hover:underline hover:text-white/80 max-sm:justify-center" href="#">Affiliates</a></li>
                 <li><a className="flex items-center gap-1 hover:underline hover:text-white/80 max-sm:justify-center" href="#">Brand Guidelines</a></li>
               </ul>
             </div>
