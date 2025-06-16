@@ -50,6 +50,7 @@ const Chat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(projectId || null);
   const [isLoadingProject, setIsLoadingProject] = useState(false);
+  const [hasLoadedProject, setHasLoadedProject] = useState(false);
 
   const { addChatVideo, scrollToVideos, clearHighlights, clearAllChatVideos } = useVideoStore();
   const { setActiveMenuItem, setShowMenuItem } = useLayoutStore();
@@ -79,8 +80,18 @@ const Chat = () => {
       setMessages([]);
       setCurrentVideoId(null);
       setHighlightedVideoIds([]);
+      setHasLoadedProject(false);
+      clearAllChatVideos();
     }
-  }, [projectId, currentProjectId]);
+  }, [projectId, currentProjectId, clearAllChatVideos]);
+
+  const storePendingRequest = (pendingRequest: PendingRequest) => {
+    localStorage.setItem(PENDING_REQUEST_KEY, JSON.stringify(pendingRequest));
+  };
+
+  const clearPendingRequest = () => {
+    localStorage.removeItem(PENDING_REQUEST_KEY);
+  };
 
   const retryCreateProject = async (pendingRequest: PendingRequest) => {
     try {
@@ -197,14 +208,6 @@ const Chat = () => {
     }
   }, [isAuthenticated, projectId]);
 
-  const storePendingRequest = (pendingRequest: PendingRequest) => {
-    localStorage.setItem(PENDING_REQUEST_KEY, JSON.stringify(pendingRequest));
-  };
-
-  const clearPendingRequest = () => {
-    localStorage.removeItem(PENDING_REQUEST_KEY);
-  };
-
   // Helper function to parse message content
   const parseMessageContent = (content: string): string => {
     if (!content) return '';
@@ -306,12 +309,9 @@ const Chat = () => {
   // Load existing project if projectId is provided
   useEffect(() => {
     const loadProject = async () => {
-      if (!projectId || !isAuthenticated) return;
+      if (!projectId || !isAuthenticated || hasLoadedProject) return;
       
       setIsLoadingProject(true);
-      
-      // Clear existing videos when loading a new project
-      clearAllChatVideos();
       
       try {
         const token = await getAccessTokenSilently();
@@ -320,7 +320,6 @@ const Chat = () => {
         // Convert backend messages to frontend format with proper text parsing
         const convertedMessages: Message[] = [];
         const videoMessages: VideoMessage[] = [];
-        const addedVideoIds = new Set<string>(); // Track added videos to prevent duplicates
         
         for (const msg of projectDetails.messages) {
           const messageText = parseMessageContent(msg.text_content || '');
@@ -339,14 +338,6 @@ const Chat = () => {
             
             videoUrls.forEach((videoUrl, index) => {
               const videoId = `${msg.id}_video_${index}`;
-              
-              // Check if we've already added this video
-              if (addedVideoIds.has(videoId)) {
-                console.log('Skipping duplicate video:', videoId);
-                return;
-              }
-              
-              addedVideoIds.add(videoId);
               messageVideoIds.push(videoId);
               
               const videoMessage: VideoMessage = {
@@ -382,6 +373,7 @@ const Chat = () => {
         setMessages(convertedMessages);
         setVideos(videoMessages);
         setCurrentProjectId(projectId);
+        setHasLoadedProject(true);
         
         // If there are videos, set the videos panel as active
         if (videoMessages.length > 0) {
@@ -402,7 +394,7 @@ const Chat = () => {
     };
 
     loadProject();
-  }, [projectId, isAuthenticated, getAccessTokenSilently, addChatVideo, setActiveMenuItem, setShowMenuItem, clearAllChatVideos]);
+  }, [projectId, isAuthenticated, getAccessTokenSilently, addChatVideo, setActiveMenuItem, setShowMenuItem, hasLoadedProject]);
 
   // Check for initial prompt from URL parameters
   useEffect(() => {
