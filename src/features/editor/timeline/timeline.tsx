@@ -174,16 +174,6 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
 
     canvasRef.current = canvas;
 
-    // Ensure the main track always exists
-    const currentState = stateManager.getState();
-    if (!currentState.tracks.find(track => track.id === "main")) {
-      stateManager.addTrack({
-        id: "main",
-        type: "main",
-        items: []
-      });
-    }
-
     setCanvasSize({ width: containerWidth, height: containerHeight });
     setSize({
       width: containerWidth,
