@@ -10,9 +10,6 @@ import useVideoStore from "@/stores/use-video-store";
 import useLayoutStore from "@/features/editor/store/use-layout-store";
 import { createProject, getProject, sendChatMessage, ProjectDetails, ChatMessage } from "@/services/api";
 import { toast } from "@/hooks/use-toast";
-import { dispatch } from "@designcombo/events";
-import { ADD_VIDEO } from "@designcombo/state";
-import { generateId } from "@designcombo/timeline";
 
 export interface VideoMessage {
   id: string;
@@ -53,27 +50,6 @@ const Chat = () => {
       loginWithRedirect();
     }
   }, [isAuthenticated, isLoading, loginWithRedirect]);
-
-  // Helper function to automatically add video to timeline
-  const addVideoToTimeline = (videoUrl: string, prompt: string) => {
-    console.log('Auto-adding video to timeline:', videoUrl);
-    dispatch(ADD_VIDEO, {
-      payload: {
-        id: generateId(),
-        details: {
-          src: videoUrl,
-        },
-        metadata: {
-          previewUrl: videoUrl,
-          prompt: prompt,
-        },
-      },
-      options: {
-        resourceId: "main",
-        scaleMode: "fit",
-      },
-    });
-  };
 
   // Helper function to parse message content
   const parseMessageContent = (content: string): string => {
@@ -231,9 +207,6 @@ const Chat = () => {
               };
               
               addChatVideo(chatVideo);
-              
-              // Automatically add to timeline
-              addVideoToTimeline(videoUrl, `${messageText} (${index + 1}/${videoUrls.length})`);
             });
             
             convertedMessage.videoIds = messageVideoIds;
@@ -414,9 +387,6 @@ const Chat = () => {
       };
       
       addChatVideo(chatVideo);
-
-      // Automatically add to timeline
-      addVideoToTimeline(videoUrl, `${prompt} (${index + 1}/${clipUrls.length})`);
 
       // Set the first video as current
       if (index === 0) {
