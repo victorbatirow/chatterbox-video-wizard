@@ -28,6 +28,17 @@ export interface Message {
   videoIds?: string[];
 }
 
+interface PendingRequest {
+  projectId: string;
+  prompt: string;
+  userMessageId: string;
+  timestamp: number;
+  type: 'create' | 'message';
+}
+
+const PENDING_REQUEST_KEY = 'pending_chat_request';
+const REQUEST_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+
 const Chat = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { projectId } = useParams();
@@ -50,6 +61,136 @@ const Chat = () => {
       loginWithRedirect();
     }
   }, [isAuthenticated, isLoading, loginWithRedirect]);
+
+  // Check for pending requests on mount
+  useEffect(() => {
+    const checkPendingRequest = async () => {
+      if (!isAuthenticated) return;
+
+      const pendingRequestStr = localStorage.getItem(PENDING_REQUEST_KEY);
+      if (!pendingRequestStr) return;
+
+      try {
+        const pendingRequest: PendingRequest = JSON.parse(pendingRequestStr);
+        
+        // Check if request is too old
+        if (Date.now() - pendingRequest.timestamp > REQUEST_TIMEOUT) {
+          localStorage.removeItem(PENDING_REQUEST_KEY);
+          return;
+        }
+
+        console.log('Found pending request, attempting recovery:', pendingRequest);
+        
+        // Set generating state
+        setIsGenerating(true);
+        
+        // If we have a project ID and it doesn't match current, load the project
+        if (pendingRequest.projectId && pendingRequest.projectId !== currentProjectId) {
+          setCurrentProjectId(pendingRequest.projectId);
+        }
+
+        // Retry the request
+        if (pendingRequest.type === 'create') {
+          await retryCreateProject(pendingRequest);
+        } else {
+          await retryMessage(pendingRequest);
+        }
+        
+      } catch (error) {
+        console.error('Error recovering pending request:', error);
+        localStorage.removeItem(PENDING_REQUEST_KEY);
+        setIsGenerating(false);
+        
+        toast({
+          title: "Request Recovery Failed",
+          description: "Your previous request couldn't be completed. Please try again.",
+          variant: "destructive",
+        });
+      }
+    };
+
+    if (isAuthenticated) {
+      checkPendingRequest();
+    }
+  }, [isAuthenticated, currentProjectId]);
+
+  const storePendingRequest = (pendingRequest: PendingRequest) => {
+    localStorage.setItem(PENDING_REQUEST_KEY, JSON.stringify(pendingRequest));
+  };
+
+  const clearPendingRequest = () => {
+    localStorage.removeItem(PENDING_REQUEST_KEY);
+  };
+
+  const retryCreateProject = async (pendingRequest: PendingRequest) => {
+    try {
+      const token = await getAccessTokenSilently();
+      const result = await createProject(token, pendingRequest.prompt);
+      
+      clearPendingRequest();
+      setCurrentProjectId(result.project.id);
+      
+      // Find and update the user message, add AI response
+      setMessages(prev => {
+        const updated = prev.map(msg => 
+          msg.id === pendingRequest.userMessageId ? msg : msg
+        );
+        
+        const aiMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          text: parseMessageContent(result.response.text),
+          isUser: false,
+          timestamp: new Date(),
+        };
+        
+        return [...updated, aiMessage];
+      });
+      
+      // Handle videos if provided
+      if (result.response.clip_urls && result.response.clip_urls.length > 0) {
+        const aiMessageId = (Date.now() + 1).toString();
+        handleVideoUrls(result.response.clip_urls, pendingRequest.prompt, aiMessageId);
+      }
+      
+    } catch (error) {
+      console.error('Error retrying project creation:', error);
+      throw error;
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const retryMessage = async (pendingRequest: PendingRequest) => {
+    try {
+      const token = await getAccessTokenSilently();
+      const response = await sendChatMessage(token, pendingRequest.projectId, pendingRequest.prompt);
+      
+      clearPendingRequest();
+      
+      const aiMessageId = (Date.now() + 1).toString();
+      
+      // Add AI response
+      const aiMessage: Message = {
+        id: aiMessageId,
+        text: parseMessageContent(response.text),
+        isUser: false,
+        timestamp: new Date(),
+      };
+
+      setMessages(prev => [...prev, aiMessage]);
+      
+      // Handle videos if provided
+      if (response.clip_urls && response.clip_urls.length > 0) {
+        handleVideoUrls(response.clip_urls, pendingRequest.prompt, aiMessageId);
+      }
+      
+    } catch (error) {
+      console.error('Error retrying message:', error);
+      throw error;
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   // Helper function to parse message content
   const parseMessageContent = (content: string): string => {
@@ -254,20 +395,35 @@ const Chat = () => {
   const handleCreateProjectWithPrompt = async (prompt: string) => {
     if (!isAuthenticated) return;
     
+    const userMessageId = Date.now().toString();
+    
+    // Add the initial user message immediately
+    const userMessage: Message = {
+      id: userMessageId,
+      text: prompt,
+      isUser: true,
+      timestamp: new Date(),
+    };
+    
+    setMessages([userMessage]);
     setIsGenerating(true);
+    
+    // Store pending request
+    const pendingRequest: PendingRequest = {
+      projectId: '',
+      prompt,
+      userMessageId,
+      timestamp: Date.now(),
+      type: 'create'
+    };
+    storePendingRequest(pendingRequest);
+    
     try {
       const token = await getAccessTokenSilently();
       const result = await createProject(token, prompt);
       
+      clearPendingRequest();
       setCurrentProjectId(result.project.id);
-      
-      // Add the initial user message
-      const userMessage: Message = {
-        id: Date.now().toString(),
-        text: prompt,
-        isUser: true,
-        timestamp: new Date(),
-      };
       
       // Add the AI response with proper text parsing
       const aiMessage: Message = {
@@ -277,7 +433,7 @@ const Chat = () => {
         timestamp: new Date(),
       };
       
-      setMessages([userMessage, aiMessage]);
+      setMessages(prev => [...prev, aiMessage]);
       
       // Handle videos if provided
       if (result.response.clip_urls && result.response.clip_urls.length > 0) {
@@ -286,9 +442,10 @@ const Chat = () => {
       
     } catch (error) {
       console.error('Error creating project:', error);
+      // Don't clear pending request on error - let recovery handle it
       toast({
         title: "Error",
-        description: "Failed to create project",
+        description: "Failed to create project. The request will be retried if you refresh the page.",
         variant: "destructive",
       });
     } finally {
@@ -304,9 +461,11 @@ const Chat = () => {
       return handleCreateProjectWithPrompt(prompt);
     }
 
+    const userMessageId = Date.now().toString();
+    
     // Add user message
     const userMessage: Message = {
-      id: Date.now().toString(),
+      id: userMessageId,
       text: prompt,
       isUser: true,
       timestamp: new Date(),
@@ -315,9 +474,21 @@ const Chat = () => {
     setMessages(prev => [...prev, userMessage]);
     setIsGenerating(true);
 
+    // Store pending request
+    const pendingRequest: PendingRequest = {
+      projectId: currentProjectId,
+      prompt,
+      userMessageId,
+      timestamp: Date.now(),
+      type: 'message'
+    };
+    storePendingRequest(pendingRequest);
+
     try {
       const token = await getAccessTokenSilently();
       const response = await sendChatMessage(token, currentProjectId, prompt);
+      
+      clearPendingRequest();
       
       const aiMessageId = (Date.now() + 1).toString();
       
@@ -338,11 +509,12 @@ const Chat = () => {
       
     } catch (error) {
       console.error('Error sending message:', error);
+      // Don't clear pending request on error - let recovery handle it
       
       // Add error message
       const errorMessage: Message = {
         id: (Date.now() + 2).toString(),
-        text: "Sorry, I'm having trouble connecting to the server. Please try again.",
+        text: "Sorry, I'm having trouble connecting to the server. Your request will be retried if you refresh the page.",
         isUser: false,
         timestamp: new Date(),
       };
@@ -351,7 +523,7 @@ const Chat = () => {
       
       toast({
         title: "Error",
-        description: "Failed to send message",
+        description: "Failed to send message. The request will be retried if you refresh the page.",
         variant: "destructive",
       });
     } finally {
