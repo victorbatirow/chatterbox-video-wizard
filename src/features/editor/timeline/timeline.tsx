@@ -140,13 +140,42 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
 
     const containerWidth = timelineContainerEl.clientWidth - 40;
     const containerHeight = timelineContainerEl.clientHeight - 90;
+
+    // First, ensure the state has the main track before creating the canvas
+    const currentState = stateManager.getState();
+    
+    // Initialize state with proper structure if missing
+    if (!currentState.tracks) {
+      currentState.tracks = [];
+    }
+    if (!currentState.trackItemsMap) {
+      currentState.trackItemsMap = {};
+    }
+    if (!currentState.trackItemIds) {
+      currentState.trackItemIds = [];
+    }
+    if (!currentState.trackItemDetailsMap) {
+      currentState.trackItemDetailsMap = {};
+    }
+    
+    // Ensure main track exists
+    if (!currentState.tracks.find(track => track.id === "main")) {
+      currentState.tracks.push({
+        id: "main",
+        type: "main" as const,
+        name: "Main Track",
+        locked: false,
+        visible: true,
+        height: 80,
+      });
+    }
     
     const canvas = new CanvasTimeline(canvasEl, {
       width: containerWidth,
       height: containerHeight,
       bounding: {
         width: containerWidth,
-        height: 120, // Set minimum height to accommodate main track
+        height: 120,
       },
       selectionColor: "rgba(0, 216, 214,0.1)",
       selectionBorderColor: "rgba(0, 216, 214,1.0)",
@@ -159,44 +188,29 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
         left: TIMELINE_OFFSET_CANVAS_LEFT,
         right: TIMELINE_OFFSET_CANVAS_RIGHT,
       },
-      // Configure for single track only
       sizesMap: {
-        main: 80, // Main track height
+        main: 80,
       },
       acceptsMap: {
-        main: ["video"], // Only allow videos on the main track
+        main: ["video"],
       },
       guideLineColor: "#ffffff",
     });
 
     canvasRef.current = canvas;
 
-    // Ensure main track exists in state by updating the current state
-    const currentState = stateManager.getState();
-    if (!currentState.tracks || !currentState.tracks.find(track => track.id === "main")) {
-      // Create a new state with the main track
-      const newState = {
-        ...currentState,
-        tracks: [
-          {
-            id: "main",
-            type: "main" as const,
-            name: "Main Track",
-            locked: false,
-            visible: true,
-            height: 80,
-          }
-        ]
-      };
-      
-      // Use the state manager's update method
-      Object.assign(currentState, newState);
-    }
+    // Sync the initial state with the store
+    setState({
+      tracks: currentState.tracks,
+      trackItemsMap: currentState.trackItemsMap || {},
+      trackItemIds: currentState.trackItemIds || [],
+      trackItemDetailsMap: currentState.trackItemDetailsMap || {},
+    });
 
     setCanvasSize({ width: containerWidth, height: containerHeight });
     setSize({
       width: containerWidth,
-      height: 120, // Set initial height to show the main track
+      height: 120,
     });
     setTimeline(canvas);
 
@@ -231,7 +245,7 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
       const currentState = stateManager.getState();
       setState({
         duration: currentState.duration,
-        trackItemsMap: currentState.trackItemsMap,
+        trackItemsMap: currentState.trackItemsMap || {},
       });
     });
 
@@ -239,10 +253,10 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
       () => {
         const currentState = stateManager.getState();
         setState({
-          trackItemDetailsMap: currentState.trackItemDetailsMap,
-          trackItemsMap: currentState.trackItemsMap,
-          trackItemIds: currentState.trackItemIds,
-          tracks: currentState.tracks,
+          trackItemDetailsMap: currentState.trackItemDetailsMap || {},
+          trackItemsMap: currentState.trackItemsMap || {},
+          trackItemIds: currentState.trackItemIds || [],
+          tracks: currentState.tracks || [],
         });
       },
     );
@@ -251,7 +265,7 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
       stateManager.subscribeToUpdateItemDetails(() => {
         const currentState = stateManager.getState();
         setState({
-          trackItemDetailsMap: currentState.trackItemDetailsMap,
+          trackItemDetailsMap: currentState.trackItemDetailsMap || {},
         });
       });
 
