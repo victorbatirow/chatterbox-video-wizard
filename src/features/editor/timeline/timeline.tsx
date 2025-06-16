@@ -140,42 +140,12 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
 
     const containerWidth = timelineContainerEl.clientWidth - 40;
     const containerHeight = timelineContainerEl.clientHeight - 90;
-
-    // First, ensure the state has the main track before creating the canvas
-    const currentState = stateManager.getState();
-    
-    // Initialize state with proper structure if missing
-    if (!currentState.tracks) {
-      currentState.tracks = [];
-    }
-    if (!currentState.trackItemsMap) {
-      currentState.trackItemsMap = {};
-    }
-    if (!currentState.trackItemIds) {
-      currentState.trackItemIds = [];
-    }
-    if (!currentState.trackItemDetailsMap) {
-      currentState.trackItemDetailsMap = {};
-    }
-    
-    // Ensure main track exists
-    if (!currentState.tracks.find(track => track.id === "main")) {
-      currentState.tracks.push({
-        id: "main",
-        type: "main" as const,
-        name: "Main Track",
-        locked: false,
-        visible: true,
-        height: 80,
-      });
-    }
-    
     const canvas = new CanvasTimeline(canvasEl, {
       width: containerWidth,
       height: containerHeight,
       bounding: {
         width: containerWidth,
-        height: 120,
+        height: 0,
       },
       selectionColor: "rgba(0, 216, 214,0.1)",
       selectionBorderColor: "rgba(0, 216, 214,1.0)",
@@ -189,28 +159,32 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
         right: TIMELINE_OFFSET_CANVAS_RIGHT,
       },
       sizesMap: {
-        main: 80,
+        caption: 32,
+        text: 32,
+        audio: 36,
+        customTrack: 40,
+        customTrack2: 40,
       },
       acceptsMap: {
-        main: ["video"],
+        text: ["text", "caption"],
+        image: ["image", "video"],
+        video: ["video", "image"],
+        audio: ["audio"],
+        caption: ["caption", "text"],
+        template: ["template"],
+        customTrack: ["video", "image"],
+        customTrack2: ["video", "image"],
+        main: ["video", "image"],
       },
       guideLineColor: "#ffffff",
     });
 
     canvasRef.current = canvas;
 
-    // Sync the initial state with the store
-    setState({
-      tracks: currentState.tracks,
-      trackItemsMap: currentState.trackItemsMap || {},
-      trackItemIds: currentState.trackItemIds || [],
-      trackItemDetailsMap: currentState.trackItemDetailsMap || {},
-    });
-
     setCanvasSize({ width: containerWidth, height: containerHeight });
     setSize({
       width: containerWidth,
-      height: 120,
+      height: 0,
     });
     setTimeline(canvas);
 
@@ -245,7 +219,7 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
       const currentState = stateManager.getState();
       setState({
         duration: currentState.duration,
-        trackItemsMap: currentState.trackItemsMap || {},
+        trackItemsMap: currentState.trackItemsMap,
       });
     });
 
@@ -253,10 +227,10 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
       () => {
         const currentState = stateManager.getState();
         setState({
-          trackItemDetailsMap: currentState.trackItemDetailsMap || {},
-          trackItemsMap: currentState.trackItemsMap || {},
-          trackItemIds: currentState.trackItemIds || [],
-          tracks: currentState.tracks || [],
+          trackItemDetailsMap: currentState.trackItemDetailsMap,
+          trackItemsMap: currentState.trackItemsMap,
+          trackItemIds: currentState.trackItemIds,
+          tracks: currentState.tracks,
         });
       },
     );
@@ -265,7 +239,7 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
       stateManager.subscribeToUpdateItemDetails(() => {
         const currentState = stateManager.getState();
         setState({
-          trackItemDetailsMap: currentState.trackItemDetailsMap || {},
+          trackItemDetailsMap: currentState.trackItemDetailsMap,
         });
       });
 
@@ -436,7 +410,6 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
           >
             <canvas id="designcombo-timeline-canvas" ref={canvasElRef} />
           </div>
-          
           <ScrollArea.Root
             type="always"
             style={{

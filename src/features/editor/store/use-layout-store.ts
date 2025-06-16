@@ -1,10 +1,9 @@
-
 import { ILayoutState } from "../interfaces/layout";
 import { create } from "zustand";
 
 const useLayoutStore = create<ILayoutState>((set) => ({
-  activeMenuItem: "videos",
-  showMenuItem: true,
+  activeMenuItem: "videos", // Changed from "texts" to "videos"
+  showMenuItem: true, // Changed from false to true so Videos panel shows by default
   cropTarget: null,
   showControlItem: false,
   showToolboxItem: false,

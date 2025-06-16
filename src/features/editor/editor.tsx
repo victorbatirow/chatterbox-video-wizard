@@ -1,4 +1,3 @@
-
 "use client";
 import Timeline from "./timeline";
 import useStore from "./store/use-store";
@@ -17,6 +16,7 @@ import { getCompactFontData, loadFonts } from "./utils/fonts";
 import { SECONDARY_FONT, SECONDARY_FONT_URL } from "./constants/constants";
 import MenuList from "./menu-list";
 import { MenuItem } from "./menu-item";
+import { ControlItem } from "./control-item";
 import CropModal from "./crop-modal/crop-modal";
 import useDataState from "./store/use-data-state";
 import { FONTS } from "./data/fonts";
@@ -121,7 +121,7 @@ const Editor = () => {
             {playerRef && <Timeline stateManager={stateManager} />}
           </ResizablePanel>
         </ResizablePanelGroup>
-        {/* Removed ControlItem component - no right side panel */}
+        <ControlItem />
       </div>
     </div>
   );
