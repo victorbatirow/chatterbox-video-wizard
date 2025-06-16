@@ -62,6 +62,26 @@ const Chat = () => {
     }
   }, [isAuthenticated, isLoading, loginWithRedirect]);
 
+  // Reset states when project changes or component unmounts
+  useEffect(() => {
+    return () => {
+      // Clear generating state when component unmounts
+      setIsGenerating(false);
+    };
+  }, []);
+
+  // Reset states when projectId changes
+  useEffect(() => {
+    if (projectId !== currentProjectId) {
+      console.log('Project changed, resetting states');
+      setIsGenerating(false);
+      setVideos([]);
+      setMessages([]);
+      setCurrentVideoId(null);
+      setHighlightedVideoIds([]);
+    }
+  }, [projectId, currentProjectId]);
+
   // Check for pending requests on mount
   useEffect(() => {
     const checkPendingRequest = async () => {
@@ -76,6 +96,12 @@ const Chat = () => {
         // Check if request is too old
         if (Date.now() - pendingRequest.timestamp > REQUEST_TIMEOUT) {
           localStorage.removeItem(PENDING_REQUEST_KEY);
+          return;
+        }
+
+        // Only process pending request if it's for the current project or no project is set
+        if (pendingRequest.projectId && pendingRequest.projectId !== projectId) {
+          console.log('Pending request is for different project, ignoring');
           return;
         }
 
@@ -112,7 +138,7 @@ const Chat = () => {
     if (isAuthenticated) {
       checkPendingRequest();
     }
-  }, [isAuthenticated, currentProjectId]);
+  }, [isAuthenticated, projectId]);
 
   const storePendingRequest = (pendingRequest: PendingRequest) => {
     localStorage.setItem(PENDING_REQUEST_KEY, JSON.stringify(pendingRequest));
@@ -120,76 +146,6 @@ const Chat = () => {
 
   const clearPendingRequest = () => {
     localStorage.removeItem(PENDING_REQUEST_KEY);
-  };
-
-  const retryCreateProject = async (pendingRequest: PendingRequest) => {
-    try {
-      const token = await getAccessTokenSilently();
-      const result = await createProject(token, pendingRequest.prompt);
-      
-      clearPendingRequest();
-      setCurrentProjectId(result.project.id);
-      
-      // Find and update the user message, add AI response
-      setMessages(prev => {
-        const updated = prev.map(msg => 
-          msg.id === pendingRequest.userMessageId ? msg : msg
-        );
-        
-        const aiMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          text: parseMessageContent(result.response.text),
-          isUser: false,
-          timestamp: new Date(),
-        };
-        
-        return [...updated, aiMessage];
-      });
-      
-      // Handle videos if provided
-      if (result.response.clip_urls && result.response.clip_urls.length > 0) {
-        const aiMessageId = (Date.now() + 1).toString();
-        handleVideoUrls(result.response.clip_urls, pendingRequest.prompt, aiMessageId);
-      }
-      
-    } catch (error) {
-      console.error('Error retrying project creation:', error);
-      throw error;
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  const retryMessage = async (pendingRequest: PendingRequest) => {
-    try {
-      const token = await getAccessTokenSilently();
-      const response = await sendChatMessage(token, pendingRequest.projectId, pendingRequest.prompt);
-      
-      clearPendingRequest();
-      
-      const aiMessageId = (Date.now() + 1).toString();
-      
-      // Add AI response
-      const aiMessage: Message = {
-        id: aiMessageId,
-        text: parseMessageContent(response.text),
-        isUser: false,
-        timestamp: new Date(),
-      };
-
-      setMessages(prev => [...prev, aiMessage]);
-      
-      // Handle videos if provided
-      if (response.clip_urls && response.clip_urls.length > 0) {
-        handleVideoUrls(response.clip_urls, pendingRequest.prompt, aiMessageId);
-      }
-      
-    } catch (error) {
-      console.error('Error retrying message:', error);
-      throw error;
-    } finally {
-      setIsGenerating(false);
-    }
   };
 
   // Helper function to parse message content
@@ -307,6 +263,7 @@ const Chat = () => {
         // Convert backend messages to frontend format with proper text parsing
         const convertedMessages: Message[] = [];
         const videoMessages: VideoMessage[] = [];
+        const addedVideoIds = new Set<string>(); // Track added videos to prevent duplicates
         
         for (const msg of projectDetails.messages) {
           const messageText = parseMessageContent(msg.text_content || '');
@@ -325,6 +282,14 @@ const Chat = () => {
             
             videoUrls.forEach((videoUrl, index) => {
               const videoId = `${msg.id}_video_${index}`;
+              
+              // Check if we've already added this video
+              if (addedVideoIds.has(videoId)) {
+                console.log('Skipping duplicate video:', videoId);
+                return;
+              }
+              
+              addedVideoIds.add(videoId);
               messageVideoIds.push(videoId);
               
               const videoMessage: VideoMessage = {
@@ -356,6 +321,7 @@ const Chat = () => {
           convertedMessages.push(convertedMessage);
         }
         
+        console.log('Loaded project with videos:', videoMessages.length);
         setMessages(convertedMessages);
         setVideos(videoMessages);
         setCurrentProjectId(projectId);
