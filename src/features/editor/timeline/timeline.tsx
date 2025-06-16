@@ -166,39 +166,31 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
       acceptsMap: {
         main: ["video"], // Only allow videos on the main track
       },
-      // Force single track behavior
-      tracks: [
-        {
-          id: "main",
-          type: "main",
-          name: "Main Track",
-          locked: false,
-          visible: true,
-          height: 80,
-        }
-      ],
       guideLineColor: "#ffffff",
     });
 
     canvasRef.current = canvas;
 
-    // Ensure main track exists in state
+    // Ensure main track exists in state by updating the current state
     const currentState = stateManager.getState();
-    if (!currentState.tracks.find(track => track.id === "main")) {
-      // Initialize the state with the main track
-      stateManager.setState({
+    if (!currentState.tracks || !currentState.tracks.find(track => track.id === "main")) {
+      // Create a new state with the main track
+      const newState = {
         ...currentState,
         tracks: [
           {
             id: "main",
-            type: "main",
+            type: "main" as const,
             name: "Main Track",
             locked: false,
             visible: true,
             height: 80,
           }
         ]
-      });
+      };
+      
+      // Use the state manager's update method
+      Object.assign(currentState, newState);
     }
 
     setCanvasSize({ width: containerWidth, height: containerHeight });
