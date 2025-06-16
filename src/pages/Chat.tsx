@@ -52,7 +52,7 @@ const Chat = () => {
   const [isLoadingProject, setIsLoadingProject] = useState(false);
   const [hasLoadedProject, setHasLoadedProject] = useState(false);
 
-  const { addChatVideo, scrollToVideos, clearHighlights, clearAllChatVideos } = useVideoStore();
+  const { addChatVideo, scrollToVideos, clearHighlights, clearAllChatVideos, getChatVideo } = useVideoStore();
   const { setActiveMenuItem, setShowMenuItem } = useLayoutStore();
 
   const { isAuthenticated, isLoading, loginWithRedirect, getAccessTokenSilently } = useAuth0();
@@ -63,7 +63,7 @@ const Chat = () => {
     }
   }, [isAuthenticated, isLoading, loginWithRedirect]);
 
-  // Reset states when project changes or component unmounts
+  // Reset states when component unmounts
   useEffect(() => {
     return () => {
       // Clear generating state when component unmounts
@@ -317,6 +317,9 @@ const Chat = () => {
         const token = await getAccessTokenSilently();
         const projectDetails = await getProject(token, projectId);
         
+        // Clear the video store completely before loading new data
+        clearAllChatVideos();
+        
         // Convert backend messages to frontend format with proper text parsing
         const convertedMessages: Message[] = [];
         const videoMessages: VideoMessage[] = [];
@@ -394,7 +397,7 @@ const Chat = () => {
     };
 
     loadProject();
-  }, [projectId, isAuthenticated, getAccessTokenSilently, addChatVideo, setActiveMenuItem, setShowMenuItem, hasLoadedProject]);
+  }, [projectId, isAuthenticated, getAccessTokenSilently, addChatVideo, setActiveMenuItem, setShowMenuItem, hasLoadedProject, clearAllChatVideos]);
 
   // Check for initial prompt from URL parameters
   useEffect(() => {
@@ -564,16 +567,20 @@ const Chat = () => {
       // Add to local videos list
       setVideos(prev => [...prev, newVideo]);
 
-      // Add to shared video store for editor
-      const chatVideo = {
-        id: currentVideoId,
-        videoUrl: videoUrl,
-        prompt: `${prompt} (${index + 1}/${clipUrls.length})`,
-        timestamp: new Date(),
-        preview: videoUrl
-      };
-      
-      addChatVideo(chatVideo);
+      // Check if video already exists in store before adding
+      const existingVideo = getChatVideo(currentVideoId);
+      if (!existingVideo) {
+        // Add to shared video store for editor
+        const chatVideo = {
+          id: currentVideoId,
+          videoUrl: videoUrl,
+          prompt: `${prompt} (${index + 1}/${clipUrls.length})`,
+          timestamp: new Date(),
+          preview: videoUrl
+        };
+        
+        addChatVideo(chatVideo);
+      }
 
       // Set the first video as current
       if (index === 0) {
