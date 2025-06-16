@@ -140,12 +140,13 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
 
     const containerWidth = timelineContainerEl.clientWidth - 40;
     const containerHeight = timelineContainerEl.clientHeight - 90;
+    
     const canvas = new CanvasTimeline(canvasEl, {
       width: containerWidth,
       height: containerHeight,
       bounding: {
         width: containerWidth,
-        height: 0,
+        height: 120, // Set minimum height to accommodate main track
       },
       selectionColor: "rgba(0, 216, 214,0.1)",
       selectionBorderColor: "rgba(0, 216, 214,1.0)",
@@ -158,26 +159,52 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
         left: TIMELINE_OFFSET_CANVAS_LEFT,
         right: TIMELINE_OFFSET_CANVAS_RIGHT,
       },
+      // Configure for single track only
       sizesMap: {
-        caption: 32,
-        text: 32,
-        audio: 36,
-        customTrack: 40,
-        customTrack2: 40,
-        main: 60, // Make the main track taller since it's the only one
+        main: 80, // Main track height
       },
       acceptsMap: {
         main: ["video"], // Only allow videos on the main track
       },
+      // Force single track behavior
+      tracks: [
+        {
+          id: "main",
+          type: "main",
+          name: "Main Track",
+          locked: false,
+          visible: true,
+          height: 80,
+        }
+      ],
       guideLineColor: "#ffffff",
     });
 
     canvasRef.current = canvas;
 
+    // Ensure main track exists in state
+    const currentState = stateManager.getState();
+    if (!currentState.tracks.find(track => track.id === "main")) {
+      // Initialize the state with the main track
+      stateManager.setState({
+        ...currentState,
+        tracks: [
+          {
+            id: "main",
+            type: "main",
+            name: "Main Track",
+            locked: false,
+            visible: true,
+            height: 80,
+          }
+        ]
+      });
+    }
+
     setCanvasSize({ width: containerWidth, height: containerHeight });
     setSize({
       width: containerWidth,
-      height: 0,
+      height: 120, // Set initial height to show the main track
     });
     setTimeline(canvas);
 
@@ -403,6 +430,7 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
           >
             <canvas id="designcombo-timeline-canvas" ref={canvasElRef} />
           </div>
+          
           <ScrollArea.Root
             type="always"
             style={{

@@ -23,7 +23,7 @@ class Track extends TrackBase {
       ctx.fillStyle = "#A0A4A2";
       ctx.textAlign = "left";
       ctx.clip();
-      ctx.fillText("Drag and drop videos here", 32, 12);
+      ctx.fillText("Drop videos here to add them sequentially", 32, 12);
 
       ctx.translate(8, 1);
 
