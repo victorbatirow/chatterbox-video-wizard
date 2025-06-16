@@ -8,22 +8,23 @@ import { Videos } from "./videos";
 const ActiveMenuItem = () => {
   const { activeMenuItem } = useLayoutStore();
 
+  if (activeMenuItem === "texts") {
+    return <Texts />;
+  }
+  if (activeMenuItem === "shapes") {
+    return <Elements />;
+  }
   if (activeMenuItem === "videos") {
     return <Videos />;
   }
-  // if (activeMenuItem === "texts") {
-  //   return <Texts />;
-  // }
-  // if (activeMenuItem === "shapes") {
-  //   return <Elements />;
-  // }  
-  // if (activeMenuItem === "audios") {
-  //   return <Audios />;
-  // }
 
-  // if (activeMenuItem === "images") {
-  //   return <Images />;
-  // }
+  if (activeMenuItem === "audios") {
+    return <Audios />;
+  }
+
+  if (activeMenuItem === "images") {
+    return <Images />;
+  }
 
   return null;
 };
