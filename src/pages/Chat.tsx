@@ -8,7 +8,6 @@ import SettingsDialog from "@/components/SettingsDialog";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import useVideoStore from "@/stores/use-video-store";
 import useLayoutStore from "@/features/editor/store/use-layout-store";
-import useStore from "@/features/editor/store/use-store";
 import { createProject, getProject, sendChatMessage, ProjectDetails, ChatMessage } from "@/services/api";
 import { toast } from "@/hooks/use-toast";
 
@@ -43,49 +42,8 @@ const Chat = () => {
 
   const { addChatVideo, scrollToVideos, clearHighlights, clearAllChatVideos } = useVideoStore();
   const { setActiveMenuItem, setShowMenuItem } = useLayoutStore();
-  const { timeline, setState } = useStore();
 
   const { isAuthenticated, isLoading, loginWithRedirect, getAccessTokenSilently } = useAuth0();
-
-  // Helper function to ensure a value is a valid unsigned long integer
-  const ensureValidUnsignedLong = (value: any, fallback: number): number => {
-    const num = Number(value);
-    if (isNaN(num) || num < 0 || !Number.isInteger(num) || num > 4294967295) {
-      return fallback;
-    }
-    return Math.floor(num);
-  };
-
-  // Helper function to load video metadata
-  const loadVideoMetadata = (videoUrl: string): Promise<{ width: number; height: number; duration: number }> => {
-    return new Promise((resolve) => {
-      const video = document.createElement('video');
-      video.crossOrigin = 'anonymous';
-      
-      const onLoadedMetadata = () => {
-        const width = ensureValidUnsignedLong(video.videoWidth, 1080);
-        const height = ensureValidUnsignedLong(video.videoHeight, 1920);
-        const duration = ensureValidUnsignedLong(video.duration * 1000, 5000); // Convert to milliseconds
-        
-        console.log('Video metadata loaded:', { width, height, duration, originalWidth: video.videoWidth, originalHeight: video.videoHeight });
-        
-        video.removeEventListener('loadedmetadata', onLoadedMetadata);
-        video.removeEventListener('error', onError);
-        resolve({ width, height, duration });
-      };
-      
-      const onError = () => {
-        console.warn('Failed to load video metadata, using fallback dimensions');
-        video.removeEventListener('loadedmetadata', onLoadedMetadata);
-        video.removeEventListener('error', onError);
-        resolve({ width: 1080, height: 1920, duration: 5000 });
-      };
-      
-      video.addEventListener('loadedmetadata', onLoadedMetadata);
-      video.addEventListener('error', onError);
-      video.src = videoUrl;
-    });
-  };
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -314,7 +272,7 @@ const Chat = () => {
       // Add the AI response with proper text parsing
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: parseMessageContent(result.response.text || ''),
+        text: parseMessageContent(result.response.text),
         isUser: false,
         timestamp: new Date(),
       };
@@ -366,7 +324,7 @@ const Chat = () => {
       // Add AI response with proper text parsing
       const aiMessage: Message = {
         id: aiMessageId,
-        text: parseMessageContent(response.text || ''),
+        text: parseMessageContent(response.text),
         isUser: false,
         timestamp: new Date(),
       };
@@ -401,126 +359,6 @@ const Chat = () => {
     }
   };
 
-  const addVideoToTimeline = async (videoUrl: string, videoId: string, index: number = 0) => {
-    if (!timeline) {
-      console.log('Timeline not available, cannot add video');
-      return;
-    }
-
-    try {
-      console.log('Loading video metadata for:', videoUrl);
-      
-      // Load video metadata to get actual dimensions
-      const { width, height, duration } = await loadVideoMetadata(videoUrl);
-      
-      // Calculate position based on index to avoid overlapping
-      const videoDuration = duration || 5000; // Use actual duration or 5 seconds fallback
-      const startTime = index * videoDuration;
-      const endTime = startTime + videoDuration;
-
-      console.log('Adding video to timeline:', { 
-        videoId, 
-        videoUrl, 
-        startTime, 
-        endTime, 
-        width, 
-        height, 
-        duration: videoDuration 
-      });
-      
-      // Create the track item with validated dimensions
-      const trackItem = {
-        id: videoId,
-        type: "video" as const,
-        name: `Video ${index + 1}`,
-        display: {
-          from: startTime,
-          to: endTime,
-        },
-        details: {
-          src: videoUrl,
-          volume: 100,
-          opacity: 1,
-        },
-        trim: {
-          from: 0,
-          to: videoDuration,
-        },
-        trackId: "main",
-        // Use validated dimensions
-        width: width,
-        height: height,
-        metadata: {
-          resourceId: videoId,
-          duration: videoDuration,
-          width: width,
-          height: height,
-          previewUrl: videoUrl,
-        },
-      };
-
-      console.log('Track item before adding:', JSON.stringify(trackItem, null, 2));
-
-      // Use the timeline's addTrackItem method if available
-      if (timeline.addTrackItem && typeof timeline.addTrackItem === 'function') {
-        console.log('Using timeline.addTrackItem method');
-        await timeline.addTrackItem(trackItem);
-        console.log('Video added via timeline.addTrackItem');
-      } else {
-        // Fallback: manually update the state
-        console.log('Using fallback method to add video');
-        
-        // Get current state from the store
-        const currentState = useStore.getState();
-        const currentTracks = currentState.tracks || [];
-        
-        // Find or create main track
-        let mainTrack = currentTracks.find(track => track.id === "main");
-        if (!mainTrack) {
-          mainTrack = {
-            id: "main",
-            type: "video",
-            items: []
-          };
-        }
-
-        // Add the video item ID to the track (tracks only store IDs)
-        const updatedTrack = {
-          ...mainTrack,
-          items: [...(mainTrack.items || []), videoId]
-        };
-
-        // Update tracks array
-        const updatedTracks = currentTracks.filter(track => track.id !== "main");
-        updatedTracks.push(updatedTrack);
-
-        // Update the state with track items stored separately
-        await setState({
-          tracks: updatedTracks,
-          trackItemsMap: {
-            ...currentState.trackItemsMap,
-            [trackItem.id]: trackItem
-          },
-          trackItemIds: [...(currentState.trackItemIds || []), trackItem.id]
-        });
-        
-        console.log('Video added via fallback method');
-      }
-      
-      console.log('Video successfully added to timeline');
-      
-    } catch (error) {
-      console.error('Error adding video to timeline:', error);
-      console.error('Error details:', {
-        message: error.message,
-        stack: error.stack,
-        videoId,
-        videoUrl,
-        index
-      });
-    }
-  };
-
   const handleVideoUrls = (clipUrls: string[], prompt: string, messageId: string) => {
     let videoIds: string[] = [];
     
@@ -545,14 +383,10 @@ const Chat = () => {
         videoUrl: videoUrl,
         prompt: `${prompt} (${index + 1}/${clipUrls.length})`,
         timestamp: new Date(),
-        preview: videoUrl,
-        messageId: messageId,
+        preview: videoUrl
       };
       
       addChatVideo(chatVideo);
-
-      // Add video to timeline automatically with proper indexing
-      addVideoToTimeline(videoUrl, currentVideoId, index);
 
       // Set the first video as current
       if (index === 0) {
