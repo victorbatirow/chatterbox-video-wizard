@@ -82,6 +82,63 @@ const Chat = () => {
     }
   }, [projectId, currentProjectId]);
 
+  const retryCreateProject = async (pendingRequest: PendingRequest) => {
+    try {
+      const token = await getAccessTokenSilently();
+      const result = await createProject(token, pendingRequest.prompt);
+      
+      clearPendingRequest();
+      setCurrentProjectId(result.project.id);
+      
+      // Add the AI response with proper text parsing
+      const aiMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: parseMessageContent(result.response.text),
+        isUser: false,
+        timestamp: new Date(),
+      };
+      
+      setMessages(prev => [...prev, aiMessage]);
+      
+      // Handle videos if provided
+      if (result.response.clip_urls && result.response.clip_urls.length > 0) {
+        handleVideoUrls(result.response.clip_urls, pendingRequest.prompt, aiMessage.id);
+      }
+    } catch (error) {
+      console.error('Error retrying create project:', error);
+      throw error;
+    }
+  };
+
+  const retryMessage = async (pendingRequest: PendingRequest) => {
+    try {
+      const token = await getAccessTokenSilently();
+      const response = await sendChatMessage(token, pendingRequest.projectId, pendingRequest.prompt);
+      
+      clearPendingRequest();
+      
+      const aiMessageId = (Date.now() + 1).toString();
+      
+      // Add AI response with proper text parsing
+      const aiMessage: Message = {
+        id: aiMessageId,
+        text: parseMessageContent(response.text),
+        isUser: false,
+        timestamp: new Date(),
+      };
+
+      setMessages(prev => [...prev, aiMessage]);
+      
+      // Handle videos if provided
+      if (response.clip_urls && response.clip_urls.length > 0) {
+        handleVideoUrls(response.clip_urls, pendingRequest.prompt, aiMessageId);
+      }
+    } catch (error) {
+      console.error('Error retrying message:', error);
+      throw error;
+    }
+  };
+
   // Check for pending requests on mount
   useEffect(() => {
     const checkPendingRequest = async () => {
