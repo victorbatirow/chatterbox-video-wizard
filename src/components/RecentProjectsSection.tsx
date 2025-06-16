@@ -21,9 +21,9 @@ const RecentProjectsSection = ({
   const location = useLocation();
   const isProjectsPage = location.pathname === '/projects';
   
-  // Show 6 projects initially (2 rows), then 6 more each time
-  const [visibleCount, setVisibleCount] = useState(6);
-  const projectsPerBatch = 6;
+  // Show 5 projects + create button initially (2 rows), then 5 more projects + create button each time
+  const [visibleCount, setVisibleCount] = useState(5);
+  const projectsPerBatch = 5;
 
   const handleProjectClick = (projectId: string) => {
     navigate(`/chat/${projectId}`);
@@ -123,7 +123,7 @@ const RecentProjectsSection = ({
                 </Card>
               ))}
               
-              {/* Create New Project Card */}
+              {/* Create New Project Card - always shown as the last item */}
               <Card 
                 className="bg-white/5 border-white/10 hover:bg-white/10 transition-colors cursor-pointer group border-dashed"
                 onClick={onCreateProject}
