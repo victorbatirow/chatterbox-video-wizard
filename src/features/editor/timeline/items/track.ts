@@ -7,11 +7,6 @@ class Track extends TrackBase {
   constructor(props: TrackItemProps) {
     super(props);
     this.fill = "#18181b";
-    
-    // Prevent creating additional tracks beyond the main track
-    if (props.id !== "main") {
-      throw new Error("Only the main track is allowed");
-    }
   }
 
   // add custom text to the track item

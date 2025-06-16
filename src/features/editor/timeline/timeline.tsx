@@ -170,12 +170,19 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
         main: ["video"], // Only allow videos on the main track
       },
       guideLineColor: "#ffffff",
-      // Disable creating new tracks
-      allowNewTracks: false,
-      maxTracks: 1,
     });
 
     canvasRef.current = canvas;
+
+    // Ensure the main track always exists
+    const currentState = stateManager.getState();
+    if (!currentState.tracks.find(track => track.id === "main")) {
+      stateManager.addTrack({
+        id: "main",
+        type: "main",
+        items: []
+      });
+    }
 
     setCanvasSize({ width: containerWidth, height: containerHeight });
     setSize({
