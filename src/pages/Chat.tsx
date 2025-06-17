@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams, useParams } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import ChatInterface from "@/components/ChatInterface";
-import VideoTimeline from "@/components/VideoTimeline";
+import { VideoEditor } from "@/components/VideoEditor";
 import ProjectMenu from "@/components/ProjectMenu";
 import SettingsDialog from "@/components/SettingsDialog";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
@@ -539,7 +539,7 @@ const Chat = () => {
           
           {/* Video Timeline - Resizable Panel */}
           <ResizablePanel defaultSize={67} minSize={50}>
-            <VideoTimeline
+            <VideoEditor
               videos={videos}
               currentVideoId={currentVideoId}
               isGenerating={isGenerating}
