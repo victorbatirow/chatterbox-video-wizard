@@ -352,3 +352,24 @@ export interface ChatMessage {
 // Legacy function names for compatibility
 export const sendMessage = sendChatMessage;
 export const getUserProjects = getProjects;
+
+// User Profile API
+export interface UserProfile {
+  monthly_credits: number;
+  used_credits: number;
+  subscribed_product_name: string;
+  current_period_start: number;
+  current_period_end: number;
+  subscription_status: string;
+  email: string;
+  success: boolean;
+  message: string;
+}
+
+export const getUserProfile = async (token: string): Promise<UserProfile> => {
+  return apiRequest<UserProfile>('/user', {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+};

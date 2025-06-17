@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
+import { useAuth0 } from "@auth0/auth0-react";
 import {
   Dialog,
   DialogContent,
@@ -18,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Settings, User, Check, Info } from "lucide-react";
+import { useUserProfile } from "@/hooks/useUserProfile";
 
 interface SettingsDialogProps {
   isOpen: boolean;
@@ -42,7 +44,12 @@ function formatNumber(number: number): string {
   } else {
     return `${number}`; // Format for less than 1000
   }
-  }
+}
+
+function formatUnixTimestamp(timestamp: number): string {
+  if (timestamp === 0) return 'N/A';
+  return new Date(timestamp * 1000).toLocaleDateString();
+}
 
 const SettingsDialog = ({ isOpen, onClose, disableOpenCloseUrlManagement = false }: SettingsDialogProps) => {
   const location = useLocation();
@@ -50,6 +57,9 @@ const SettingsDialog = ({ isOpen, onClose, disableOpenCloseUrlManagement = false
   const [selectedHobbyValue, setSelectedHobbyValue] = useState('1600,price_1RahQ4CmyYc460qRPIcmisOI')
   const [selectedProValue, setSelectedProValue] = useState('10000,price_1RahY6CmyYc460qRoWUq57Ur')
   const isInProject = location.pathname.startsWith('/chat');
+  
+  const { user } = useAuth0();
+  const { userProfile, loading: profileLoading, usagePercentage, remainingCredits } = useUserProfile();
   
   // Get settings type and tab from URL params
   const settingsParam = searchParams.get('settings');
@@ -142,6 +152,29 @@ const SettingsDialog = ({ isOpen, onClose, disableOpenCloseUrlManagement = false
     setSelectedProValue(value);
   }
 
+  // Helper functions for display
+  const getUserInitials = () => {
+    if (user?.name) {
+      return user.name
+        .split(' ')
+        .map(n => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
+    }
+    return 'U';
+  };
+
+  const getUserDisplayName = () => {
+    return user?.name || user?.email || 'User';
+  };
+
+  const getWorkspaceName = () => {
+    const displayName = getUserDisplayName();
+    // return `${displayName}'s Pamba`;
+    return `My Pamba`;
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="fixed left-[50%] top-[50%] z-[10001] max-w-[95vw] translate-x-[-50%] translate-y-[-50%] gap-0 rounded-xl border bg-background p-0 shadow-lg duration-300 md:max-w-[1200px] flex h-[90dvh] max-h-[640px] w-[95dvw] flex-1 overflow-hidden [&>div:first-child]:bg-black/5">
@@ -184,19 +217,19 @@ const SettingsDialog = ({ isOpen, onClose, disableOpenCloseUrlManagement = false
             >
               <Avatar className="h-5 w-5 rounded-[6px]">
                 <AvatarFallback className="bg-purple-600 text-white font-medium text-xs rounded-[6px]">
-                  V
+                  {getUserInitials()}
                 </AvatarFallback>
               </Avatar>
-              <p className="-ml-0.5">victor's Pamba</p>
+              <p className="-ml-0.5">{getWorkspaceName()}</p>
             </TabsTrigger>
 
-            <TabsTrigger
+            {/* <TabsTrigger
               value="people"
               className="flex min-h-8 w-full items-center justify-start gap-2 rounded-md px-2.5 py-2 text-start text-sm data-[state=active]:bg-muted hover:bg-muted"
             >
               <User className="h-4 w-4" />
               <p>People</p>
-            </TabsTrigger>
+            </TabsTrigger> */}
 
             <TabsTrigger
               value="billing"
@@ -223,7 +256,7 @@ const SettingsDialog = ({ isOpen, onClose, disableOpenCloseUrlManagement = false
               className="flex min-h-8 w-full items-center justify-start gap-2 rounded-md px-2.5 py-2 text-start text-sm data-[state=active]:bg-muted hover:bg-muted"
             >
               <User className="h-4 w-4" />
-              <p>victor batirow</p>
+              <p>{getUserDisplayName()}</p>
             </TabsTrigger>
           </TabsList>
 
@@ -368,8 +401,38 @@ const SettingsDialog = ({ isOpen, onClose, disableOpenCloseUrlManagement = false
                     Manage your workspace preferences and settings.
                   </p>
                 </div>
-                <div className="flex-1 flex items-center justify-center">
-                  <p className="text-muted-foreground">Workspace settings coming soon...</p>
+                <div className="flex-1 p-6 space-y-6">
+                  <div className="space-y-4">
+                    <h5 className="font-medium">Workspace Overview</h5>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium">Workspace Name</p>
+                        <p className="text-sm text-muted-foreground">{getWorkspaceName()}</p>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium">Owner Email</p>
+                        <p className="text-sm text-muted-foreground">
+                          {profileLoading ? 'Loading...' : (userProfile?.email || user?.email || 'Unknown')}
+                        </p>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium">Subscription Status</p>
+                        <p className="text-sm text-muted-foreground">
+                          {profileLoading ? 'Loading...' : (userProfile?.subscription_status || 'inactive')}
+                        </p>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium">Current Plan</p>
+                        <p className="text-sm text-muted-foreground">
+                          {profileLoading ? 'Loading...' : (userProfile?.subscribed_product_name || 'No Subscription')}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </TabsContent>
@@ -421,15 +484,31 @@ const SettingsDialog = ({ isOpen, onClose, disableOpenCloseUrlManagement = false
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <h5 className="font-medium">Credits</h5>
-                      <span className="text-sm text-muted-foreground">201/400</span>
+                      <span className="text-sm text-muted-foreground">
+                        {profileLoading ? 'Loading...' : `${userProfile?.used_credits || 0}/${userProfile?.monthly_credits || 0}`}
+                      </span>
                     </div>
                     <div className="w-full bg-muted rounded-full h-2">
-                      <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${(201/400*100)}%` }}></div>
+                      <div 
+                        className="bg-blue-600 h-2 rounded-full transition-all" 
+                        style={{ width: `${Math.min(usagePercentage, 100)}%` }}
+                      ></div>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      You're currently subscribed to plan: <strong>Pro 3</strong> charged at $100/mo.{' '}
-                      <button onClick={() => window.open('https://billing.stripe.com/p/login/test_14A6oG5aJ4LDaWLdKX18c00', '_blank')} 
-                      className="underline">Manage your payment preferences</button>, or change your plan below. Your monthly credits will renew on June 17 at 15:18.
+                      {profileLoading ? (
+                        'Loading subscription information...'
+                      ) : userProfile?.subscription_status === 'active' ? (
+                        <>
+                          You're currently subscribed to plan: <strong>{userProfile.subscribed_product_name}</strong>.{' '}
+                          <button onClick={() => window.open('https://billing.stripe.com/p/login/test_14A6oG5aJ4LDaWLdKX18c00', '_blank')} 
+                          className="underline">Manage your payment preferences</button>, or change your plan below. 
+                          {userProfile.current_period_end > 0 && (
+                            <> Your monthly credits will renew on {formatUnixTimestamp(userProfile.current_period_end)}.</>
+                          )}
+                        </>
+                      ) : (
+                        'You don\'t have an active subscription. Choose a plan below to get started.'
+                      )}
                     </p>
                   </div>
 
@@ -446,8 +525,12 @@ const SettingsDialog = ({ isOpen, onClose, disableOpenCloseUrlManagement = false
                         <p className="text-sm text-muted-foreground mt-2">For getting started</p>
                       </div>
 
-                      <Button variant="outline" className="w-full">
-                        Downgrade
+                      <Button 
+                        variant="outline" 
+                        className="w-full"
+                        disabled={!userProfile || userProfile.subscription_status !== 'active'}
+                      >
+                        {userProfile?.subscription_status === 'active' ? 'Downgrade' : 'Current plan'}
                       </Button>
 
                       <div className="space-y-2">
@@ -489,8 +572,11 @@ const SettingsDialog = ({ isOpen, onClose, disableOpenCloseUrlManagement = false
                         </SelectContent>
                       </Select>
                       
-                      <Button className="w-full z-0" disabled>
-                        Your current plan
+                      <Button 
+                        className="w-full z-0" 
+                        disabled={userProfile?.subscribed_product_name?.toLowerCase().includes('hobby')}
+                      >
+                        {userProfile?.subscribed_product_name?.toLowerCase().includes('hobby') ? 'Your current plan' : 'Upgrade'}
                       </Button>
 
                       <div className="space-y-2">
@@ -546,8 +632,11 @@ const SettingsDialog = ({ isOpen, onClose, disableOpenCloseUrlManagement = false
                         </SelectContent>
                       </Select>
 
-                      <Button className="w-full bg-blue-600 hover:bg-blue-700 z-10">
-                        Upgrade
+                      <Button 
+                        className="w-full bg-blue-600 hover:bg-blue-700 z-10"
+                        disabled={userProfile?.subscribed_product_name?.toLowerCase().includes('pro')}
+                      >
+                        {userProfile?.subscribed_product_name?.toLowerCase().includes('pro') ? 'Your current plan' : 'Upgrade'}
                       </Button>
 
                       <div className="space-y-2">
@@ -607,8 +696,59 @@ const SettingsDialog = ({ isOpen, onClose, disableOpenCloseUrlManagement = false
                     Manage your personal account information.
                   </p>
                 </div>
-                <div className="flex-1 flex items-center justify-center">
-                  <p className="text-muted-foreground">Account settings coming soon...</p>
+                <div className="flex-1 p-6 space-y-6">
+                  <div className="space-y-4">
+                    <h5 className="font-medium">Account Information</h5>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium">Display Name</p>
+                        <p className="text-sm text-muted-foreground">{getUserDisplayName()}</p>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium">Email Address</p>
+                        <p className="text-sm text-muted-foreground">
+                          {profileLoading ? 'Loading...' : (userProfile?.email || user?.email || 'Unknown')}
+                        </p>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium">Account Status</p>
+                        <p className="text-sm text-muted-foreground">
+                          {user?.email_verified ? 'Verified' : 'Unverified'}
+                        </p>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium">Subscription</p>
+                        <p className="text-sm text-muted-foreground">
+                          {profileLoading ? 'Loading...' : (userProfile?.subscribed_product_name || 'No Subscription')}
+                        </p>
+                      </div>
+                    </div>
+
+                    {userProfile?.subscription_status === 'active' && (
+                      <div className="space-y-4 pt-4 border-t">
+                        <h6 className="font-medium">Billing Information</h6>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <p className="text-sm font-medium">Billing Period</p>
+                            <p className="text-sm text-muted-foreground">
+                              {formatUnixTimestamp(userProfile.current_period_start)} - {formatUnixTimestamp(userProfile.current_period_end)}
+                            </p>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <p className="text-sm font-medium">Credits Usage</p>
+                            <p className="text-sm text-muted-foreground">
+                              {userProfile.used_credits} of {userProfile.monthly_credits} used ({remainingCredits} remaining)
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </TabsContent>

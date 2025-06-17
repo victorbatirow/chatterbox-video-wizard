@@ -13,6 +13,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import Container from "@/components/Container";
 import SettingsDialog from "@/components/SettingsDialog";
+import { useUserProfile } from "@/hooks/useUserProfile";
 
 interface NavbarProps {
   isAuthenticated?: boolean;
@@ -26,6 +27,7 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated, onOpenSettings }: Navbar
   const navigate = useNavigate();
   
   const { isAuthenticated, user, logout, loginWithRedirect, isLoading } = useAuth0();
+  const { userProfile, loading: profileLoading, usagePercentage, remainingCredits } = useUserProfile();
   
   // Use Auth0 authentication state if available, otherwise fall back to prop
   const actualIsAuthenticated = isAuthenticated ?? propIsAuthenticated ?? false;
@@ -87,6 +89,21 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated, onOpenSettings }: Navbar
 
   const getUserDisplayName = () => {
     return user?.name || user?.email || 'User';
+  };
+
+  // Get subscription badge text
+  const getSubscriptionBadge = () => {
+    if (!userProfile) return 'Free';
+    
+    if (userProfile.subscription_status === 'active') {
+      // Extract plan name from subscribed_product_name
+      const planName = userProfile.subscribed_product_name;
+      if (planName.toLowerCase().includes('pro')) return 'Pro';
+      if (planName.toLowerCase().includes('hobby')) return 'Hobby';
+      return 'Pro';
+    }
+    
+    return 'Free';
   };
 
   if (isLoading) {
@@ -155,7 +172,7 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated, onOpenSettings }: Navbar
                     </Avatar>
                     <div className="flex flex-col justify-center gap-[2px] leading-none">
                       <p className="text-sm font-medium">{getUserDisplayName()}'s Pamba</p>
-                      <p className="text-xs text-muted-foreground">{user?.email}</p>
+                      <p className="text-xs text-muted-foreground">{userProfile?.email || user?.email}</p>
                     </div>
                   </div>
 
@@ -174,10 +191,12 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated, onOpenSettings }: Navbar
                         <div className="relative w-full overflow-hidden rounded-full bg-muted-foreground/20 h-[7px] min-w-0 flex-1">
                           <div 
                             className="h-full bg-purple-600 transition-all" 
-                            style={{ width: '30%' }}
+                            style={{ width: `${Math.min(usagePercentage, 100)}%` }}
                           ></div>
                         </div>
-                        <p className="text-xs text-muted-foreground">30/100</p>
+                        <p className="text-xs text-muted-foreground">
+                          {profileLoading ? '...' : `${userProfile?.used_credits || 0}/${userProfile?.monthly_credits || 0}`}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -214,7 +233,7 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated, onOpenSettings }: Navbar
                     </Avatar>
                     <p className="min-w-0 truncate text-sm">{getUserDisplayName()}'s Pamba</p>
                     <span className="rounded-full px-2 py-px text-[10px] font-medium uppercase bg-purple-600 text-white">
-                      Pro
+                      {getSubscriptionBadge()}
                     </span>
                   </div>
 
