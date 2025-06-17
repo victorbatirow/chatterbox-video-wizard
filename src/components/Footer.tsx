@@ -6,7 +6,7 @@ import Container from "./Container";
 const Footer = () => {
   return (
     <div className="relative z-10 w-full mt-12 pb-8">
-      <Container>
+      {/* <Container>
         <footer className="mx-auto flex w-full flex-col justify-center rounded-[20px] border border-gray-200/20 bg-white/5 backdrop-blur-sm px-8 py-8 dark:border-gray-800/20 sm:flex-row">
           <nav className="grid w-full grid-cols-3 content-center justify-end gap-4 gap-y-12 text-base sm:gap-12 md:grid-cols-6">
             <div className="col-span-full mb-16 flex flex-col max-sm:items-center sm:col-span-1 sm:mb-0">
@@ -64,7 +64,7 @@ const Footer = () => {
             </div>
           </nav>
         </footer>
-      </Container>
+      </Container> */}
     </div>
   );
 };

@@ -112,10 +112,10 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated }: NavbarProps) => {
               <span className="text-2xl font-bold text-white">Pamba</span>
             </Link>
             <div className="hidden md:flex items-center gap-6 text-white/80">
-              <a href="#" className="hover:text-white transition-colors">Community</a>
+              {/* <a href="#" className="hover:text-white transition-colors">Community</a>
               <a href="#" className="hover:text-white transition-colors">Gallery</a>
               <a href="#" className="hover:text-white transition-colors">Learn</a>
-              <a href="#" className="hover:text-white transition-colors">Showcase</a>
+              <a href="#" className="hover:text-white transition-colors">Showcase</a> */}
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -188,14 +188,14 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated }: NavbarProps) => {
                       <Settings className="h-4 w-4 mr-2" />
                       Settings
                     </Button>
-                    <Button 
+                    {/* <Button 
                       variant="outline" 
                       size="sm" 
                       className="bg-muted border-input hover:bg-accent h-8 px-[11px]"
                     >
                       <UserPlus className="h-4 w-4 mr-2" />
                       Invite
-                    </Button>
+                    </Button> */}
                   </div>
 
                   <DropdownMenuSeparator />
