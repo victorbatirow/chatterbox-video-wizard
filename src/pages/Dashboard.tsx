@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -9,7 +8,11 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Container from "@/components/Container";
 import StaticGradientBackground from "@/components/StaticGradientBackground";
-import { createProject, getProjects, Project } from "@/services/api";
+import { 
+  createProject, 
+  getProjects, 
+  Project
+} from "@/services/api";
 import { toast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
@@ -38,11 +41,34 @@ const Dashboard = () => {
           setProjects(userProjects);
         } catch (error) {
           console.error('Error loading projects:', error);
-          toast({
-            title: "Error",
-            description: "Failed to load projects",
-            variant: "destructive",
-          });
+          
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          
+          if (errorMessage.includes('<!DOCTYPE') || errorMessage.includes('HTML')) {
+            toast({
+              title: "Backend Connection Error",
+              description: "Cannot connect to the backend server. Please make sure it's running on http://localhost:8080",
+              variant: "destructive",
+            });
+          } else if (errorMessage.includes('404')) {
+            toast({
+              title: "Backend Setup Issue",
+              description: "API endpoints are missing. Please check your backend configuration.",
+              variant: "destructive",
+            });
+          } else if (errorMessage.includes('401') || errorMessage.includes('Unauthorized')) {
+            toast({
+              title: "Authentication Error", 
+              description: "Your session may have expired. Please try logging out and back in.",
+              variant: "destructive",
+            });
+          } else {
+            toast({
+              title: "Error",
+              description: "Failed to load projects. Please check if the backend is running.",
+              variant: "destructive",
+            });
+          }
         }
       }
     };
@@ -63,11 +89,34 @@ const Dashboard = () => {
       window.scrollTo(0, 0);
     } catch (error) {
       console.error('Error creating project:', error);
-      toast({
-        title: "Error",
-        description: "Failed to create project",
-        variant: "destructive",
-      });
+      
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
+      if (errorMessage.includes('<!DOCTYPE') || errorMessage.includes('HTML')) {
+        toast({
+          title: "Backend Connection Error",
+          description: "Cannot connect to the backend server. Please make sure it's running on http://localhost:8080",
+          variant: "destructive",
+        });
+      } else if (errorMessage.includes('404')) {
+        toast({
+          title: "Backend Setup Issue",
+          description: "The project creation endpoint is missing. Please check your backend configuration.",
+          variant: "destructive",
+        });
+      } else if (errorMessage.includes('401')) {
+        toast({
+          title: "Authentication Error",
+          description: "Your session may have expired. Please try logging out and back in.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to create project. Please try again.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsCreatingProject(false);
     }
@@ -86,11 +135,34 @@ const Dashboard = () => {
       window.scrollTo(0, 0);
     } catch (error) {
       console.error('Error creating project:', error);
-      toast({
-        title: "Error",
-        description: "Failed to create project",
-        variant: "destructive",
-      });
+      
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
+      if (errorMessage.includes('<!DOCTYPE') || errorMessage.includes('HTML')) {
+        toast({
+          title: "Backend Connection Error",
+          description: "Cannot connect to the backend server. Please make sure it's running on http://localhost:8080",
+          variant: "destructive",
+        });
+      } else if (errorMessage.includes('404')) {
+        toast({
+          title: "Backend Setup Issue",
+          description: "The project creation endpoint is missing. Please check your backend configuration.",
+          variant: "destructive",
+        });
+      } else if (errorMessage.includes('401')) {
+        toast({
+          title: "Authentication Error",
+          description: "Your session may have expired. Please try logging out and back in.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to create project. Please try again.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsCreatingProject(false);
     }

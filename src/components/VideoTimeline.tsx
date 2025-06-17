@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Slider } from "@/components/ui/slider";
-import { Play, Pause, Volume2, Download, RotateCcw, Maximize, VolumeX } from "lucide-react";
+import { Play, Pause, Volume2, Download, RotateCcw, Maximize, VolumeX, Grid, Film } from "lucide-react";
 import { VideoMessage } from "@/pages/Chat";
 
 interface VideoTimelineProps {
@@ -20,6 +19,7 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
   const [isMuted, setIsMuted] = useState<{ [key: string]: boolean }>({});
   const [hasAudio, setHasAudio] = useState<{ [key: string]: boolean }>({});
   const [isDragging, setIsDragging] = useState<{ [key: string]: 'progress' | 'volume' | null }>({});
+  const [viewMode, setViewMode] = useState<'timeline' | 'clips' | 'final'>('timeline');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const videoRefs = useRef<{ [key: string]: HTMLDivElement }>({});
   const videoElementRefs = useRef<{ [key: string]: HTMLVideoElement }>({});
@@ -34,7 +34,7 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
     }
   }, [currentVideoId]);
 
-  // Mouse move and up event listeners
+  // Mouse move and up event listeners for dragging
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       Object.entries(isDragging).forEach(([videoId, dragType]) => {
@@ -69,6 +69,37 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
       document.removeEventListener('mouseup', handleMouseUp);
     };
   }, [isDragging]);
+
+  // Group videos by message and type
+  const groupedVideos = videos.reduce((acc, video) => {
+    const messageId = video.messageId || 'unknown';
+    if (!acc[messageId]) {
+      acc[messageId] = { clips: [], final: null };
+    }
+    
+    if (video.isClip) {
+      acc[messageId].clips.push(video);
+    } else {
+      acc[messageId].final = video;
+    }
+    
+    return acc;
+  }, {} as Record<string, { clips: VideoMessage[], final: VideoMessage | null }>);
+
+  // Filter videos based on view mode
+  const getFilteredVideos = () => {
+    switch (viewMode) {
+      case 'clips':
+        return videos.filter(v => v.isClip);
+      case 'final':
+        return videos.filter(v => !v.isClip);
+      case 'timeline':
+      default:
+        return videos;
+    }
+  };
+
+  const filteredVideos = getFilteredVideos();
 
   const handlePlayPause = (videoId: string) => {
     const videoElement = videoElementRefs.current[videoId];
@@ -252,6 +283,253 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
     setIsDragging(prev => ({ ...prev, [videoId]: type }));
   };
 
+  // Render video section for timeline view
+  const renderVideoSection = (messageId: string, videoGroup: { clips: VideoMessage[], final: VideoMessage | null }) => {
+    const { clips, final } = videoGroup;
+    
+    return (
+      <div key={messageId} className="space-y-4 border-b border-white/10 pb-6 mb-6">
+        {/* Clips Section */}
+        {clips.length > 0 && (
+          <div>
+            <h4 className="text-white font-medium mb-3 flex items-center gap-2">
+              <Grid className="w-4 h-4" />
+              Individual Clips ({clips.length})
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {clips
+                .sort((a, b) => (a.clipIndex || 0) - (b.clipIndex || 0))
+                .map((clip) => (
+                <div
+                  key={clip.id}
+                  ref={(el) => {
+                    if (el) videoRefs.current[clip.id] = el;
+                  }}
+                  className={`rounded-lg border transition-all cursor-pointer ${
+                    currentVideoId === clip.id
+                      ? "border-purple-500 bg-purple-500/10"
+                      : "border-white/20 bg-white/5"
+                  }`}
+                  onClick={() => onVideoSelect(clip.id)}
+                >
+                  <div className="relative w-full aspect-video bg-black rounded-t-lg overflow-hidden">
+                    <video
+                      ref={(el) => {
+                        if (el) {
+                          videoElementRefs.current[clip.id] = el;
+                          el.addEventListener('timeupdate', () => handleTimeUpdate(clip.id));
+                          el.addEventListener('loadedmetadata', () => handleLoadedMetadata(clip.id));
+                        }
+                      }}
+                      className="w-full h-full object-contain"
+                      src={clip.videoUrl}
+                      controls={false}
+                    />
+                    
+                    {/* Custom Controls for Clips */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300">
+                      <div className="absolute bottom-2 left-2 right-2">
+                        <div className="flex items-center justify-between">
+                          <Button
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handlePlayPause(clip.id);
+                            }}
+                            className="bg-white/20 hover:bg-white/30 backdrop-blur-sm"
+                          >
+                            {playingVideos.has(clip.id) ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+                          </Button>
+                          
+                          <div className="flex gap-1">
+                            <Button
+                              size="sm"
+                              className="bg-white/20 hover:bg-white/30 backdrop-blur-sm p-1"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDownload(clip.videoUrl, `${clip.prompt} - Clip ${(clip.clipIndex || 0) + 1}`);
+                              }}
+                            >
+                              <Download className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="p-3">
+                    <p className="text-white/80 text-sm">
+                      Clip {(clip.clipIndex || 0) + 1}
+                    </p>
+                    <p className="text-white/50 text-xs">
+                      {clip.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Final Video Section */}
+        {final && (
+          <div>
+            <h4 className="text-white font-medium mb-3 flex items-center gap-2">
+              <Film className="w-4 h-4" />
+              Final Video
+            </h4>
+            <div
+              ref={(el) => {
+                if (el) videoRefs.current[final.id] = el;
+              }}
+              className={`rounded-lg border transition-all cursor-pointer ${
+                currentVideoId === final.id
+                  ? "border-purple-500 bg-purple-500/10"
+                  : "border-white/20 bg-white/5"
+              }`}
+              onClick={() => onVideoSelect(final.id)}
+            >
+              <div className="relative w-full h-[60vh] bg-black rounded-t-lg overflow-hidden">
+                <video
+                  ref={(el) => {
+                    if (el) {
+                      videoElementRefs.current[final.id] = el;
+                      el.addEventListener('timeupdate', () => handleTimeUpdate(final.id));
+                      el.addEventListener('loadedmetadata', () => handleLoadedMetadata(final.id));
+                    }
+                  }}
+                  className="w-full h-full object-contain"
+                  src={final.videoUrl}
+                  controls={false}
+                />
+                
+                {/* Full controls for final video */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300">
+                  <div className="absolute bottom-4 left-4 right-4">
+                    {/* Progress Bar */}
+                    <div className="mb-3">
+                      <div 
+                        className="relative w-full h-2 bg-white/20 rounded-full cursor-pointer"
+                        data-slider={`${final.id}-progress`}
+                        onClick={(e) => handleSliderClick(e, final.id, 'progress')}
+                        onMouseDown={(e) => handleSliderMouseDown(e, final.id, 'progress')}
+                      >
+                        <div 
+                          className="absolute h-full bg-white rounded-full transition-all duration-150"
+                          style={{ width: `${videoProgress[final.id] || 0}%` }}
+                        />
+                        <div 
+                          className="absolute w-4 h-4 bg-white rounded-full border-2 border-white shadow-lg transform -translate-y-1/2 -translate-x-1/2 top-1/2 cursor-grab active:cursor-grabbing"
+                          style={{ left: `${videoProgress[final.id] || 0}%` }}
+                          onMouseDown={(e) => handleSliderMouseDown(e, final.id, 'progress')}
+                        />
+                      </div>
+                      <div className="flex justify-between text-xs text-white/70 mt-1">
+                        <span>{formatTime((videoProgress[final.id] || 0) * (videoDuration[final.id] || 0) / 100)}</span>
+                        <span>{formatTime(videoDuration[final.id] || 0)}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      {/* Left side controls */}
+                      <div className="flex items-center gap-4">
+                        <Button
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handlePlayPause(final.id);
+                          }}
+                          className="bg-white/20 hover:bg-white/30 backdrop-blur-sm"
+                        >
+                          {playingVideos.has(final.id) ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                        </Button>
+                        
+                        {/* Volume Control */}
+                        {hasAudio[final.id] ? (
+                          <div className="flex items-center gap-2 max-w-32">
+                            <Button
+                              size="sm"
+                              className="bg-white/20 hover:bg-white/30 backdrop-blur-sm p-2"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleMuteToggle(final.id);
+                              }}
+                            >
+                              {isMuted[final.id] ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                            </Button>
+                            <div 
+                              className="relative w-20 h-1 bg-white/20 rounded-full cursor-pointer"
+                              data-slider={`${final.id}-volume`}
+                              onClick={(e) => handleSliderClick(e, final.id, 'volume')}
+                              onMouseDown={(e) => handleSliderMouseDown(e, final.id, 'volume')}
+                            >
+                              <div 
+                                className="absolute h-full bg-white rounded-full transition-all duration-150"
+                                style={{ width: `${videoVolume[final.id] || 100}%` }}
+                              />
+                              <div 
+                                className="absolute w-3 h-3 bg-white rounded-full border border-white shadow-lg transform -translate-y-1/2 -translate-x-1/2 top-1/2 cursor-grab active:cursor-grabbing"
+                                style={{ left: `${videoVolume[final.id] || 100}%` }}
+                                onMouseDown={(e) => handleSliderMouseDown(e, final.id, 'volume')}
+                              />
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2 text-white/40 text-xs">
+                            <VolumeX className="w-4 h-4" />
+                            <span>No audio</span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Right side controls */}
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          className="bg-white/20 hover:bg-white/30 backdrop-blur-sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDownload(final.videoUrl, final.prompt);
+                          }}
+                        >
+                          <Download className="w-4 h-4" />
+                        </Button>
+                        
+                        <Button
+                          size="sm"
+                          className="bg-white/20 hover:bg-white/30 backdrop-blur-sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleFullscreen(final.id);
+                          }}
+                        >
+                          <Maximize className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-white font-medium">{final.prompt}</h4>
+                  {currentVideoId === final.id && (
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                  )}
+                </div>
+                <p className="text-white/50 text-sm">
+                  {final.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   if (videos.length === 0) {
     return (
       <div className="h-screen flex items-center justify-center bg-black/20 backdrop-blur-sm">
@@ -271,9 +549,9 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
 
   return (
     <div className="h-screen flex flex-col bg-black/20 backdrop-blur-sm">
-      {/* Header */}
+      {/* Header with View Mode Toggles */}
       <div className="p-6 border-b border-white/10 flex-shrink-0">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-lg font-semibold text-white">Video Timeline</h2>
             <p className="text-sm text-white/60">
@@ -282,175 +560,218 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
             </p>
           </div>
         </div>
+
+        {/* View Mode Toggles */}
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant={viewMode === 'timeline' ? 'default' : 'outline'}
+            onClick={() => setViewMode('timeline')}
+            className="text-xs"
+          >
+            Timeline
+          </Button>
+          <Button
+            size="sm"
+            variant={viewMode === 'clips' ? 'default' : 'outline'}
+            onClick={() => setViewMode('clips')}
+            className="text-xs"
+          >
+            <Grid className="w-3 h-3 mr-1" />
+            Clips Only
+          </Button>
+          <Button
+            size="sm"
+            variant={viewMode === 'final' ? 'default' : 'outline'}
+            onClick={() => setViewMode('final')}
+            className="text-xs"
+          >
+            <Film className="w-3 h-3 mr-1" />
+            Final Videos
+          </Button>
+        </div>
       </div>
 
-      {/* Video Timeline - Scrollable */}
+      {/* Video Content - Scrollable */}
       <div className="flex-1 flex flex-col min-h-0">
         <ScrollArea className="flex-1" ref={scrollAreaRef}>
-          <div className="p-4 space-y-6">
-            {videos.map((video) => (
-              <div
-                key={video.id}
-                ref={(el) => {
-                  if (el) videoRefs.current[video.id] = el;
-                }}
-                className={`rounded-lg border transition-all ${
-                  currentVideoId === video.id
-                    ? "border-purple-500 bg-purple-500/10"
-                    : "border-white/20 bg-white/5"
-                }`}
-                onClick={() => onVideoSelect(video.id)}
-              >
-                {/* Video Player */}
-                <div className="relative w-full h-[80vh] bg-black rounded-t-lg overflow-hidden">
-                  <video
+          <div className="p-4">
+            {viewMode === 'timeline' ? (
+              // Timeline view - grouped by message
+              Object.entries(groupedVideos)
+                .sort(([, a], [, b]) => {
+                  const aTime = a.final?.timestamp || a.clips[0]?.timestamp || new Date(0);
+                  const bTime = b.final?.timestamp || b.clips[0]?.timestamp || new Date(0);
+                  return bTime.getTime() - aTime.getTime();
+                })
+                .map(([messageId, videoGroup]) => renderVideoSection(messageId, videoGroup))
+            ) : (
+              // List view - individual videos
+              <div className="space-y-6">
+                {filteredVideos
+                  .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+                  .map((video) => (
+                  <div
+                    key={video.id}
                     ref={(el) => {
-                      if (el) {
-                        videoElementRefs.current[video.id] = el;
-                        el.addEventListener('timeupdate', () => handleTimeUpdate(video.id));
-                        el.addEventListener('loadedmetadata', () => handleLoadedMetadata(video.id));
-                      }
+                      if (el) videoRefs.current[video.id] = el;
                     }}
-                    className="w-full h-full object-contain"
-                    src={video.videoUrl}
-                    controls={false}
-                  />
-                  
-                  {/* Custom Controls Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300">
-                    <div className="absolute bottom-4 left-4 right-4">
-                      {/* Progress Bar */}
-                      <div className="mb-3">
-                        <div 
-                          className="relative w-full h-2 bg-white/20 rounded-full cursor-pointer"
-                          data-slider={`${video.id}-progress`}
-                          onClick={(e) => handleSliderClick(e, video.id, 'progress')}
-                          onMouseDown={(e) => handleSliderMouseDown(e, video.id, 'progress')}
-                        >
-                          <div 
-                            className="absolute h-full bg-white rounded-full transition-all duration-150"
-                            style={{ width: `${videoProgress[video.id] || 0}%` }}
-                          />
-                          <div 
-                            className="absolute w-4 h-4 bg-white rounded-full border-2 border-white shadow-lg transform -translate-y-1/2 -translate-x-1/2 top-1/2 cursor-grab active:cursor-grabbing"
-                            style={{ left: `${videoProgress[video.id] || 0}%` }}
-                            onMouseDown={(e) => handleSliderMouseDown(e, video.id, 'progress')}
-                          />
-                        </div>
-                        <div className="flex justify-between text-xs text-white/70 mt-1">
-                          <span>{formatTime((videoProgress[video.id] || 0) * (videoDuration[video.id] || 0) / 100)}</span>
-                          <span>{formatTime(videoDuration[video.id] || 0)}</span>
-                        </div>
-                      </div>
+                    className={`rounded-lg border transition-all ${
+                      currentVideoId === video.id
+                        ? "border-purple-500 bg-purple-500/10"
+                        : "border-white/20 bg-white/5"
+                    }`}
+                    onClick={() => onVideoSelect(video.id)}
+                  >
+                    <div className="relative w-full h-[70vh] bg-black rounded-t-lg overflow-hidden">
+                      <video
+                        ref={(el) => {
+                          if (el) {
+                            videoElementRefs.current[video.id] = el;
+                            el.addEventListener('timeupdate', () => handleTimeUpdate(video.id));
+                            el.addEventListener('loadedmetadata', () => handleLoadedMetadata(video.id));
+                          }
+                        }}
+                        className="w-full h-full object-contain"
+                        src={video.videoUrl}
+                        controls={false}
+                      />
                       
-                      <div className="flex items-center justify-between">
-                        {/* Left side controls */}
-                        <div className="flex items-center gap-4">
-                          <Button
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handlePlayPause(video.id);
-                            }}
-                            className="bg-white/20 hover:bg-white/30 backdrop-blur-sm"
-                          >
-                            {playingVideos.has(video.id) ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                          </Button>
+                      {/* Standard video controls */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300">
+                        <div className="absolute bottom-4 left-4 right-4">
+                          {/* Progress Bar */}
+                          <div className="mb-3">
+                            <div 
+                              className="relative w-full h-2 bg-white/20 rounded-full cursor-pointer"
+                              data-slider={`${video.id}-progress`}
+                              onClick={(e) => handleSliderClick(e, video.id, 'progress')}
+                              onMouseDown={(e) => handleSliderMouseDown(e, video.id, 'progress')}
+                            >
+                              <div 
+                                className="absolute h-full bg-white rounded-full transition-all duration-150"
+                                style={{ width: `${videoProgress[video.id] || 0}%` }}
+                              />
+                              <div 
+                                className="absolute w-4 h-4 bg-white rounded-full border-2 border-white shadow-lg transform -translate-y-1/2 -translate-x-1/2 top-1/2 cursor-grab active:cursor-grabbing"
+                                style={{ left: `${videoProgress[video.id] || 0}%` }}
+                                onMouseDown={(e) => handleSliderMouseDown(e, video.id, 'progress')}
+                              />
+                            </div>
+                            <div className="flex justify-between text-xs text-white/70 mt-1">
+                              <span>{formatTime((videoProgress[video.id] || 0) * (videoDuration[video.id] || 0) / 100)}</span>
+                              <span>{formatTime(videoDuration[video.id] || 0)}</span>
+                            </div>
+                          </div>
                           
-                          {/* Volume Control - Only show if video has audio */}
-                          {hasAudio[video.id] ? (
-                            <div className="flex items-center gap-2 max-w-32">
+                          <div className="flex items-center justify-between">
+                            {/* Left side controls */}
+                            <div className="flex items-center gap-4">
                               <Button
                                 size="sm"
-                                className="bg-white/20 hover:bg-white/30 backdrop-blur-sm p-2"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleMuteToggle(video.id);
+                                  handlePlayPause(video.id);
+                                }}
+                                className="bg-white/20 hover:bg-white/30 backdrop-blur-sm"
+                              >
+                                {playingVideos.has(video.id) ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                              </Button>
+                              
+                              {/* Volume Control */}
+                              {hasAudio[video.id] ? (
+                                <div className="flex items-center gap-2 max-w-32">
+                                  <Button
+                                    size="sm"
+                                    className="bg-white/20 hover:bg-white/30 backdrop-blur-sm p-2"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleMuteToggle(video.id);
+                                    }}
+                                  >
+                                    {isMuted[video.id] ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                                  </Button>
+                                  <div 
+                                    className="relative w-20 h-1 bg-white/20 rounded-full cursor-pointer"
+                                    data-slider={`${video.id}-volume`}
+                                    onClick={(e) => handleSliderClick(e, video.id, 'volume')}
+                                    onMouseDown={(e) => handleSliderMouseDown(e, video.id, 'volume')}
+                                  >
+                                    <div 
+                                      className="absolute h-full bg-white rounded-full transition-all duration-150"
+                                      style={{ width: `${videoVolume[video.id] || 100}%` }}
+                                    />
+                                    <div 
+                                      className="absolute w-3 h-3 bg-white rounded-full border border-white shadow-lg transform -translate-y-1/2 -translate-x-1/2 top-1/2 cursor-grab active:cursor-grabbing"
+                                      style={{ left: `${videoVolume[video.id] || 100}%` }}
+                                      onMouseDown={(e) => handleSliderMouseDown(e, video.id, 'volume')}
+                                    />
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-2 text-white/40 text-xs">
+                                  <VolumeX className="w-4 h-4" />
+                                  <span>No audio</span>
+                                </div>
+                              )}
+                            </div>
+                            
+                            {/* Right side controls */}
+                            <div className="flex items-center gap-2">
+                              <Button
+                                size="sm"
+                                className="bg-white/20 hover:bg-white/30 backdrop-blur-sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDownload(video.videoUrl, video.prompt);
                                 }}
                               >
-                                {isMuted[video.id] ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                                <Download className="w-4 h-4" />
                               </Button>
-                              <div 
-                                className="relative w-20 h-1 bg-white/20 rounded-full cursor-pointer"
-                                data-slider={`${video.id}-volume`}
-                                onClick={(e) => handleSliderClick(e, video.id, 'volume')}
-                                onMouseDown={(e) => handleSliderMouseDown(e, video.id, 'volume')}
+                              
+                              <Button
+                                size="sm"
+                                className="bg-white/20 hover:bg-white/30 backdrop-blur-sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleFullscreen(video.id);
+                                }}
                               >
-                                <div 
-                                  className="absolute h-full bg-white rounded-full transition-all duration-150"
-                                  style={{ width: `${videoVolume[video.id] || 100}%` }}
-                                />
-                                <div 
-                                  className="absolute w-3 h-3 bg-white rounded-full border border-white shadow-lg transform -translate-y-1/2 -translate-x-1/2 top-1/2 cursor-grab active:cursor-grabbing"
-                                  style={{ left: `${videoVolume[video.id] || 100}%` }}
-                                  onMouseDown={(e) => handleSliderMouseDown(e, video.id, 'volume')}
-                                />
-                              </div>
+                                <Maximize className="w-4 h-4" />
+                              </Button>
                             </div>
-                          ) : (
-                            /* Show "No audio" indicator when video has no audio */
-                            <div className="flex items-center gap-2 text-white/40 text-xs">
-                              <VolumeX className="w-4 h-4" />
-                              <span>No audio</span>
-                            </div>
-                          )}
-                        </div>
-                        
-                        {/* Right side controls */}
-                        <div className="flex items-center gap-2">
-                          <Button
-                            size="sm"
-                            className="bg-white/20 hover:bg-white/30 backdrop-blur-sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              // Add regenerate functionality here
-                              console.log('Regenerate video:', video.id);
-                            }}
-                          >
-                            <RotateCcw className="w-4 h-4" />
-                          </Button>
-                          
-                          <Button
-                            size="sm"
-                            className="bg-white/20 hover:bg-white/30 backdrop-blur-sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDownload(video.videoUrl, video.prompt);
-                            }}
-                          >
-                            <Download className="w-4 h-4" />
-                          </Button>
-                          
-                          <Button
-                            size="sm"
-                            className="bg-white/20 hover:bg-white/30 backdrop-blur-sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleFullscreen(video.id);
-                            }}
-                          >
-                            <Maximize className="w-4 h-4" />
-                          </Button>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
 
-                {/* Video Info */}
-                <div className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="text-white font-medium">{video.prompt}</h4>
-                    {currentVideoId === video.id && (
-                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                    )}
+                    <div className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="text-white font-medium flex items-center gap-2">
+                          {video.isClip ? (
+                            <>
+                              <Grid className="w-4 h-4" />
+                              {video.prompt}
+                            </>
+                          ) : (
+                            <>
+                              <Film className="w-4 h-4" />
+                              {video.prompt}
+                            </>
+                          )}
+                        </h4>
+                        {currentVideoId === video.id && (
+                          <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                        )}
+                      </div>
+                      <p className="text-white/50 text-sm">
+                        {video.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-white/50 text-sm">
-                    {video.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </p>
-                </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
         </ScrollArea>
       </div>

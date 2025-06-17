@@ -6,15 +6,28 @@ import VideoTimeline from "@/components/VideoTimeline";
 import ProjectMenu from "@/components/ProjectMenu";
 import SettingsDialog from "@/components/SettingsDialog";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
-import { createProject, getProject, sendChatMessage, ProjectDetails, ChatMessage } from "@/services/api";
+import { 
+  createProject, 
+  getProject, 
+  sendChatMessage, 
+  ensureUserExists,
+  ProjectDetails, 
+  ExternalMessage,
+  GeneratedVideo,
+  CreateProjectResponse,
+  ChatPromptResponse
+} from "@/services/api";
 import { toast } from "@/hooks/use-toast";
 
+// Updated interfaces to match backend
 export interface VideoMessage {
   id: string;
   videoUrl: string;
   prompt: string;
   timestamp: Date;
   messageId?: string;
+  isClip?: boolean; // Distinguish between clips and final video
+  clipIndex?: number; // For organizing clips
 }
 
 export interface Message {
@@ -22,8 +35,9 @@ export interface Message {
   text: string;
   isUser: boolean;
   timestamp: Date;
-  videoId?: string;
-  videoIds?: string[];
+  videoIds?: string[]; // For individual clips
+  finalVideoId?: string; // For final merged video
+  generatedVideo?: GeneratedVideo; // Store the full video structure
 }
 
 const Chat = () => {
@@ -37,7 +51,7 @@ const Chat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(projectId || null);
   const [isLoadingProject, setIsLoadingProject] = useState(false);
-  const { isAuthenticated, isLoading, loginWithRedirect, getAccessTokenSilently } = useAuth0();
+  const { isAuthenticated, isLoading, loginWithRedirect, getAccessTokenSilently, user } = useAuth0();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -45,102 +59,176 @@ const Chat = () => {
     }
   }, [isAuthenticated, isLoading, loginWithRedirect]);
 
-  // Helper function to parse message content
+  // Enhanced message content parsing for new backend format
   const parseMessageContent = (content: string): string => {
     if (!content) return '';
     
     try {
-      // Try to parse as JSON first
       const parsed = JSON.parse(content);
       
-      // Handle different JSON structures
+      // Handle the new backend response format
+      if (typeof parsed === 'object' && parsed !== null) {
+        // Check for direct text property first
+        if (parsed.text && typeof parsed.text === 'string') {
+          return parsed.text;
+        }
+        
+        // Check for textResponse (legacy format)
+        if (parsed.textResponse && typeof parsed.textResponse === 'string') {
+          return parsed.textResponse;
+        }
+        
+        // Handle user input format
+        if (parsed.user_input && typeof parsed.user_input === 'string') {
+          return parsed.user_input;
+        }
+        
+        // Handle other common text fields
+        const textFields = ['content', 'message', 'response'];
+        for (const field of textFields) {
+          if (parsed[field] && typeof parsed[field] === 'string') {
+            return parsed[field];
+          }
+        }
+      }
+      
+      // If it's a simple string, return it
       if (typeof parsed === 'string') {
         return parsed;
       }
       
-      if (parsed.textResponse) {
-        return parsed.textResponse;
-      }
-      
-      if (parsed.text) {
-        return parsed.text;
-      }
-      
-      if (parsed.content) {
-        return parsed.content;
-      }
-      
-      if (parsed.message) {
-        return parsed.message;
-      }
-      
-      // Handle user input format
-      if (parsed.user_input) {
-        return parsed.user_input;
-      }
-      
-      // If it's an object but doesn't have expected properties, stringify it nicely
-      if (typeof parsed === 'object') {
-        // Try to extract any text-like properties
-        const textProps = ['text', 'message', 'content', 'textResponse', 'response', 'user_input'];
-        for (const prop of textProps) {
-          if (parsed[prop] && typeof parsed[prop] === 'string') {
-            return parsed[prop];
-          }
-        }
-        // If no text properties found, return the original content
-        return content;
-      }
-      
+      // Fallback to original content if no text found
       return content;
     } catch {
-      // If it's not valid JSON, it might be user text with JSON appended
-      // Look for patterns where user text is followed by JSON instructions
-      const jsonInstructionPattern = /^(.+?)\s*You must answer strictly in the following JSON format:/s;
-      const match = content.match(jsonInstructionPattern);
+      // If not valid JSON, try to extract user text from mixed content
+      const jsonInstructionPatterns = [
+        /^(.+?)\s*You must answer strictly in the following JSON format:/s,
+        /^(.+?)\s*\{\s*"textResponse":/s,
+        /^(.+?)\s*\{\s*"text":/s,
+      ];
       
-      if (match && match[1]) {
-        // Return just the user text part, trimmed
-        return match[1].trim();
+      for (const pattern of jsonInstructionPatterns) {
+        const match = content.match(pattern);
+        if (match && match[1]) {
+          return match[1].trim();
+        }
       }
       
-      // Also check for other JSON instruction patterns
-      const jsonFormatPattern = /^(.+?)\s*\{\s*"textResponse":/s;
-      const formatMatch = content.match(jsonFormatPattern);
-      
-      if (formatMatch && formatMatch[1]) {
-        return formatMatch[1].trim();
-      }
-      
-      // If no patterns match, return as is
+      // Return as is if no patterns match
       return content;
     }
   };
 
-  // Helper function to extract video URLs from message content
-  const extractVideoUrls = (content: string): string[] => {
-    if (!content) return [];
+  // Enhanced video extraction for new backend format
+  const extractGeneratedVideo = (content: string): GeneratedVideo | null => {
+    if (!content) return null;
     
     try {
       const parsed = JSON.parse(content);
       
-      // Check for various video URL properties
+      // Check for the new structured video format
+      if (parsed.generated_video) {
+        const video = parsed.generated_video;
+        if (video.clip_urls && Array.isArray(video.clip_urls) && video.full_video_url) {
+          return {
+            clip_urls: video.clip_urls,
+            full_video_url: video.full_video_url,
+          };
+        }
+      }
+      
+      // Check for direct video structure
+      if (parsed.clip_urls && Array.isArray(parsed.clip_urls) && parsed.full_video_url) {
+        return {
+          clip_urls: parsed.clip_urls,
+          full_video_url: parsed.full_video_url,
+        };
+      }
+      
+      // Legacy format - just clip URLs
       if (parsed.clip_urls && Array.isArray(parsed.clip_urls)) {
-        return parsed.clip_urls;
+        return {
+          clip_urls: parsed.clip_urls,
+          full_video_url: '', // Empty for legacy
+        };
       }
       
-      if (parsed.videoUrls && Array.isArray(parsed.videoUrls)) {
-        return parsed.videoUrls;
+      // Other legacy formats
+      const legacyFields = ['videoUrls', 'videos'];
+      for (const field of legacyFields) {
+        if (parsed[field] && Array.isArray(parsed[field])) {
+          return {
+            clip_urls: parsed[field],
+            full_video_url: '',
+          };
+        }
       }
       
-      if (parsed.videos && Array.isArray(parsed.videos)) {
-        return parsed.videos;
-      }
-      
-      return [];
+      return null;
     } catch {
-      return [];
+      return null;
     }
+  };
+
+  // Convert backend messages to frontend format
+  const convertBackendMessagesToFrontend = (backendMessages: ExternalMessage[]) => {
+    const convertedMessages: Message[] = [];
+    const videoMessages: VideoMessage[] = [];
+
+    backendMessages.forEach((msg) => {
+      const convertedMessage: Message = {
+        id: msg.id,
+        text: parseMessageContent(msg.text_content),
+        isUser: msg.message_type === 'user',
+        timestamp: new Date(msg.created_at),
+      };
+
+      // Handle AI messages with videos
+      if (!convertedMessage.isUser && msg.video) {
+        convertedMessage.generatedVideo = msg.video;
+        
+        // Create video messages for individual clips
+        const clipVideoIds: string[] = [];
+        msg.video.clip_urls.forEach((clipUrl, index) => {
+          const clipVideoId = `${msg.id}_clip_${index}`;
+          clipVideoIds.push(clipVideoId);
+          
+          const clipVideoMessage: VideoMessage = {
+            id: clipVideoId,
+            videoUrl: clipUrl,
+            prompt: `${convertedMessage.text} - Clip ${index + 1}`,
+            timestamp: new Date(msg.created_at),
+            messageId: msg.id,
+            isClip: true,
+            clipIndex: index,
+          };
+          
+          videoMessages.push(clipVideoMessage);
+        });
+        
+        // Create video message for final video if available
+        if (msg.video.full_video_url) {
+          const finalVideoId = `${msg.id}_final`;
+          const finalVideoMessage: VideoMessage = {
+            id: finalVideoId,
+            videoUrl: msg.video.full_video_url,
+            prompt: `${convertedMessage.text} - Final Video`,
+            timestamp: new Date(msg.created_at),
+            messageId: msg.id,
+            isClip: false,
+          };
+          
+          videoMessages.push(finalVideoMessage);
+          convertedMessage.finalVideoId = finalVideoId;
+        }
+        
+        convertedMessage.videoIds = clipVideoIds;
+      }
+
+      convertedMessages.push(convertedMessage);
+    });
+
+    return { convertedMessages, videoMessages };
   };
 
   // Load existing project if projectId is provided
@@ -154,49 +242,25 @@ const Chat = () => {
         const token = await getAccessTokenSilently();
         const projectDetails = await getProject(token, projectId);
         
-        // Convert backend messages to frontend format with proper text parsing
-        const convertedMessages: Message[] = [];
-        const videoMessages: VideoMessage[] = [];
-        
-        for (const msg of projectDetails.messages) {
-          const messageText = parseMessageContent(msg.text_content || '');
-          const videoUrls = extractVideoUrls(msg.text_content || '');
-          
-          const convertedMessage: Message = {
-            id: msg.id,
-            text: messageText,
-            isUser: msg.message_type === 'user',
-            timestamp: new Date(msg.created_at),
-          };
-          
-          // If this is an AI message with videos, process them
-          if (!convertedMessage.isUser && videoUrls.length > 0) {
-            const messageVideoIds: string[] = [];
-            
-            videoUrls.forEach((videoUrl, index) => {
-              const videoId = `${msg.id}_video_${index}`;
-              messageVideoIds.push(videoId);
-              
-              const videoMessage: VideoMessage = {
-                id: videoId,
-                videoUrl: videoUrl,
-                prompt: `${messageText} (${index + 1}/${videoUrls.length})`,
-                timestamp: new Date(msg.created_at),
-                messageId: msg.id,
-              };
-              
-              videoMessages.push(videoMessage);
-            });
-            
-            convertedMessage.videoIds = messageVideoIds;
-          }
-          
-          convertedMessages.push(convertedMessage);
-        }
+        const { convertedMessages, videoMessages } = convertBackendMessagesToFrontend(projectDetails.messages);
         
         setMessages(convertedMessages);
         setVideos(videoMessages);
         setCurrentProjectId(projectId);
+        
+        // Set the latest final video as current if available
+        const latestFinalVideo = videoMessages
+          .filter(v => !v.isClip)
+          .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())[0];
+        
+        if (latestFinalVideo) {
+          setCurrentVideoId(latestFinalVideo.id);
+        } else if (videoMessages.length > 0) {
+          // Fallback to latest video if no final video
+          const latestVideo = videoMessages
+            .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())[0];
+          setCurrentVideoId(latestVideo.id);
+        }
         
       } catch (error) {
         console.error('Error loading project:', error);
@@ -224,13 +288,20 @@ const Chat = () => {
     }
   }, [searchParams, currentProjectId]);
 
+  // Create project with initial prompt
   const handleCreateProjectWithPrompt = async (prompt: string) => {
     if (!isAuthenticated) return;
     
     setIsGenerating(true);
     try {
       const token = await getAccessTokenSilently();
-      const result = await createProject(token, prompt);
+      
+      // Ensure user exists in backend
+      if (user) {
+        await ensureUserExists(token, user);
+      }
+      
+      const result: CreateProjectResponse = await createProject(token, prompt);
       
       setCurrentProjectId(result.project.id);
       
@@ -242,19 +313,19 @@ const Chat = () => {
         timestamp: new Date(),
       };
       
-      // Add the AI response with proper text parsing
+      // Add the AI response
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: parseMessageContent(result.response.text),
+        text: result.response.text,
         isUser: false,
         timestamp: new Date(),
       };
       
       setMessages([userMessage, aiMessage]);
       
-      // Handle videos if provided
-      if (result.response.clip_urls && result.response.clip_urls.length > 0) {
-        handleVideoUrls(result.response.clip_urls, prompt, aiMessage.id);
+      // Handle generated video if available
+      if (result.response.generated_video) {
+        handleGeneratedVideo(result.response.generated_video, prompt, aiMessage.id);
       }
       
     } catch (error) {
@@ -269,6 +340,7 @@ const Chat = () => {
     }
   };
 
+  // Send message in existing project
   const handleSendMessage = async (prompt: string) => {
     if (!prompt.trim() || isGenerating || !isAuthenticated) return;
 
@@ -290,29 +362,27 @@ const Chat = () => {
 
     try {
       const token = await getAccessTokenSilently();
-      const response = await sendChatMessage(token, currentProjectId, prompt);
+      const response: ChatPromptResponse = await sendChatMessage(token, currentProjectId, prompt);
       
       const aiMessageId = (Date.now() + 1).toString();
       
-      // Add AI response with proper text parsing
       const aiMessage: Message = {
         id: aiMessageId,
-        text: parseMessageContent(response.text),
+        text: response.text,
         isUser: false,
         timestamp: new Date(),
       };
 
       setMessages(prev => [...prev, aiMessage]);
       
-      // Handle videos if provided
-      if (response.clip_urls && response.clip_urls.length > 0) {
-        handleVideoUrls(response.clip_urls, prompt, aiMessageId);
+      // Handle generated video if available
+      if (response.generated_video) {
+        handleGeneratedVideo(response.generated_video, prompt, aiMessageId);
       }
       
     } catch (error) {
       console.error('Error sending message:', error);
       
-      // Add error message
       const errorMessage: Message = {
         id: (Date.now() + 2).toString(),
         text: "Sorry, I'm having trouble connecting to the server. Please try again.",
@@ -332,38 +402,64 @@ const Chat = () => {
     }
   };
 
-  const handleVideoUrls = (clipUrls: string[], prompt: string, messageId: string) => {
-    let videoIds: string[] = [];
+  // Handle generated video structure from backend
+  const handleGeneratedVideo = (generatedVideo: GeneratedVideo, prompt: string, messageId: string) => {
+    const clipVideoIds: string[] = [];
     
-    clipUrls.forEach((videoUrl, index) => {
-      const currentVideoId = (Date.now() + 1000 + index).toString();
-      videoIds.push(currentVideoId);
+    // Create video messages for individual clips
+    generatedVideo.clip_urls.forEach((clipUrl, index) => {
+      const clipVideoId = `${messageId}_clip_${index}`;
+      clipVideoIds.push(clipVideoId);
       
-      const newVideo: VideoMessage = {
-        id: currentVideoId,
-        videoUrl: videoUrl,
-        prompt: `${prompt} (${index + 1}/${clipUrls.length})`,
+      const clipVideoMessage: VideoMessage = {
+        id: clipVideoId,
+        videoUrl: clipUrl,
+        prompt: `${prompt} - Clip ${index + 1}`,
         timestamp: new Date(),
         messageId: messageId,
+        isClip: true,
+        clipIndex: index,
       };
 
-      // Add to local videos list
-      setVideos(prev => [...prev, newVideo]);
-
-      // Set the first video as current
-      if (index === 0) {
-        setCurrentVideoId(currentVideoId);
-      }
+      setVideos(prev => [...prev, clipVideoMessage]);
     });
 
-    // Update the message with video IDs
+    // Create video message for final video if available
+    let finalVideoId: string | undefined;
+    if (generatedVideo.full_video_url) {
+      finalVideoId = `${messageId}_final`;
+      const finalVideoMessage: VideoMessage = {
+        id: finalVideoId,
+        videoUrl: generatedVideo.full_video_url,
+        prompt: `${prompt} - Final Video`,
+        timestamp: new Date(),
+        messageId: messageId,
+        isClip: false,
+      };
+
+      setVideos(prev => [...prev, finalVideoMessage]);
+      
+      // Set the final video as current
+      setCurrentVideoId(finalVideoId);
+    } else if (clipVideoIds.length > 0) {
+      // If no final video, set the first clip as current
+      setCurrentVideoId(clipVideoIds[0]);
+    }
+
+    // Update the message with video IDs and generated video data
     setMessages(prev => prev.map(msg => 
       msg.id === messageId 
-        ? { ...msg, videoIds: videoIds }
+        ? { 
+            ...msg, 
+            videoIds: clipVideoIds,
+            finalVideoId: finalVideoId,
+            generatedVideo: generatedVideo
+          }
         : msg
     ));
   };
 
+  // Legacy video generation handler (kept for compatibility)
   const handleVideoGeneration = async (prompt: string) => {
     setIsGenerating(true);
     // Simulate video generation delay
@@ -373,6 +469,7 @@ const Chat = () => {
         videoUrl: "https://v3.fal.media/files/lion/SwXkHnSV2Wcnoh8aQ7tqD_output.mp4",
         prompt,
         timestamp: new Date(),
+        isClip: false, // This is a legacy single video
       };
       
       setVideos(prev => [...prev, newVideo]);
@@ -387,8 +484,14 @@ const Chat = () => {
 
   const handleMessageClick = (message: Message) => {
     if (!message.isUser && message.videoIds && message.videoIds.length > 0) {
-    } else if (message.videoId) {
-      setCurrentVideoId(message.videoId);
+      // For messages with multiple videos, select the final video if available, otherwise the first clip
+      if (message.finalVideoId) {
+        setCurrentVideoId(message.finalVideoId);
+      } else {
+        setCurrentVideoId(message.videoIds[0]);
+      }
+    } else if (message.videoIds && message.videoIds.length > 0) {
+      setCurrentVideoId(message.videoIds[0]);
     }
   };
 
@@ -436,7 +539,7 @@ const Chat = () => {
           
           {/* Video Timeline - Resizable Panel */}
           <ResizablePanel defaultSize={67} minSize={50}>
-          <VideoTimeline
+            <VideoTimeline
               videos={videos}
               currentVideoId={currentVideoId}
               isGenerating={isGenerating}
