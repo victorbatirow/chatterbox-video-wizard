@@ -602,14 +602,14 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
                 .sort(([, a], [, b]) => {
                   const aTime = a.final?.timestamp || a.clips[0]?.timestamp || new Date(0);
                   const bTime = b.final?.timestamp || b.clips[0]?.timestamp || new Date(0);
-                  return bTime.getTime() - aTime.getTime();
+                  return aTime.getTime() - bTime.getTime();
                 })
                 .map(([messageId, videoGroup]) => renderVideoSection(messageId, videoGroup))
             ) : (
               // List view - individual videos
               <div className="space-y-6">
                 {filteredVideos
-                  .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+                  .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime())
                   .map((video) => (
                   <div
                     key={video.id}
