@@ -247,7 +247,19 @@ const Chat = () => {
         
         const { convertedMessages, videoMessages } = convertBackendMessagesToFrontend(projectDetails.messages);
         
-        setMessages(convertedMessages);
+        // If project has no messages, add a greeting message (created via "Create new project")
+        if (convertedMessages.length === 0) {
+          const greetingMessage: Message = {
+            id: 'greeting',
+            text: "Welcome to your new video project! I'm here to help you create amazing videos.\"\n\nWhat would you like to create today?",
+            isUser: false,
+            timestamp: new Date(),
+          };
+          setMessages([greetingMessage]);
+        } else {
+          setMessages(convertedMessages);
+        }
+        
         setVideos(videoMessages);
         setCurrentProjectId(projectId);
         
