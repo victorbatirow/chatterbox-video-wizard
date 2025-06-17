@@ -25,9 +25,30 @@ interface SettingsDialogProps {
   disableOpenCloseUrlManagement?: boolean;
 }
 
+function formatNumber(number: number): string {
+  const formatWithPrecision = (value: number, divisor: number): string => {
+    const result = value / divisor;
+    return result % 1 === 0 ? result.toFixed(0) : result.toFixed(1);
+  };
+  
+  if (number >= 1e12) {
+    return `${formatWithPrecision(number, 1e12)}T`; // Format for trillions
+  } else if (number >= 1e9) {
+    return `${formatWithPrecision(number, 1e9)}B`; // Format for billions
+  } else if (number >= 1e6) {
+    return `${formatWithPrecision(number, 1e6)}M`; // Format for millions
+  } else if (number >= 1e3) {
+    return `${formatWithPrecision(number, 1e3)}K`; // Format for thousands
+  } else {
+    return `${number}`; // Format for less than 1000
+  }
+  }
+
 const SettingsDialog = ({ isOpen, onClose, disableOpenCloseUrlManagement = false }: SettingsDialogProps) => {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [selectedHobbyValue, setSelectedHobbyValue] = useState('1600,price_1RahQ4CmyYc460qRPIcmisOI')
+  const [selectedProValue, setSelectedProValue] = useState('10000,price_1RahY6CmyYc460qRoWUq57Ur')
   const isInProject = location.pathname.startsWith('/chat');
   
   // Get settings type and tab from URL params
@@ -113,6 +134,13 @@ const SettingsDialog = ({ isOpen, onClose, disableOpenCloseUrlManagement = false
       setActiveTab(settingsParam);
     }
   }, [settingsParam, activeTab, disableOpenCloseUrlManagement]);
+
+  const handleHobbySelectChange = (value) => {
+    setSelectedHobbyValue(value);
+  }
+  const handleProSelectChange = (value) => {
+    setSelectedProValue(value);
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -380,7 +408,7 @@ const SettingsDialog = ({ isOpen, onClose, disableOpenCloseUrlManagement = false
                   <div>
                     <h4 className="text-lg font-medium">Plans & Billing</h4>
                     <p className="text-sm text-muted-foreground mt-1">
-                      Choose plans for starting solo, growing your projects, and collaborating with your team.
+                      Choose plans for just starting out, or expanding your video generation.
                     </p>
                   </div>
                   <Button variant="ghost" size="sm" className="text-muted-foreground">
@@ -396,11 +424,12 @@ const SettingsDialog = ({ isOpen, onClose, disableOpenCloseUrlManagement = false
                       <span className="text-sm text-muted-foreground">201/400</span>
                     </div>
                     <div className="w-full bg-muted rounded-full h-2">
-                      <div className="bg-blue-600 h-2 rounded-full" style={{ width: '50.25%' }}></div>
+                      <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${(201/400*100)}%` }}></div>
                     </div>
                     <p className="text-sm text-muted-foreground">
                       You're currently subscribed to plan: <strong>Pro 3</strong> charged at $100/mo.{' '}
-                      <button className="underline">Manage your payment preferences</button>, or change your plan below. Your monthly credits will renew on June 17 at 15:18.
+                      <button onClick={() => window.open('https://billing.stripe.com/p/login/test_14A6oG5aJ4LDaWLdKX18c00', '_blank')} 
+                      className="underline">Manage your payment preferences</button>, or change your plan below. Your monthly credits will renew on June 17 at 15:18.
                     </p>
                   </div>
 
@@ -415,11 +444,6 @@ const SettingsDialog = ({ isOpen, onClose, disableOpenCloseUrlManagement = false
                           <span className="text-muted-foreground"> /month</span>
                         </div>
                         <p className="text-sm text-muted-foreground mt-2">For getting started</p>
-                      </div>
-
-                      <div className="flex items-center gap-2 text-sm">
-                        <span>5 daily credits</span>
-                        <Info className="h-4 w-4 text-muted-foreground" />
                       </div>
 
                       <Button variant="outline" className="w-full">
@@ -442,31 +466,30 @@ const SettingsDialog = ({ isOpen, onClose, disableOpenCloseUrlManagement = false
                       </div>
                       
                       <div>
-                        <h3 className="text-lg font-semibold">Pro</h3>
+                        <h3 className="text-lg font-semibold">Hobby</h3>
                         <div className="mt-2">
-                          <span className="text-3xl font-bold">$100</span>
+                          <span className="text-3xl font-bold">${formatNumber(parseInt(selectedHobbyValue.split(",")[0])/100)}</span>
                           <span className="text-muted-foreground"> /month</span>
                         </div>
-                        <p className="text-sm text-muted-foreground mt-2">For more projects and usage</p>
+                        <p className="text-sm text-muted-foreground mt-2">Start creating videos</p>
                       </div>
-
-                      <Select defaultValue="400">
+                      
+                      <Select defaultValue="1600,price_1RahQ4CmyYc460qRPIcmisOI" onValueChange={handleHobbySelectChange}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="100">100 credits / month</SelectItem>
-                          <SelectItem value="200">200 credits / month</SelectItem>
-                          <SelectItem value="400">400 credits / month</SelectItem>
-                          <SelectItem value="800">800 credits / month</SelectItem>
-                          <SelectItem value="1200">1200 credits / month</SelectItem>
-                          <SelectItem value="2000">2000 credits / month</SelectItem>
-                          <SelectItem value="3000">3000 credits / month</SelectItem>
-                          <SelectItem value="4000">4000 credits / month</SelectItem>
+                        <SelectContent className="z-50">
+                          <SelectItem value="1600,price_1RahQ4CmyYc460qRPIcmisOI">1.6K credits / month</SelectItem>
+                          <SelectItem value="3200,price_1RahSNCmyYc460qRr1Wcoy2O">3.2K credits / month</SelectItem>
+                          <SelectItem value="5000,price_1RahVqCmyYc460qRamtXAUvF">5K credits / month</SelectItem>
+                          <SelectItem value="6000,price_1RahW5CmyYc460qRn46VLJPH">6K credits / month</SelectItem>
+                          <SelectItem value="7000,price_1RahWVCmyYc460qRSMDK3PL6">7K credits / month</SelectItem>
+                          <SelectItem value="8000,price_1RahWwCmyYc460qRY8i5N0hY">8K credits / month</SelectItem>
+                          <SelectItem value="9000,price_1RahXOCmyYc460qRjaqJUOW0">9K credits / month</SelectItem>
                         </SelectContent>
                       </Select>
-
-                      <Button className="w-full" disabled>
+                      
+                      <Button className="w-full z-0" disabled>
                         Your current plan
                       </Button>
 
@@ -475,7 +498,7 @@ const SettingsDialog = ({ isOpen, onClose, disableOpenCloseUrlManagement = false
                         <div className="space-y-1">
                           <div className="flex items-center gap-2 text-sm">
                             <Check className="h-4 w-4 text-green-600" />
-                            <span>400 credits / month</span>
+                            <span>{formatNumber(parseInt(selectedHobbyValue.split(",")[0]))} credits / month</span>
                           </div>
                           <div className="flex items-center gap-2 text-sm">
                             <Check className="h-4 w-4 text-green-600" />
@@ -483,15 +506,11 @@ const SettingsDialog = ({ isOpen, onClose, disableOpenCloseUrlManagement = false
                           </div>
                           <div className="flex items-center gap-2 text-sm">
                             <Check className="h-4 w-4 text-green-600" />
-                            <span>Remove the Lovable badge</span>
+                            <span>No watermark</span>
                           </div>
                           <div className="flex items-center gap-2 text-sm">
                             <Check className="h-4 w-4 text-green-600" />
-                            <span>Custom domains</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm">
-                            <Check className="h-4 w-4 text-green-600" />
-                            <span>3 editors per project</span>
+                            <span>Commercial use</span>
                           </div>
                         </div>
                       </div>
@@ -500,41 +519,55 @@ const SettingsDialog = ({ isOpen, onClose, disableOpenCloseUrlManagement = false
                     {/* Teams Plan */}
                     <div className="border rounded-lg p-6 space-y-4">
                       <div>
-                        <h3 className="text-lg font-semibold">Teams</h3>
+                        <h3 className="text-lg font-semibold">Pro</h3>
                         <div className="mt-2">
-                          <span className="text-3xl font-bold">$240</span>
+                          <span className="text-3xl font-bold">${formatNumber(parseInt(selectedProValue.split(",")[0])/100)}</span>
                           <span className="text-muted-foreground"> /month</span>
                         </div>
-                        <p className="text-sm text-muted-foreground mt-2">For collaborating with others</p>
+                        <p className="text-sm text-muted-foreground mt-2">For expanded production and bonus credits</p>
                       </div>
 
-                      <Select defaultValue="800">
+                      <Select defaultValue="10000,price_1RahY6CmyYc460qRoWUq57Ur" onValueChange={handleProSelectChange}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="800">800 credits / month</SelectItem>
+                        <SelectContent  className="z-50">
+                          <SelectItem value="10000,price_1RahY6CmyYc460qRoWUq57Ur">10K credits / month</SelectItem>
+                          <SelectItem value="20000,price_1RahiWCmyYc460qR1qQXvhDm">20K credits / month</SelectItem>
+                          <SelectItem value="30000,price_1RahirCmyYc460qRwKzYr9WV">30K credits / month</SelectItem>
+                          <SelectItem value="40000,price_1RahjBCmyYc460qR8X5jKSIJ">40K credits / month</SelectItem>
+                          <SelectItem value="50000,price_1RahjbCmyYc460qRA0lD8pjg">50K credits / month</SelectItem>
+                          <SelectItem value="75000,price_1RahlsCmyYc460qR3V0yQMki">75K credits / month</SelectItem>
+                          <SelectItem value="100000,price_1RahmFCmyYc460qRKlDoix1A">100K credits / month</SelectItem>
+                          <SelectItem value="150000,price_1RahnYCmyYc460qR8R5Ctaes">150K credits / month</SelectItem>
+                          <SelectItem value="200000,price_1RahnwCmyYc460qRwT8zVkCD">200K credits / month</SelectItem>
+                          <SelectItem value="250000,price_1RahoNCmyYc460qRkowz5alE">250K credits / month</SelectItem>
+                          <SelectItem value="300000,price_1RahoxCmyYc460qR6uZlTIOi">300K credits / month</SelectItem>
                         </SelectContent>
                       </Select>
 
-                      <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                      <Button className="w-full bg-blue-600 hover:bg-blue-700 z-10">
                         Upgrade
                       </Button>
 
                       <div className="space-y-2">
-                        <p className="text-sm font-medium">Everything in Pro, plus:</p>
+                        <p className="text-sm font-medium">Everything in Hobby, plus:</p>
                         <div className="space-y-1">
                           <div className="flex items-center gap-2 text-sm">
                             <Check className="h-4 w-4 text-green-600" />
-                            <span>Centralised billing</span>
+                            <span>{formatNumber(parseInt(selectedProValue.split(",")[0]))} credits / month</span>
+                          </div>
+                           <div className="flex items-center gap-2 text-sm">
+                            <Check className="h-4 w-4 text-green-600" />
+                            <span>+5% ({formatNumber(parseInt(selectedProValue.split(",")[0])*0.05)}) bonus credits / month</span>
                           </div>
                           <div className="flex items-center gap-2 text-sm">
                             <Check className="h-4 w-4 text-green-600" />
-                            <span>Centralised access management</span>
+                            <span>Priority in generaiton queue</span>
                           </div>
                           <div className="flex items-center gap-2 text-sm">
                             <Check className="h-4 w-4 text-green-600" />
-                            <span>Includes 20 seats</span>
+                            <span>Priority support</span>
                           </div>
                         </div>
                       </div>
