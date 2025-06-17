@@ -32,13 +32,6 @@ const ChatInterface = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  const promptSuggestions = [
-    "A serene sunset over mountains with birds flying",
-    "A futuristic city with flying cars at night",
-    "Ocean waves crashing on a beach in slow motion",
-    "A cozy coffee shop on a rainy day",
-  ];
-
   // Auto-resize textarea
   const adjustTextareaHeight = () => {
     const textarea = textareaRef.current;
@@ -126,24 +119,6 @@ const ChatInterface = ({
           )}
         </div>
       </ScrollArea>
-
-      {/* Suggestions */}
-      {messages.length === 1 && (
-        <div className="p-6">
-          <p className="text-sm text-white/60 mb-3">Try these prompts:</p>
-          <div className="grid grid-cols-1 gap-2">
-            {promptSuggestions.map((suggestion, index) => (
-              <button
-                key={index}
-                onClick={() => handleSuggestionClick(suggestion)}
-                className="text-left p-3 bg-white/5 hover:bg-white/10 rounded-lg text-sm text-white/80 transition-colors"
-              >
-                {suggestion}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Input */}
       <div className="p-6">
