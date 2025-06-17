@@ -2,12 +2,10 @@ import { useState, useEffect } from "react";
 import { useSearchParams, useParams } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import ChatInterface from "@/components/ChatInterface";
-import VideoEditor from "@/components/VideoEditor";
+import VideoTimeline from "@/components/VideoTimeline";
 import ProjectMenu from "@/components/ProjectMenu";
 import SettingsDialog from "@/components/SettingsDialog";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
-import useVideoStore from "@/stores/use-video-store";
-import useLayoutStore from "@/features/editor/store/use-layout-store";
 import { createProject, getProject, sendChatMessage, ProjectDetails, ChatMessage } from "@/services/api";
 import { toast } from "@/hooks/use-toast";
 
@@ -39,10 +37,6 @@ const Chat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(projectId || null);
   const [isLoadingProject, setIsLoadingProject] = useState(false);
-
-  const { addChatVideo, scrollToVideos, clearHighlights, clearAllChatVideos } = useVideoStore();
-  const { setActiveMenuItem, setShowMenuItem } = useLayoutStore();
-
   const { isAuthenticated, isLoading, loginWithRedirect, getAccessTokenSilently } = useAuth0();
 
   useEffect(() => {
@@ -156,9 +150,6 @@ const Chat = () => {
       
       setIsLoadingProject(true);
       
-      // Clear existing videos when loading a new project
-      clearAllChatVideos();
-      
       try {
         const token = await getAccessTokenSilently();
         const projectDetails = await getProject(token, projectId);
@@ -195,18 +186,6 @@ const Chat = () => {
               };
               
               videoMessages.push(videoMessage);
-              
-              // Add to shared video store for editor
-              const chatVideo = {
-                id: videoId,
-                videoUrl: videoUrl,
-                prompt: `${messageText} (${index + 1}/${videoUrls.length})`,
-                timestamp: new Date(msg.created_at),
-                preview: videoUrl,
-                messageId: msg.id,
-              };
-              
-              addChatVideo(chatVideo);
             });
             
             convertedMessage.videoIds = messageVideoIds;
@@ -218,12 +197,6 @@ const Chat = () => {
         setMessages(convertedMessages);
         setVideos(videoMessages);
         setCurrentProjectId(projectId);
-        
-        // If there are videos, set the videos panel as active
-        if (videoMessages.length > 0) {
-          setActiveMenuItem("videos");
-          setShowMenuItem(true);
-        }
         
       } catch (error) {
         console.error('Error loading project:', error);
@@ -238,7 +211,7 @@ const Chat = () => {
     };
 
     loadProject();
-  }, [projectId, isAuthenticated, getAccessTokenSilently, addChatVideo, setActiveMenuItem, setShowMenuItem, clearAllChatVideos]);
+  }, [projectId, isAuthenticated, getAccessTokenSilently]);
 
   // Check for initial prompt from URL parameters
   useEffect(() => {
@@ -377,17 +350,6 @@ const Chat = () => {
       // Add to local videos list
       setVideos(prev => [...prev, newVideo]);
 
-      // Add to shared video store for editor
-      const chatVideo = {
-        id: currentVideoId,
-        videoUrl: videoUrl,
-        prompt: `${prompt} (${index + 1}/${clipUrls.length})`,
-        timestamp: new Date(),
-        preview: videoUrl
-      };
-      
-      addChatVideo(chatVideo);
-
       // Set the first video as current
       if (index === 0) {
         setCurrentVideoId(currentVideoId);
@@ -400,10 +362,6 @@ const Chat = () => {
         ? { ...msg, videoIds: videoIds }
         : msg
     ));
-
-    // Switch to videos panel in editor
-    setActiveMenuItem("videos");
-    setShowMenuItem(true);
   };
 
   const handleVideoGeneration = async (prompt: string) => {
@@ -429,12 +387,7 @@ const Chat = () => {
 
   const handleMessageClick = (message: Message) => {
     if (!message.isUser && message.videoIds && message.videoIds.length > 0) {
-      setActiveMenuItem("videos");
-      setShowMenuItem(true);
-      scrollToVideos(message.videoIds);
     } else if (message.videoId) {
-      setActiveMenuItem("videos");
-      setShowMenuItem(true);
       setCurrentVideoId(message.videoId);
     }
   };
@@ -483,7 +436,12 @@ const Chat = () => {
           
           {/* Video Timeline - Resizable Panel */}
           <ResizablePanel defaultSize={67} minSize={50}>
-            <VideoEditor />
+          <VideoTimeline
+              videos={videos}
+              currentVideoId={currentVideoId}
+              isGenerating={isGenerating}
+              onVideoSelect={handleVideoSelect}
+            />
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
