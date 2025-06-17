@@ -22,9 +22,10 @@ import { Settings, User, Check, Info } from "lucide-react";
 interface SettingsDialogProps {
   isOpen: boolean;
   onClose: () => void;
+  disableOpenCloseUrlManagement?: boolean;
 }
 
-const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
+const SettingsDialog = ({ isOpen, onClose, disableOpenCloseUrlManagement = false }: SettingsDialogProps) => {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const isInProject = location.pathname.startsWith('/chat');
@@ -35,6 +36,16 @@ const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
   
   // Determine default tab based on context and URL
   const getDefaultTab = () => {
+    // If open/close URL management is disabled, still read URL for initial tab but use context defaults as fallback
+    if (disableOpenCloseUrlManagement) {
+      if (settingsParam === 'project' && isInProject) return 'project';
+      if (settingsParam === 'workspace') return 'workspace';
+      if (settingsParam === 'people') return 'people';
+      if (settingsParam === 'billing') return 'billing';
+      if (settingsParam === 'account') return 'account';
+      return isInProject ? 'project' : 'workspace';
+    }
+    
     if (settingsParam === 'project' && isInProject) return 'project';
     if (settingsParam === 'workspace') return 'workspace';
     if (settingsParam === 'people') return 'people';
@@ -47,8 +58,20 @@ const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
 
   const [activeTab, setActiveTab] = useState(getDefaultTab());
 
-  // Update URL when settings are opened/closed
+  // Update the active tab when the dialog opens and open/close URL management is disabled
   useEffect(() => {
+    if (disableOpenCloseUrlManagement && isOpen) {
+      const defaultTab = isInProject ? 'project' : 'workspace';
+      // If we have a settings parameter in URL, use it, otherwise use default
+      const urlTab = settingsParam || defaultTab;
+      setActiveTab(urlTab);
+    }
+  }, [disableOpenCloseUrlManagement, isOpen, isInProject, settingsParam]);
+
+  // Update URL when settings are opened/closed (only if open/close URL management is enabled)
+  useEffect(() => {
+    if (disableOpenCloseUrlManagement) return;
+    
     if (isOpen && !isSettingsOpen) {
       // Open settings - add appropriate settings param
       const newParams = new URLSearchParams(searchParams);
@@ -62,9 +85,9 @@ const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
       newParams.delete('settings');
       setSearchParams(newParams);
     }
-  }, [isOpen, isSettingsOpen, isInProject, searchParams, setSearchParams]);
+  }, [isOpen, isSettingsOpen, isInProject, searchParams, setSearchParams, disableOpenCloseUrlManagement]);
 
-  // Update URL when tab changes
+  // Update URL when tab changes (always enabled - this should work in both modes)
   const handleTabChange = (value: string) => {
     setActiveTab(value);
     const newParams = new URLSearchParams(searchParams);
@@ -74,18 +97,22 @@ const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
 
   // Handle dialog close
   const handleClose = () => {
-    const newParams = new URLSearchParams(searchParams);
-    newParams.delete('settings');
-    setSearchParams(newParams);
+    if (!disableOpenCloseUrlManagement) {
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('settings');
+      setSearchParams(newParams);
+    }
     onClose();
   };
 
-  // Sync with URL changes
+  // Sync with URL changes (only if open/close URL management is enabled)
   useEffect(() => {
+    if (disableOpenCloseUrlManagement) return;
+    
     if (settingsParam && settingsParam !== activeTab) {
       setActiveTab(settingsParam);
     }
-  }, [settingsParam, activeTab]);
+  }, [settingsParam, activeTab, disableOpenCloseUrlManagement]);
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>

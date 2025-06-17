@@ -16,9 +16,10 @@ import SettingsDialog from "@/components/SettingsDialog";
 
 interface NavbarProps {
   isAuthenticated?: boolean;
+  onOpenSettings?: () => void;
 }
 
-const Navbar = ({ isAuthenticated: propIsAuthenticated }: NavbarProps) => {
+const Navbar = ({ isAuthenticated: propIsAuthenticated, onOpenSettings }: NavbarProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -52,7 +53,11 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated }: NavbarProps) => {
 
   const handleOpenSettings = () => {
     setIsDropdownOpen(false);
-    setIsSettingsOpen(true);
+    if (onOpenSettings) {
+      onOpenSettings();
+    } else {
+      setIsSettingsOpen(true);
+    }
   };
 
   const handleLogin = () => {
@@ -108,8 +113,8 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated }: NavbarProps) => {
         <Container className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-6">
             <Link to={actualIsAuthenticated ? "/dashboard" : "/"} className="flex items-center gap-3" onClick={() => window.scrollTo(0, 0)}>
-              <Video className="w-10 h-10 text-purple-400" />
-              <span className="text-2xl font-bold text-white">Pamba</span>
+              <img src="/pamba.ico" alt="Pamba Logo" className="w-10 h-10" />
+              <span className="text-2xl font-bold text-white">pamba</span>
             </Link>
             <div className="hidden md:flex items-center gap-6 text-white/80">
               {/* <a href="#" className="hover:text-white transition-colors">Community</a>
@@ -283,10 +288,12 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated }: NavbarProps) => {
         </Container>
       </nav>
       
-      <SettingsDialog 
-        isOpen={isSettingsOpen} 
-        onClose={() => setIsSettingsOpen(false)} 
-      />
+      {!onOpenSettings && (
+        <SettingsDialog 
+          isOpen={isSettingsOpen} 
+          onClose={() => setIsSettingsOpen(false)} 
+        />
+      )}
     </>
   );
 };

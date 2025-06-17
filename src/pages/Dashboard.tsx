@@ -8,6 +8,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Container from "@/components/Container";
 import StaticGradientBackground from "@/components/StaticGradientBackground";
+import SettingsDialog from "@/components/SettingsDialog";
+import { useSettingsUrlManagement } from "@/hooks/useSettingsUrlManagement";
 import { 
   createProject, 
   getProjects, 
@@ -20,6 +22,9 @@ const Dashboard = () => {
   const { isAuthenticated, isLoading, loginWithRedirect, getAccessTokenSilently } = useAuth0();
   const [projects, setProjects] = useState<Project[]>([]);
   const [isCreatingProject, setIsCreatingProject] = useState(false);
+  
+  // Use the custom hook for settings URL management
+  const { isSettingsOpen, handleOpenSettings, handleCloseSettings } = useSettingsUrlManagement();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -188,7 +193,7 @@ const Dashboard = () => {
       <StaticGradientBackground />
       
       {/* Navigation */}
-      <Navbar isAuthenticated={true} />
+      <Navbar isAuthenticated={true} onOpenSettings={handleOpenSettings} />
 
       <div className="flex flex-col flex-1 relative z-10">
         <Container>
@@ -212,6 +217,13 @@ const Dashboard = () => {
 
       {/* Footer */}
       <Footer />
+      
+      {/* Settings Dialog */}
+      <SettingsDialog 
+        isOpen={isSettingsOpen} 
+        onClose={handleCloseSettings}
+        disableOpenCloseUrlManagement={true}
+      />
     </div>
   );
 };

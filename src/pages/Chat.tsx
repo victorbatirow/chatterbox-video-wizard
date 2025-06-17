@@ -18,6 +18,7 @@ import {
   ChatPromptResponse
 } from "@/services/api";
 import { toast } from "@/hooks/use-toast";
+import { useSettingsUrlManagement } from "@/hooks/useSettingsUrlManagement";
 
 // Updated interfaces to match backend
 export interface VideoMessage {
@@ -46,12 +47,14 @@ const Chat = () => {
   const [videos, setVideos] = useState<VideoMessage[]>([]);
   const [currentVideoId, setCurrentVideoId] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [highlightedVideoIds, setHighlightedVideoIds] = useState<string[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(projectId || null);
   const [isLoadingProject, setIsLoadingProject] = useState(false);
   const { isAuthenticated, isLoading, loginWithRedirect, getAccessTokenSilently, user } = useAuth0();
+  
+  // Use the custom hook for settings URL management
+  const { isSettingsOpen, handleOpenSettings, handleCloseSettings } = useSettingsUrlManagement();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -495,10 +498,6 @@ const Chat = () => {
     }
   };
 
-  const handleOpenSettings = () => {
-    setIsSettingsOpen(true);
-  };
-
   if (isLoading || isLoadingProject) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
@@ -551,7 +550,8 @@ const Chat = () => {
       
       <SettingsDialog 
         isOpen={isSettingsOpen} 
-        onClose={() => setIsSettingsOpen(false)} 
+        onClose={handleCloseSettings}
+        disableOpenCloseUrlManagement={true}
       />
     </>
   );
