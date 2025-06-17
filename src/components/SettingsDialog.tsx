@@ -46,7 +46,7 @@ function formatNumber(number: number): string {
 const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [selectedHobbyValue, setSelectedHobbyValue] = useState('1000,price_1RahQ4CmyYc460qRPIcmisOI')
+  const [selectedHobbyValue, setSelectedHobbyValue] = useState('1600,price_1RahQ4CmyYc460qRPIcmisOI')
   const [selectedProValue, setSelectedProValue] = useState('10000,price_1RahY6CmyYc460qRoWUq57Ur')
   const isInProject = location.pathname.startsWith('/chat');
   
@@ -441,21 +441,19 @@ const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
                       <div>
                         <h3 className="text-lg font-semibold">Hobby</h3>
                         <div className="mt-2">
-                          <span className="text-3xl font-bold">$10</span>
+                          <span className="text-3xl font-bold">${formatNumber(parseInt(selectedHobbyValue.split(",")[0])/100)}</span>
                           <span className="text-muted-foreground"> /month</span>
                         </div>
                         <p className="text-sm text-muted-foreground mt-2">Start creating videos</p>
                       </div>
                       
-                      <Select defaultValue="1000,price_1RahQ4CmyYc460qRPIcmisOI" onValueChange={handleHobbySelectChange}>
+                      <Select defaultValue="1600,price_1RahQ4CmyYc460qRPIcmisOI" onValueChange={handleHobbySelectChange}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent className="z-50">
-                          <SelectItem value="1000,price_1RahQ4CmyYc460qRPIcmisOI">1K credits / month</SelectItem>
-                          <SelectItem value="2000,price_1RahRvCmyYc460qR92INVJax">2K credits / month</SelectItem>
-                          <SelectItem value="3000,price_1RahSNCmyYc460qRr1Wcoy2O">3K credits / month</SelectItem>
-                          <SelectItem value="4000,price_1RahVDCmyYc460qRRqGXFcF2">4K credits / month</SelectItem>
+                          <SelectItem value="1600,price_1RahQ4CmyYc460qRPIcmisOI">1.6K credits / month</SelectItem>
+                          <SelectItem value="3200,price_1RahSNCmyYc460qRr1Wcoy2O">3.2K credits / month</SelectItem>
                           <SelectItem value="5000,price_1RahVqCmyYc460qRamtXAUvF">5K credits / month</SelectItem>
                           <SelectItem value="6000,price_1RahW5CmyYc460qRn46VLJPH">6K credits / month</SelectItem>
                           <SelectItem value="7000,price_1RahWVCmyYc460qRSMDK3PL6">7K credits / month</SelectItem>
@@ -496,7 +494,7 @@ const SettingsDialog = ({ isOpen, onClose }: SettingsDialogProps) => {
                       <div>
                         <h3 className="text-lg font-semibold">Pro</h3>
                         <div className="mt-2">
-                          <span className="text-3xl font-bold">$100</span>
+                          <span className="text-3xl font-bold">${formatNumber(parseInt(selectedProValue.split(",")[0])/100)}</span>
                           <span className="text-muted-foreground"> /month</span>
                         </div>
                         <p className="text-sm text-muted-foreground mt-2">For expanded production and bonus credits</p>
