@@ -56,8 +56,8 @@ const SettingsDialog = ({ isOpen, onClose, disableOpenCloseUrlManagement = false
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const { getAccessTokenSilently, isAuthenticated, isLoading, user } = useAuth0();
-  const [selectedHobbyValue, setSelectedHobbyValue] = useState('1600,price_1RahQ4CmyYc460qRPIcmisOI')
-  const [selectedProValue, setSelectedProValue] = useState('10500,price_1RahY6CmyYc460qRoWUq57Ur')
+  const [selectedHobbyValue, setSelectedHobbyValue] = useState('1600,price_1RahQ4CmyYc460qRPIcmisOI,Hobby 1')
+  const [selectedProValue, setSelectedProValue] = useState('10500,price_1RahY6CmyYc460qRoWUq57Ur,Pro 1')
   const [stripeCPURL, setStripeCPURL] = useState('https://billing.stripe.com/p/login/test_14A6oG5aJ4LDaWLdKX18c00')
   const isInProject = location.pathname.startsWith('/chat');
   
@@ -597,18 +597,18 @@ useEffect(() => {
                         <p className="text-sm text-muted-foreground mt-2">Start creating videos</p>
                       </div>
                       
-                      <Select defaultValue="1600,price_1RahQ4CmyYc460qRPIcmisOI" onValueChange={handleHobbySelectChange}>
+                      <Select defaultValue={selectedHobbyValue} onValueChange={handleHobbySelectChange}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent className="z-50">
-                          <SelectItem value="1600,price_1RahQ4CmyYc460qRPIcmisOI">1.6K credits / month</SelectItem>
-                          <SelectItem value="3200,price_1RahSNCmyYc460qRr1Wcoy2O">3.2K credits / month</SelectItem>
-                          <SelectItem value="5000,price_1RahVqCmyYc460qRamtXAUvF">5K credits / month</SelectItem>
-                          <SelectItem value="6000,price_1RahW5CmyYc460qRn46VLJPH">6K credits / month</SelectItem>
-                          <SelectItem value="7000,price_1RahWVCmyYc460qRSMDK3PL6">7K credits / month</SelectItem>
-                          <SelectItem value="8000,price_1RahWwCmyYc460qRY8i5N0hY">8K credits / month</SelectItem>
-                          <SelectItem value="9000,price_1RahXOCmyYc460qRjaqJUOW0">9K credits / month</SelectItem>
+                          <SelectItem value="1600,price_1RahQ4CmyYc460qRPIcmisOI,Hobby 1">1.6K credits / month</SelectItem>
+                          <SelectItem value="3200,price_1RahSNCmyYc460qRr1Wcoy2O,Hobby 3">3.2K credits / month</SelectItem>
+                          <SelectItem value="5000,price_1RahVqCmyYc460qRamtXAUvF,Hobby 5">5K credits / month</SelectItem>
+                          <SelectItem value="6000,price_1RahW5CmyYc460qRn46VLJPH,Hobby 6">6K credits / month</SelectItem>
+                          <SelectItem value="7000,price_1RahWVCmyYc460qRSMDK3PL6,Hobby 7">7K credits / month</SelectItem>
+                          <SelectItem value="8000,price_1RahWwCmyYc460qRY8i5N0hY,Hobby 8">8K credits / month</SelectItem>
+                          <SelectItem value="9000,price_1RahXOCmyYc460qRjaqJUOW0,Hobby 9">9K credits / month</SelectItem>
                         </SelectContent>
                       </Select>
                       
@@ -654,22 +654,22 @@ useEffect(() => {
                         <p className="text-sm text-muted-foreground mt-2">For expanded production and bonus credits</p>
                       </div>
 
-                      <Select defaultValue="10500,price_1RahY6CmyYc460qRoWUq57Ur" onValueChange={handleProSelectChange}>
+                      <Select defaultValue={selectedProValue} onValueChange={handleProSelectChange}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent  className="z-50">
-                          <SelectItem value="10500,price_1RahY6CmyYc460qRoWUq57Ur">{formatNumber(10500)} credits / month</SelectItem>
-                          <SelectItem value="21000,price_1RahiWCmyYc460qR1qQXvhDm">{formatNumber(21000)} credits / month</SelectItem>
-                          <SelectItem value="31500,price_1RahirCmyYc460qRwKzYr9WV">{formatNumber(31500)} credits / month</SelectItem>
-                          <SelectItem value="42000,price_1RahjBCmyYc460qR8X5jKSIJ">{formatNumber(42000)} credits / month</SelectItem>
-                          <SelectItem value="52500,price_1RahjbCmyYc460qRA0lD8pjg">{formatNumber(52500)} credits / month</SelectItem>
-                          <SelectItem value="78750,price_1RahlsCmyYc460qR3V0yQMki">{formatNumber(78750)} credits / month</SelectItem>
-                          <SelectItem value="105000,price_1RahmFCmyYc460qRKlDoix1A">{formatNumber(105000)} credits / month</SelectItem>
-                          <SelectItem value="157500,price_1RahnYCmyYc460qR8R5Ctaes">{formatNumber(157500)} credits / month</SelectItem>
-                          <SelectItem value="210000,price_1RahnwCmyYc460qRwT8zVkCD">{formatNumber(210000)} credits / month</SelectItem>
-                          <SelectItem value="262500,price_1RahoNCmyYc460qRkowz5alE">{formatNumber(262500)} credits / month</SelectItem>
-                          <SelectItem value="315000,price_1RahoxCmyYc460qR6uZlTIOi">{formatNumber(315000)} credits / month</SelectItem>
+                          <SelectItem value="10500,price_1RahY6CmyYc460qRoWUq57Ur,Pro 1">{formatNumber(10500)} credits / month</SelectItem>
+                          <SelectItem value="21000,price_1RahiWCmyYc460qR1qQXvhDm,Pro 2">{formatNumber(21000)} credits / month</SelectItem>
+                          <SelectItem value="31500,price_1RahirCmyYc460qRwKzYr9WV,Pro 3">{formatNumber(31500)} credits / month</SelectItem>
+                          <SelectItem value="42000,price_1RahjBCmyYc460qR8X5jKSIJ,Pro 4">{formatNumber(42000)} credits / month</SelectItem>
+                          <SelectItem value="52500,price_1RahjbCmyYc460qRA0lD8pjg,Pro 5">{formatNumber(52500)} credits / month</SelectItem>
+                          <SelectItem value="78750,price_1RahlsCmyYc460qR3V0yQMki,Pro 7.5">{formatNumber(78750)} credits / month</SelectItem>
+                          <SelectItem value="105000,price_1RahmFCmyYc460qRKlDoix1A,Pro 10">{formatNumber(105000)} credits / month</SelectItem>
+                          <SelectItem value="157500,price_1RahnYCmyYc460qR8R5Ctaes,Pro 15">{formatNumber(157500)} credits / month</SelectItem>
+                          <SelectItem value="210000,price_1RahnwCmyYc460qRwT8zVkCD,Pro 20">{formatNumber(210000)} credits / month</SelectItem>
+                          <SelectItem value="262500,price_1RahoNCmyYc460qRkowz5alE,Pro 25">{formatNumber(262500)} credits / month</SelectItem>
+                          <SelectItem value="315000,price_1RahoxCmyYc460qR6uZlTIOi,Pro 30">{formatNumber(315000)} credits / month</SelectItem>
                         </SelectContent>
                       </Select>
 
