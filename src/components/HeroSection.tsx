@@ -14,7 +14,7 @@ const HeroSection = ({ onSubmit, isDisabled = false }: HeroSectionProps) => {
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
           Create stunning ads with{" "}
           <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-            pamba
+            Pamba
           </span>
         </h1>
         
