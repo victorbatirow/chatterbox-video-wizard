@@ -46,7 +46,7 @@ const VideoPromptInput = ({
   }, [prompt]);
 
   return (
-    <div className="w-full max-w-2xl bg-slate-900 backdrop-blur-sm rounded-2xl p-4 border border-slate-900">
+    <div className="w-full max-w-2xl bg-slate-900/80 backdrop-blur-sm rounded-2xl p-4 border border-slate-600/30">
       <div className="w-full">
         <Textarea
           ref={textareaRef}
