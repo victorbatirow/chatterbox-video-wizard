@@ -251,7 +251,7 @@ const Chat = () => {
         if (convertedMessages.length === 0) {
           const greetingMessage: Message = {
             id: 'greeting',
-            text: "Welcome to your new video project! I'm here to help you create amazing videos.\"\n\nWhat would you like to create today?",
+            text: "Hi, I'm here to help you create amazing videos.\nWhat would you like to create today?",
             isUser: false,
             timestamp: new Date(),
           };

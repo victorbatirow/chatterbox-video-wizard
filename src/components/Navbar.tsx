@@ -259,10 +259,10 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated, onOpenSettings }: Navbar
                     <p>Create new project</p>
                   </DropdownMenuItem>
 
-                  <DropdownMenuSeparator />
+                  {/* <DropdownMenuSeparator /> */}
 
                   {/* Help Center */}
-                  <DropdownMenuItem className="gap-2 px-2 py-1.5">
+                  {/* <DropdownMenuItem className="gap-2 px-2 py-1.5">
                     <svg 
                       xmlns="http://www.w3.org/2000/svg" 
                       width="16" 
@@ -274,7 +274,7 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated, onOpenSettings }: Navbar
                       <path d="M484.03-247Q500-247 511-258.03t11-27T510.97-312t-27-11T457-311.97t-11 27T457.03-258t27 11m-3.2-314q14.02 0 23.52-9.2T513-626q0-14.45-9.48-24.22-9.48-9.78-23.5-9.78t-23.52 9.78Q447-640.45 447-626q0 13.6 9.48 22.8t23.5 9.2m.29 514q-82.74 0-155.5-31.5Q252-143 197.5-197.5t-86-127.34T80-480.5t31.5-155.66 86-126.84 127.34-85.5T480.5-880t155.66 31.5T763-763t85.5 127T880-480.27q0 82.74-31.5 155.5Q817-252 763-197.68q-54 54.31-127 86Q563-80 480.27-80m.23-60Q622-140 721-239.5t99-241T721.19-721 480-820q-141 0-240.5 98.81T140-480q0 141 99.5 240.5t241 99.5m-.5-340"/>
                     </svg>
                     <p>Help Center</p>
-                  </DropdownMenuItem>
+                  </DropdownMenuItem> */}
 
                   <DropdownMenuSeparator />
 
