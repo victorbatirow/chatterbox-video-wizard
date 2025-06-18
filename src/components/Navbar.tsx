@@ -112,8 +112,8 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated, onOpenSettings }: Navbar
         <Container className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-6">
             <Link to="/" className="flex items-center gap-3">
-              <Video className="w-10 h-10 text-purple-400" />
-              <span className="text-2xl font-bold text-white">Pamba</span>
+              {/* <img src="/pambaNav.ico" alt="Pamba Logo" className="w-10 h-10" /> */}
+              <span className="text-2xl font-bold text-white">pamba</span>
             </Link>
           </div>
           <div className="text-white">Loading...</div>
@@ -130,7 +130,7 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated, onOpenSettings }: Navbar
         <Container className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-6">
             <Link to={actualIsAuthenticated ? "/dashboard" : "/"} className="flex items-center gap-3" onClick={() => window.scrollTo(0, 0)}>
-              <img src="/pambaNav.ico" alt="Pamba Logo" className="w-10 h-10" />
+              {/* <img src="/pambaNav.ico" alt="Pamba Logo" className="w-10 h-10" /> */}
               <span className="text-3xl font-bold text-white">pamba</span>
             </Link>
             <div className="hidden md:flex items-center gap-6 text-white/80">
