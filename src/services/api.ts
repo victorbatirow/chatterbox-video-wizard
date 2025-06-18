@@ -32,6 +32,7 @@ export interface FilmGenerationResponse {
 
 export interface Project {
   id: string;
+  project_name: string;
   created_at: string;
   updated_at: string;
 }
@@ -90,6 +91,10 @@ export interface ChatPromptResponse {
 
 export interface CreateProjectRequest {
   initial_message?: string;
+}
+
+export interface UpdateProjectRequest {
+  project_name: string;
 }
 
 export interface VideoClipRequest {
@@ -226,10 +231,71 @@ export const getProject = async (
 
 export const getProjects = async (token: string): Promise<Project[]> => {
   return apiRequest<Project[]>('/projects', {
+    method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`,
     },
   });
+};
+
+export const updateProjectName = async (
+  token: string,
+  projectId: string,
+  newName: string
+): Promise<void> => {
+  const url = `${API_BASE_URL}/projects/${projectId}`;
+  
+  try {
+    const response = await fetch(url, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        project_name: newName,
+      }),
+    });
+
+    if (!response.ok) {
+      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+      
+      try {
+        const errorData = await response.json();
+        if (errorData.message) {
+          errorMessage = errorData.message;
+        } else if (errorData.error) {
+          errorMessage = errorData.error;
+        }
+      } catch {
+        // If we can't parse error JSON, try to read as text
+        try {
+          const errorText = await response.text();
+          if (errorText) {
+            errorMessage = errorText;
+          }
+        } catch {
+          // Use the status text as fallback
+        }
+      }
+      
+      throw new ApiError(errorMessage, response.status, response);
+    }
+
+    // For successful responses, we don't need to parse the response body
+    // The backend returns plain text "Project title updated successfully"
+    return;
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    
+    // Network or other errors
+    throw new ApiError(
+      error instanceof Error ? error.message : 'Network error occurred',
+      0
+    );
+  }
 };
 
 // Chat/AI Interaction

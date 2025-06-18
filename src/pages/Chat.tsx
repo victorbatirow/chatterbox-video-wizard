@@ -50,6 +50,7 @@ const Chat = () => {
   const [highlightedVideoIds, setHighlightedVideoIds] = useState<string[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(projectId || null);
+  const [currentProjectName, setCurrentProjectName] = useState<string>("video-generation-project");
   const [isLoadingProject, setIsLoadingProject] = useState(false);
   const { isAuthenticated, isLoading, loginWithRedirect, getAccessTokenSilently, user } = useAuth0();
   
@@ -244,6 +245,9 @@ const Chat = () => {
       try {
         const token = await getAccessTokenSilently();
         const projectDetails = await getProject(token, projectId);
+
+        // Set the project name from the backend response
+      setCurrentProjectName(projectDetails.project.project_name)
         
         const { convertedMessages, videoMessages } = convertBackendMessagesToFrontend(projectDetails.messages);
         
@@ -510,6 +514,15 @@ const Chat = () => {
     }
   };
 
+  const handleProjectRename = (newName: string) => {
+    setCurrentProjectName(newName);
+    // Optionally reload the project or update URL
+    toast({
+      title: "Project Renamed",
+      description: `Project name updated to "${newName}"`,
+    });
+  };
+
   if (isLoading || isLoadingProject) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
@@ -527,7 +540,12 @@ const Chat = () => {
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
         {/* Project Menu - positioned absolutely in top left */}
         <div className="absolute top-4 left-4 z-50">
-          <ProjectMenu onOpenSettings={handleOpenSettings} />
+          <ProjectMenu 
+            onOpenSettings={handleOpenSettings} 
+            projectId={currentProjectId || undefined}
+            projectName={currentProjectName}
+            onProjectRenamed={handleProjectRename}
+          />
         </div>
         
         <ResizablePanelGroup direction="horizontal" className="h-screen">
