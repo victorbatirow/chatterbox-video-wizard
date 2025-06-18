@@ -1,5 +1,6 @@
 import { createRoot } from 'react-dom/client'
 import { Auth0Provider } from '@auth0/auth0-react'
+import { PostHogProvider } from 'posthog-js/react'
 import App from './App.tsx'
 import './index.css'
 
@@ -18,15 +19,25 @@ const getEnvVar = (key: string, fallback: string) => {
   return fallback;
 };
 
+// PostHog options
+const options = {
+  api_host: import.meta.env.VITE_REACT_APP_PUBLIC_POSTHOG_HOST,
+}
+
 createRoot(document.getElementById("root")!).render(
-  <Auth0Provider
-    domain={getEnvVar("AUTH0_DOMAIN", "auth.pamba.app")}
-    clientId={getEnvVar("AUTH0_CLIENT_ID", "hcdMCKsScucHyZcp6mWiKUhL48hdC54I")}
-    authorizationParams={{
-      redirect_uri: window.location.origin + '/dashboard',
-      audience: getEnvVar("AUTH0_AUDIENCE", 'https://dev-y1uvqekat854n8q4.us.auth0.com/api/v2/')
-    }}
+  <PostHogProvider 
+    apiKey={import.meta.env.VITE_REACT_APP_PUBLIC_POSTHOG_KEY}
+    options={options}
   >
-    <App />
-  </Auth0Provider>
+    <Auth0Provider
+      domain={getEnvVar("AUTH0_DOMAIN", "auth.pamba.app")}
+      clientId={getEnvVar("AUTH0_CLIENT_ID", "hcdMCKsScucHyZcp6mWiKUhL48hdC54I")}
+      authorizationParams={{
+        redirect_uri: window.location.origin + '/dashboard',
+        audience: getEnvVar("AUTH0_AUDIENCE", 'https://dev-y1uvqekat854n8q4.us.auth0.com/api/v2/')
+      }}
+    >
+      <App />
+    </Auth0Provider>
+  </PostHogProvider>
 );
