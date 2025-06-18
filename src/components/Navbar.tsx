@@ -183,9 +183,13 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated, onOpenSettings }: Navbar
                     <div className="flex flex-col gap-1 rounded-md bg-muted p-3">
                       <div className="flex items-center justify-between">
                         <p className="text-sm font-medium">Credits Used</p>
-                        <p className="text-xs font-medium text-muted-foreground cursor-pointer hover:opacity-80">
+                        <Link 
+                          to="/dashboard?settings=billing" 
+                          className="text-xs font-medium text-muted-foreground cursor-pointer hover:opacity-80"
+                          onClick={() => setIsDropdownOpen(false)}
+                        >
                           Manage
-                        </p>
+                        </Link>
                       </div>
                       <div className="flex w-full items-center gap-2">
                         <div className="relative w-full overflow-hidden rounded-full bg-muted-foreground/20 h-[7px] min-w-0 flex-1">
