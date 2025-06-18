@@ -21,11 +21,15 @@ import {
 import { Settings, User, Check, Info } from "lucide-react";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { loadStripe } from '@stripe/stripe-js';
+import RenameProjectDialog from "@/components/RenameProjectDialog";
 
 interface SettingsDialogProps {
   isOpen: boolean;
   onClose: () => void;
   disableOpenCloseUrlManagement?: boolean;
+  projectId?: string;
+  projectName?: string;
+  onProjectRenamed?: (newName: string) => void;
 }
 
 function formatNumber(number: number): string {
@@ -52,13 +56,14 @@ function formatUnixTimestamp(timestamp: number): string {
   return new Date(timestamp * 1000).toLocaleDateString();
 }
 
-const SettingsDialog = ({ isOpen, onClose, disableOpenCloseUrlManagement = false }: SettingsDialogProps) => {
+const SettingsDialog = ({ isOpen, onClose, disableOpenCloseUrlManagement = false, projectId, projectName, onProjectRenamed }: SettingsDialogProps) => {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const { getAccessTokenSilently, isAuthenticated, isLoading, user } = useAuth0();
   const [selectedHobbyValue, setSelectedHobbyValue] = useState('1600,price_1RahQ4CmyYc460qRPIcmisOI,Hobby 1')
   const [selectedProValue, setSelectedProValue] = useState('10500,price_1RahY6CmyYc460qRoWUq57Ur,Pro 1')
   const [stripeCPURL, setStripeCPURL] = useState('https://billing.stripe.com/p/login/test_14A6oG5aJ4LDaWLdKX18c00')
+  const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
   const isInProject = location.pathname.startsWith('/chat');
   
   const { userProfile, loading: profileLoading, usagePercentage, remainingCredits } = useUserProfile();
@@ -168,8 +173,12 @@ useEffect(() => {
     setSearchParams(newParams);
   };
 
-  // Handle dialog close
+  // Handle dialog close - but prevent closing when rename dialog is open
   const handleClose = () => {
+    if (isRenameDialogOpen) {
+      return; // Don't close if rename dialog is open
+    }
+    
     if (!disableOpenCloseUrlManagement) {
       const newParams = new URLSearchParams(searchParams);
       newParams.delete('settings');
@@ -277,6 +286,20 @@ useEffect(() => {
     const displayName = getUserDisplayName();
     // return `${displayName}'s Pamba`;
     return `My Pamba`;
+  };
+
+  const handleRenameClick = () => {
+    setIsRenameDialogOpen(true);
+  };
+
+  const handleCloseRenameDialog = () => {
+    setIsRenameDialogOpen(false);
+  };
+
+  const handleProjectRename = (newName: string) => {
+    if (onProjectRenamed) {
+      onProjectRenamed(newName);
+    }
   };
 
   return (
@@ -468,7 +491,9 @@ useEffect(() => {
                         <div className="text-sm text-muted-foreground">Update your project's title.</div>
                       </div>
                       <div className="flex items-center md:justify-end">
-                        <Button size="sm">Rename project</Button>
+                        <Button size="sm" onClick={handleRenameClick} disabled={!projectId}>
+                          Rename project
+                        </Button>
                       </div>
                     </div>
 
@@ -862,6 +887,17 @@ useEffect(() => {
           </div>
         </Tabs>
       </DialogContent>
+      
+      {/* Rename Project Dialog */}
+      {projectId && projectName && (
+        <RenameProjectDialog
+          isOpen={isRenameDialogOpen}
+          onClose={handleCloseRenameDialog}
+          projectId={projectId}
+          currentProjectName={projectName}
+          onRename={handleProjectRename}
+        />
+      )}
     </Dialog>
   );
 };

@@ -582,6 +582,9 @@ const Chat = () => {
         isOpen={isSettingsOpen} 
         onClose={handleCloseSettings}
         disableOpenCloseUrlManagement={true}
+        projectId={currentProjectId || undefined}
+        projectName={currentProjectName}
+        onProjectRenamed={handleProjectRename}
       />
     </>
   );
