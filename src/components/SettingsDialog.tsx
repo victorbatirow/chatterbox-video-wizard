@@ -629,19 +629,22 @@ useEffect(() => {
                         <p className="text-sm text-muted-foreground mt-2">For getting started</p>
                       </div>
 
-                      <Button 
-                        variant="outline" 
-                        className="w-full"
-                        disabled={!userProfile || userProfile.subscription_status !== 'active'}
-                      >
-                        {userProfile?.subscription_status === 'active' ? 'Downgrade' : 'Current plan'}
-                      </Button>
+                      {/* Only show button for free users or when loading */}
+                      {(profileLoading || userProfile?.subscription_status !== 'active') && (
+                        <Button 
+                          variant="outline" 
+                          className="w-full"
+                          disabled={true}
+                        >
+                          {profileLoading ? 'Loading...' : 'Current Plan'}
+                        </Button>
+                      )}
 
                       <div className="space-y-2">
                         <p className="text-sm font-medium">Get started with:</p>
                         <div className="flex items-center gap-2 text-sm">
                           <Check className="h-4 w-4 text-green-600" />
-                          <span>Public projects</span>
+                          <span>Pamba access</span>
                         </div>
                       </div>
                     </div>
