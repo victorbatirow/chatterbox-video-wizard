@@ -14,6 +14,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import Container from "@/components/Container";
 import SettingsDialog from "@/components/SettingsDialog";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { createProject } from "@/services/api";
+import { toast } from "@/hooks/use-toast";
 
 interface NavbarProps {
   isAuthenticated?: boolean;
@@ -26,7 +28,7 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated, onOpenSettings }: Navbar
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
   
-  const { isAuthenticated, user, logout, loginWithRedirect, isLoading } = useAuth0();
+  const { isAuthenticated, user, logout, loginWithRedirect, isLoading, getAccessTokenSilently } = useAuth0();
   const { userProfile, loading: profileLoading, usagePercentage, remainingCredits } = useUserProfile();
   
   // Use Auth0 authentication state if available, otherwise fall back to prop
@@ -42,10 +44,56 @@ const Navbar = ({ isAuthenticated: propIsAuthenticated, onOpenSettings }: Navbar
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleCreateNewProject = () => {
+  const handleCreateNewProject = async () => {
     setIsDropdownOpen(false);
-    navigate('/chat');
-    window.scrollTo(0, 0);
+    
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to create a project",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    try {
+      const token = await getAccessTokenSilently();
+      const result = await createProject(token);
+      
+      // Navigate to the new project's chat
+      navigate(`/chat/${result.project.id}`);
+      window.scrollTo(0, 0);
+    } catch (error) {
+      console.error('Error creating project:', error);
+      
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
+      if (errorMessage.includes('<!DOCTYPE') || errorMessage.includes('HTML')) {
+        toast({
+          title: "Backend Connection Error",
+          description: "Cannot connect to the backend server. Please make sure it's running on http://localhost:8080",
+          variant: "destructive",
+        });
+      } else if (errorMessage.includes('404')) {
+        toast({
+          title: "Backend Setup Issue",
+          description: "The project creation endpoint is missing. Please check your backend configuration.",
+          variant: "destructive",
+        });
+      } else if (errorMessage.includes('401')) {
+        toast({
+          title: "Authentication Error",
+          description: "Your session may have expired. Please try logging out and back in.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to create project. Please try again.",
+          variant: "destructive",
+        });
+      }
+    }
   };
 
   const handleSignOut = () => {
