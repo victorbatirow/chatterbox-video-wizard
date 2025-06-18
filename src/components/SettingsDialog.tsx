@@ -716,7 +716,7 @@ useEffect(() => {
                           <span className="text-3xl font-bold">${formatNumber(parseInt(selectedProValue.split(",")[0])/105)}</span>
                           <span className="text-muted-foreground"> /month</span>
                         </div>
-                        <p className="text-sm text-muted-foreground mt-2">For expanded production and bonus credits</p>
+                        <p className="text-sm text-muted-foreground mt-2">More content and bonus credits</p>
                       </div>
 
                       <Select defaultValue={selectedProValue} onValueChange={handleProSelectChange}>
