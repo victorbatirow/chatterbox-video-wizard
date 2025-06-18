@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Settings, User, Check, Info } from "lucide-react";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { loadStripe } from '@stripe/stripe-js';
 
 interface SettingsDialogProps {
   isOpen: boolean;
@@ -54,17 +55,58 @@ function formatUnixTimestamp(timestamp: number): string {
 const SettingsDialog = ({ isOpen, onClose, disableOpenCloseUrlManagement = false }: SettingsDialogProps) => {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { getAccessTokenSilently, isAuthenticated, isLoading, user } = useAuth0();
   const [selectedHobbyValue, setSelectedHobbyValue] = useState('1600,price_1RahQ4CmyYc460qRPIcmisOI')
   const [selectedProValue, setSelectedProValue] = useState('10000,price_1RahY6CmyYc460qRoWUq57Ur')
+  const [stripeCPURL, setStripeCPURL] = useState('https://billing.stripe.com/p/login/test_14A6oG5aJ4LDaWLdKX18c00')
   const isInProject = location.pathname.startsWith('/chat');
   
-  const { user } = useAuth0();
   const { userProfile, loading: profileLoading, usagePercentage, remainingCredits } = useUserProfile();
   
   // Get settings type and tab from URL params
   const settingsParam = searchParams.get('settings');
   const isSettingsOpen = settingsParam !== null;
   
+  const createCheckoutSession = async (price_id:string) => {
+  const token = await getAccessTokenSilently();
+  
+  const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/billing/create-stripe-checkout-session`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json' },
+    body: JSON.stringify({"price_id":price_id})
+  });
+
+  
+  const { session_id } = await response.json();
+  console.log(session_id)
+  console.log(import.meta.env)
+  const stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+  stripe?.redirectToCheckout({ sessionId: session_id });
+};
+
+useEffect(() => {
+    const fetchStripeURL = async () => {
+      try {
+        const token = await getAccessTokenSilently();
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/billing/create-customer-portal-session`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json' },
+        });
+
+        const data = await res.json();
+        if (data.portal_url) {
+          setStripeCPURL(data.portal_url);
+        }
+      } catch (error) {
+        console.error('Failed to fetch customer portal URL:', error);
+      }
+    };
+
+    fetchStripeURL();
+  }, []);
+
   // Determine default tab based on context and URL
   const getDefaultTab = () => {
     // If open/close URL management is disabled, still read URL for initial tab but use context defaults as fallback
@@ -500,7 +542,7 @@ const SettingsDialog = ({ isOpen, onClose, disableOpenCloseUrlManagement = false
                       ) : userProfile?.subscription_status === 'active' ? (
                         <>
                           You're currently subscribed to plan: <strong>{userProfile.subscribed_product_name}</strong>.{' '}
-                          <button onClick={() => window.open('https://billing.stripe.com/p/login/test_14A6oG5aJ4LDaWLdKX18c00', '_blank')} 
+                          <button onClick={() => window.open(stripeCPURL, '_self')} 
                           className="underline">Manage your payment preferences</button>, or change your plan below. 
                           {userProfile.current_period_end > 0 && (
                             <> Your monthly credits will renew on {formatUnixTimestamp(userProfile.current_period_end)}.</>
@@ -543,10 +585,8 @@ const SettingsDialog = ({ isOpen, onClose, disableOpenCloseUrlManagement = false
                     </div>
 
                     {/* Pro Plan */}
-                    <div className="border-2 border-blue-600 rounded-lg p-6 space-y-4 relative">
-                      <div className="absolute -top-2 left-4">
-                        <span className="bg-blue-600 text-white px-2 py-1 text-xs rounded">POPULAR</span>
-                      </div>
+                    <div className="border rounded-lg p-6 space-y-4 relative">
+             
                       
                       <div>
                         <h3 className="text-lg font-semibold">Hobby</h3>
@@ -575,6 +615,7 @@ const SettingsDialog = ({ isOpen, onClose, disableOpenCloseUrlManagement = false
                       <Button 
                         className="w-full z-0" 
                         disabled={userProfile?.subscribed_product_name?.toLowerCase().includes('hobby')}
+                        onClick={() => createCheckoutSession(selectedHobbyValue.split(",")[1])}
                       >
                         {userProfile?.subscribed_product_name?.toLowerCase().includes('hobby') ? 'Your current plan' : 'Upgrade'}
                       </Button>
@@ -635,6 +676,7 @@ const SettingsDialog = ({ isOpen, onClose, disableOpenCloseUrlManagement = false
                       <Button 
                         className="w-full bg-blue-600 hover:bg-blue-700 z-10"
                         disabled={userProfile?.subscribed_product_name?.toLowerCase().includes('pro')}
+                        onClick={() => createCheckoutSession(selectedProValue.split(",")[1])}
                       >
                         {userProfile?.subscribed_product_name?.toLowerCase().includes('pro') ? 'Your current plan' : 'Upgrade'}
                       </Button>
