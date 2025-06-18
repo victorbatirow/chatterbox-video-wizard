@@ -46,7 +46,7 @@ const VideoPromptInput = ({
   }, [prompt]);
 
   return (
-    <div className="w-full max-w-2xl bg-slate-800/60 backdrop-blur-sm rounded-2xl p-4 border border-slate-600/30">
+    <div className="w-full max-w-2xl bg-slate-900 backdrop-blur-sm rounded-2xl p-4 border border-slate-900">
       <div className="w-full">
         <Textarea
           ref={textareaRef}
@@ -66,10 +66,10 @@ const VideoPromptInput = ({
           }}
         />
       </div>
-      <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-600/20">
+      <div className="flex items-center justify-between mt-3 pt-2">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-purple-400" />
-          <span className="text-sm text-slate-400">Public</span>
+          {/* <Sparkles className="w-4 h-4 text-purple-400" />
+          <span className="text-sm text-slate-400">Public</span> */}
         </div>
         <Button 
           onClick={handleSubmit}
