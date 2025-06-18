@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -112,7 +111,7 @@ const RecentProjectsSection = ({
                     </div>
                     
                     <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-purple-300 transition-colors">
-                      Video Project
+                      {project.project_name}
                     </h3>
                     
                     <div className="flex items-center gap-2 text-white/60 text-sm">
