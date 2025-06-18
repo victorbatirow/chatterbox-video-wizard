@@ -358,6 +358,7 @@ export interface UserProfile {
   monthly_credits: number;
   used_credits: number;
   subscribed_product_name: string;
+  stripe_price_id: string;
   current_period_start: number;
   current_period_end: number;
   subscription_status: string;

@@ -56,8 +56,8 @@ const SettingsDialog = ({ isOpen, onClose, disableOpenCloseUrlManagement = false
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const { getAccessTokenSilently, isAuthenticated, isLoading, user } = useAuth0();
-  const [selectedHobbyValue, setSelectedHobbyValue] = useState('1600,price_1RahQ4CmyYc460qRPIcmisOI')
-  const [selectedProValue, setSelectedProValue] = useState('10000,price_1RahY6CmyYc460qRoWUq57Ur')
+  const [selectedHobbyValue, setSelectedHobbyValue] = useState('1600,price_1RahQ4CmyYc460qRPIcmisOI,Hobby 1')
+  const [selectedProValue, setSelectedProValue] = useState('10500,price_1RahY6CmyYc460qRoWUq57Ur,Pro 1')
   const [stripeCPURL, setStripeCPURL] = useState('https://billing.stripe.com/p/login/test_14A6oG5aJ4LDaWLdKX18c00')
   const isInProject = location.pathname.startsWith('/chat');
   
@@ -193,6 +193,68 @@ useEffect(() => {
   const handleProSelectChange = (value) => {
     setSelectedProValue(value);
   }
+
+  // Plan comparison helper functions
+  const getUserCurrentPlan = () => {
+    if (!userProfile || userProfile.subscription_status !== 'active') {
+      return null;
+    }
+    return `${userProfile.monthly_credits},${userProfile.stripe_price_id},${userProfile.subscribed_product_name}`;
+  };
+
+  const getButtonText = (selectedValue: string, planType: 'hobby' | 'pro') => {
+    const userCurrentPlan = getUserCurrentPlan();
+    const isActive = userProfile?.subscription_status === 'active';
+    
+    // Free plan users
+    if (!isActive) {
+      return "Upgrade";
+    }
+    
+    // Paid plan users
+    if (userCurrentPlan === selectedValue) {
+      return "Current Plan";
+    }
+    
+    const selectedCredits = parseInt(selectedValue.split(',')[0]);
+    const userCredits = userProfile?.monthly_credits || 0;
+    
+    return selectedCredits > userCredits ? "Upgrade" : "Downgrade";
+  };
+
+  const isButtonDisabled = (selectedValue: string) => {
+    const userCurrentPlan = getUserCurrentPlan();
+    const isActive = userProfile?.subscription_status === 'active';
+    
+    return isActive && userCurrentPlan === selectedValue;
+  };
+
+  const handlePlanChange = (selectedValue: string) => {
+    const userCurrentPlan = getUserCurrentPlan();
+    const isActive = userProfile?.subscription_status === 'active';
+    
+    // If not active or upgrading, use checkout session
+    if (!isActive) {
+      createCheckoutSession(selectedValue.split(",")[1]);
+      return;
+    }
+    
+    // If current plan, do nothing
+    if (userCurrentPlan === selectedValue) {
+      return;
+    }
+    
+    const selectedCredits = parseInt(selectedValue.split(',')[0]);
+    const userCredits = userProfile?.monthly_credits || 0;
+    
+    // If upgrading, use checkout session
+    if (selectedCredits > userCredits) {
+      createCheckoutSession(selectedValue.split(",")[1]);
+    } else {
+      // If downgrading, redirect to customer portal
+      window.open(stripeCPURL, '_self');
+    }
+  };
 
   // Helper functions for display
   const getUserInitials = () => {
@@ -597,27 +659,27 @@ useEffect(() => {
                         <p className="text-sm text-muted-foreground mt-2">Start creating videos</p>
                       </div>
                       
-                      <Select defaultValue="1600,price_1RahQ4CmyYc460qRPIcmisOI" onValueChange={handleHobbySelectChange}>
+                      <Select defaultValue={selectedHobbyValue} onValueChange={handleHobbySelectChange}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent className="z-50">
-                          <SelectItem value="1600,price_1RahQ4CmyYc460qRPIcmisOI">1.6K credits / month</SelectItem>
-                          <SelectItem value="3200,price_1RahSNCmyYc460qRr1Wcoy2O">3.2K credits / month</SelectItem>
-                          <SelectItem value="5000,price_1RahVqCmyYc460qRamtXAUvF">5K credits / month</SelectItem>
-                          <SelectItem value="6000,price_1RahW5CmyYc460qRn46VLJPH">6K credits / month</SelectItem>
-                          <SelectItem value="7000,price_1RahWVCmyYc460qRSMDK3PL6">7K credits / month</SelectItem>
-                          <SelectItem value="8000,price_1RahWwCmyYc460qRY8i5N0hY">8K credits / month</SelectItem>
-                          <SelectItem value="9000,price_1RahXOCmyYc460qRjaqJUOW0">9K credits / month</SelectItem>
+                          <SelectItem value="1600,price_1RahQ4CmyYc460qRPIcmisOI,Hobby 1">1.6K credits / month</SelectItem>
+                          <SelectItem value="3200,price_1RahSNCmyYc460qRr1Wcoy2O,Hobby 3">3.2K credits / month</SelectItem>
+                          <SelectItem value="5000,price_1RahVqCmyYc460qRamtXAUvF,Hobby 5">5K credits / month</SelectItem>
+                          <SelectItem value="6000,price_1RahW5CmyYc460qRn46VLJPH,Hobby 6">6K credits / month</SelectItem>
+                          <SelectItem value="7000,price_1RahWVCmyYc460qRSMDK3PL6,Hobby 7">7K credits / month</SelectItem>
+                          <SelectItem value="8000,price_1RahWwCmyYc460qRY8i5N0hY,Hobby 8">8K credits / month</SelectItem>
+                          <SelectItem value="9000,price_1RahXOCmyYc460qRjaqJUOW0,Hobby 9">9K credits / month</SelectItem>
                         </SelectContent>
                       </Select>
                       
                       <Button 
                         className="w-full z-0" 
-                        disabled={userProfile?.subscribed_product_name?.toLowerCase().includes('hobby')}
-                        onClick={() => createCheckoutSession(selectedHobbyValue.split(",")[1])}
+                        disabled={isButtonDisabled(selectedHobbyValue)}
+                        onClick={() => handlePlanChange(selectedHobbyValue)}
                       >
-                        {userProfile?.subscribed_product_name?.toLowerCase().includes('hobby') ? 'Your current plan' : 'Upgrade'}
+                        {profileLoading ? 'Loading...' : getButtonText(selectedHobbyValue, 'hobby')}
                       </Button>
 
                       <div className="space-y-2">
@@ -648,37 +710,37 @@ useEffect(() => {
                       <div>
                         <h3 className="text-lg font-semibold">Pro</h3>
                         <div className="mt-2">
-                          <span className="text-3xl font-bold">${formatNumber(parseInt(selectedProValue.split(",")[0])/100)}</span>
+                          <span className="text-3xl font-bold">${formatNumber(parseInt(selectedProValue.split(",")[0])/105)}</span>
                           <span className="text-muted-foreground"> /month</span>
                         </div>
                         <p className="text-sm text-muted-foreground mt-2">For expanded production and bonus credits</p>
                       </div>
 
-                      <Select defaultValue="10000,price_1RahY6CmyYc460qRoWUq57Ur" onValueChange={handleProSelectChange}>
+                      <Select defaultValue={selectedProValue} onValueChange={handleProSelectChange}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent  className="z-50">
-                          <SelectItem value="10000,price_1RahY6CmyYc460qRoWUq57Ur">10K credits / month</SelectItem>
-                          <SelectItem value="20000,price_1RahiWCmyYc460qR1qQXvhDm">20K credits / month</SelectItem>
-                          <SelectItem value="30000,price_1RahirCmyYc460qRwKzYr9WV">30K credits / month</SelectItem>
-                          <SelectItem value="40000,price_1RahjBCmyYc460qR8X5jKSIJ">40K credits / month</SelectItem>
-                          <SelectItem value="50000,price_1RahjbCmyYc460qRA0lD8pjg">50K credits / month</SelectItem>
-                          <SelectItem value="75000,price_1RahlsCmyYc460qR3V0yQMki">75K credits / month</SelectItem>
-                          <SelectItem value="100000,price_1RahmFCmyYc460qRKlDoix1A">100K credits / month</SelectItem>
-                          <SelectItem value="150000,price_1RahnYCmyYc460qR8R5Ctaes">150K credits / month</SelectItem>
-                          <SelectItem value="200000,price_1RahnwCmyYc460qRwT8zVkCD">200K credits / month</SelectItem>
-                          <SelectItem value="250000,price_1RahoNCmyYc460qRkowz5alE">250K credits / month</SelectItem>
-                          <SelectItem value="300000,price_1RahoxCmyYc460qR6uZlTIOi">300K credits / month</SelectItem>
+                          <SelectItem value="10500,price_1RahY6CmyYc460qRoWUq57Ur,Pro 1">{formatNumber(10500)} credits / month</SelectItem>
+                          <SelectItem value="21000,price_1RahiWCmyYc460qR1qQXvhDm,Pro 2">{formatNumber(21000)} credits / month</SelectItem>
+                          <SelectItem value="31500,price_1RahirCmyYc460qRwKzYr9WV,Pro 3">{formatNumber(31500)} credits / month</SelectItem>
+                          <SelectItem value="42000,price_1RahjBCmyYc460qR8X5jKSIJ,Pro 4">{formatNumber(42000)} credits / month</SelectItem>
+                          <SelectItem value="52500,price_1RahjbCmyYc460qRA0lD8pjg,Pro 5">{formatNumber(52500)} credits / month</SelectItem>
+                          <SelectItem value="78750,price_1RahlsCmyYc460qR3V0yQMki,Pro 7.5">{formatNumber(78750)} credits / month</SelectItem>
+                          <SelectItem value="105000,price_1RahmFCmyYc460qRKlDoix1A,Pro 10">{formatNumber(105000)} credits / month</SelectItem>
+                          <SelectItem value="157500,price_1RahnYCmyYc460qR8R5Ctaes,Pro 15">{formatNumber(157500)} credits / month</SelectItem>
+                          <SelectItem value="210000,price_1RahnwCmyYc460qRwT8zVkCD,Pro 20">{formatNumber(210000)} credits / month</SelectItem>
+                          <SelectItem value="262500,price_1RahoNCmyYc460qRkowz5alE,Pro 25">{formatNumber(262500)} credits / month</SelectItem>
+                          <SelectItem value="315000,price_1RahoxCmyYc460qR6uZlTIOi,Pro 30">{formatNumber(315000)} credits / month</SelectItem>
                         </SelectContent>
                       </Select>
 
                       <Button 
                         className="w-full bg-blue-600 hover:bg-blue-700 z-10"
-                        disabled={userProfile?.subscribed_product_name?.toLowerCase().includes('pro')}
-                        onClick={() => createCheckoutSession(selectedProValue.split(",")[1])}
+                        disabled={isButtonDisabled(selectedProValue)}
+                        onClick={() => handlePlanChange(selectedProValue)}
                       >
-                        {userProfile?.subscribed_product_name?.toLowerCase().includes('pro') ? 'Your current plan' : 'Upgrade'}
+                        {profileLoading ? 'Loading...' : getButtonText(selectedProValue, 'pro')}
                       </Button>
 
                       <div className="space-y-2">
@@ -690,11 +752,11 @@ useEffect(() => {
                           </div>
                            <div className="flex items-center gap-2 text-sm">
                             <Check className="h-4 w-4 text-green-600" />
-                            <span>+5% ({formatNumber(parseInt(selectedProValue.split(",")[0])*0.05)}) bonus credits / month</span>
+                            <span>Including 5% ({formatNumber(parseInt(selectedProValue.split(",")[0])/1.05*0.05)}) bonus credits / month</span>
                           </div>
                           <div className="flex items-center gap-2 text-sm">
                             <Check className="h-4 w-4 text-green-600" />
-                            <span>Priority in generaiton queue</span>
+                            <span>Priority in generation queue</span>
                           </div>
                           <div className="flex items-center gap-2 text-sm">
                             <Check className="h-4 w-4 text-green-600" />
