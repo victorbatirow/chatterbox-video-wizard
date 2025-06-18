@@ -507,24 +507,12 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
               <Film className="w-4 h-4" />
               Final Video
             </h4>
-            
-            {/* Message info outside video container */}
-            <div className="mb-4 p-4 rounded-lg bg-white/5 border border-white/10">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="text-white font-medium">{final.prompt}</h4>
-                  <p className="text-white/50 text-sm">
-                    {final.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </p>
-                </div>
-                {currentVideoId === final.id && (
-                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                )}
-              </div>
-            </div>
 
             {/* Video container - only as wide as needed */}
             <div 
+              ref={(el) => {
+                if (el) videoRefs.current[final.id] = el;
+              }}
               className={`cursor-pointer transition-all ${
                 currentVideoId === final.id ? "ring-2 ring-purple-500" : ""
               }`}
@@ -809,11 +797,11 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
                           
                           {/* Standard video controls */}
                           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300">
-                            <div className="absolute bottom-4 left-4 right-4">
+                            <div className={`absolute ${video.isClip ? 'bottom-2 left-2 right-2' : 'bottom-4 left-4 right-4'}`}>
                               {/* Progress Bar */}
-                              <div className="mb-3">
+                              <div className={video.isClip ? 'mb-2' : 'mb-3'}>
                                 <div 
-                                  className="relative w-full h-2 bg-white/20 rounded-full cursor-pointer"
+                                  className={`relative w-full ${video.isClip ? 'h-1' : 'h-2'} bg-white/20 rounded-full cursor-pointer`}
                                   data-slider={`${video.id}-progress`}
                                   onClick={(e) => handleSliderClick(e, video.id, 'progress')}
                                   onMouseDown={(e) => handleSliderMouseDown(e, video.id, 'progress')}
@@ -823,12 +811,12 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
                                     style={{ width: `${videoProgress[video.id] || 0}%` }}
                                   />
                                   <div 
-                                    className="absolute w-4 h-4 bg-white rounded-full border-2 border-white shadow-lg transform -translate-y-1/2 -translate-x-1/2 top-1/2 cursor-grab active:cursor-grabbing"
+                                    className={`absolute ${video.isClip ? 'w-3 h-3' : 'w-4 h-4'} bg-white rounded-full border-2 border-white shadow-lg transform -translate-y-1/2 -translate-x-1/2 top-1/2 cursor-grab active:cursor-grabbing`}
                                     style={{ left: `${videoProgress[video.id] || 0}%` }}
                                     onMouseDown={(e) => handleSliderMouseDown(e, video.id, 'progress')}
                                   />
                                 </div>
-                                <div className="flex justify-between text-xs text-white/70 mt-1">
+                                <div className={`flex justify-between text-xs text-white/70 ${video.isClip ? 'mt-0.5' : 'mt-1'}`}>
                                   <span>{formatTime((videoProgress[video.id] || 0) * (videoDuration[video.id] || 0) / 100)}</span>
                                   <span>{formatTime(videoDuration[video.id] || 0)}</span>
                                 </div>
@@ -836,33 +824,33 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
                               
                               <div className="flex items-center justify-between">
                                 {/* Left side controls */}
-                                <div className="flex items-center gap-4">
+                                <div className={`flex items-center ${video.isClip ? 'gap-1' : 'gap-4'}`}>
                                   <Button
                                     size="sm"
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       handlePlayPause(video.id);
                                     }}
-                                    className="bg-white/20 hover:bg-white/30 backdrop-blur-sm"
+                                    className={`bg-white/20 hover:bg-white/30 backdrop-blur-sm ${video.isClip ? 'h-7 w-7 p-0' : ''}`}
                                   >
-                                    {playingVideos.has(video.id) ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                                    {playingVideos.has(video.id) ? <Pause className={video.isClip ? "w-3 h-3" : "w-4 h-4"} /> : <Play className={video.isClip ? "w-3 h-3" : "w-4 h-4"} />}
                                   </Button>
                                   
                                   {/* Volume Control */}
                                   {hasAudio[video.id] ? (
-                                    <div className="flex items-center gap-2 max-w-32">
+                                    <div className={`flex items-center ${video.isClip ? 'gap-1' : 'gap-2 max-w-32'}`}>
                                       <Button
                                         size="sm"
-                                        className="bg-white/20 hover:bg-white/30 backdrop-blur-sm p-2"
+                                        className={`bg-white/20 hover:bg-white/30 backdrop-blur-sm ${video.isClip ? 'h-7 w-7 p-0' : 'p-2'}`}
                                         onClick={(e) => {
                                           e.stopPropagation();
                                           handleMuteToggle(video.id);
                                         }}
                                       >
-                                        {isMuted[video.id] ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                                        {isMuted[video.id] ? <VolumeX className={video.isClip ? "w-3 h-3" : "w-4 h-4"} /> : <Volume2 className={video.isClip ? "w-3 h-3" : "w-4 h-4"} />}
                                       </Button>
                                       <div 
-                                        className="relative w-20 h-1 bg-white/20 rounded-full cursor-pointer"
+                                        className={`relative ${video.isClip ? 'w-12' : 'w-20'} h-1 bg-white/20 rounded-full cursor-pointer`}
                                         data-slider={`${video.id}-volume`}
                                         onClick={(e) => handleSliderClick(e, video.id, 'volume')}
                                         onMouseDown={(e) => handleSliderMouseDown(e, video.id, 'volume')}
@@ -872,42 +860,42 @@ const VideoTimeline = ({ videos, currentVideoId, isGenerating, onVideoSelect }: 
                                           style={{ width: `${videoVolume[video.id] || 100}%` }}
                                         />
                                         <div 
-                                          className="absolute w-3 h-3 bg-white rounded-full border border-white shadow-lg transform -translate-y-1/2 -translate-x-1/2 top-1/2 cursor-grab active:cursor-grabbing"
+                                          className={`absolute ${video.isClip ? 'w-2 h-2' : 'w-3 h-3'} bg-white rounded-full border border-white shadow-lg transform -translate-y-1/2 -translate-x-1/2 top-1/2 cursor-grab active:cursor-grabbing`}
                                           style={{ left: `${videoVolume[video.id] || 100}%` }}
                                           onMouseDown={(e) => handleSliderMouseDown(e, video.id, 'volume')}
                                         />
                                       </div>
                                     </div>
                                   ) : (
-                                    <div className="flex items-center gap-2 text-white/40 text-xs">
-                                      <VolumeX className="w-4 h-4" />
-                                      <span>No audio</span>
+                                    <div className={`flex items-center ${video.isClip ? 'gap-1' : 'gap-2'} text-white/40 text-xs`}>
+                                      <VolumeX className={video.isClip ? "w-3 h-3" : "w-4 h-4"} />
+                                      {!video.isClip && <span>No audio</span>}
                                     </div>
                                   )}
                                 </div>
                                 
                                 {/* Right side controls */}
-                                <div className="flex items-center gap-2">
+                                <div className={`flex items-center ${video.isClip ? 'gap-1' : 'gap-2'}`}>
                                   <Button
                                     size="sm"
-                                    className="bg-white/20 hover:bg-white/30 backdrop-blur-sm"
+                                    className={`bg-white/20 hover:bg-white/30 backdrop-blur-sm ${video.isClip ? 'h-7 w-7 p-0' : ''}`}
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       handleDownload(video.videoUrl, video.prompt);
                                     }}
                                   >
-                                    <Download className="w-4 h-4" />
+                                    <Download className={video.isClip ? "w-3 h-3" : "w-4 h-4"} />
                                   </Button>
                                   
                                   <Button
                                     size="sm"
-                                    className="bg-white/20 hover:bg-white/30 backdrop-blur-sm"
+                                    className={`bg-white/20 hover:bg-white/30 backdrop-blur-sm ${video.isClip ? 'h-7 w-7 p-0' : ''}`}
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       handleFullscreen(video.id);
                                     }}
                                   >
-                                    <Maximize className="w-4 h-4" />
+                                    <Maximize className={video.isClip ? "w-3 h-3" : "w-4 h-4"} />
                                   </Button>
                                 </div>
                               </div>
